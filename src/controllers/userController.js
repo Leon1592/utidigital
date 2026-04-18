@@ -18,6 +18,14 @@ async function getUsers(req, res) {
     }
 }
 
+function getUsers(req, res) {
+  res.json({ message: "ok" })
+}
+
+module.exports = {
+  getUsers
+}
+
 module.exports = {
     createUser,
     getUsers
