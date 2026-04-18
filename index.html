@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UTI Digital</title>
+  <link rel="stylesheet" href="./public/styles/login_page.css" />
+</head>
+
+<body style="
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #003640;
+">
+
+  <form id="loginForm" method="post" style="
+        max-width: 400px;
+        width: 100%;
+        margin: 20px;
+        padding: 50px;
+        border: 3px solid antiquewhite;
+        border-radius: 5px;
+      ">
+    <div>
+      <img src="./uploads/images/ui.png" alt="UTI Digital Logo" height="85px"
+        style="display: block; margin: -20px auto 0; border-radius: 7px" />
+    </div>
+
+    <div style="margin-bottom: 15px">
+      <label class="perfil" style="font-weight: bold; display: block; margin-bottom: 10px">Perfis de acesso</label>
+      <div class="radio-group">
+        <label class="radio-option" for="medico">
+          <input type="radio" id="medico" name="acesso" value="Medico" required />
+          <span>👨‍⚕️ Médico</span>
+        </label>
+        <label class="radio-option" for="enfermeiro">
+          <input type="radio" id="enfermeiro" name="acesso" value="Enfermeiro" />
+          <span>👩‍⚕️ Enfermeiro</span>
+        </label>
+        <label class="radio-option" for="admin">
+          <input type="radio" id="admin" name="acesso" value="Admin" />
+          <span>👨‍💻 Admin</span>
+        </label>
+      </div>
+    </div>
+
+    <div>
+      <label class="email" for="email">Email:</label><br />
+      <input type="email" id="email" name="email" required />
+    </div>
+
+    <div>
+      <label class="senha" for="password">Senha:</label><br />
+      <input type="password" id="password" name="password" required />
+    </div>
+    <br />
+
+    <div style="display: flex; justify-content: center; margin-top: 20px">
+      <input type="submit" value="Entrar" name="Entrar" style="padding: 10px 40px; cursor: pointer" />
+    </div>
+  </form>
+
+  <script src="./public/js/script.js"></script>
+</body>
+
+</html>
