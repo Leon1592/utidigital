@@ -1,22 +1,42 @@
-.leito {
-  display: flex;
-  color: #333;
-  flex-direction: row;
-}
-
 #container {
   display: flex;
   flex-direction: row;
   gap: 20px;
   justify-content: center;
-  padding: 20px;
+  padding: 10px;
 }
 
 .paciente {
   display: flex;
   width: 30%;
-  padding: 20px;
-  border: 20px solid #ccc;
+  padding: 10px;
+  border: 10px solid #ccc;
   border-radius: 20px;
   justify-content: space-between;
+}
+
+#leitos {
+  font-family: abril-fatface, serif;
+  display: flex;
+  justify-content: center;
+}
+
+.leito {
+  position: absolute;
+  top: 100px;
+  right: 100px;
+  background-color: rgb(255, 255, 255);
+  padding: 50px;
+  height: 400px;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  border: 5px solid #161515;
+  background-color: antiquewhite;
+  width: 10%;
+  height: 400px;
 }
