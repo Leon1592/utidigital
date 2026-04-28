@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "@better-auth/kysely-adapter": "^1.6.9",
+    "better-auth": "^1.6.9",
+    "dotenv": "^17.4.2",
+    "drizzle-orm": "^0.45.2",
+    "kysely": "^0.28.16",
+    "pg": "^8.20.0"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.10",
+    "typescript": "^6.0.3"
+  }
+}
