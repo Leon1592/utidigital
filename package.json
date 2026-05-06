@@ -1,9 +1,12 @@
 {
   "dependencies": {
     "@better-auth/kysely-adapter": "^1.6.9",
+    "bcrypt": "^6.0.0",
     "better-auth": "^1.6.9",
+    "connect-flash": "^0.1.1",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
+    "express-session": "^1.19.0",
     "kysely": "^0.28.16",
     "pg": "^8.20.0"
   },
