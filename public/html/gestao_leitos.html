@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão de Leitos - UTI Digital</title>
+  <meta name="description" content="Painel de gestão de leitos da UTI Digital - controle de disponibilidade e ocupação">
+  <link rel="shortcut icon" href="/uploads/images/ui.png" type="image/x-icon">
+  <link rel="stylesheet" href="/public/styles/gestao_leitos.css">
+</head>
+
+<body>
+  <div class="page-wrapper">
+
+    <!-- ===== Top Header ===== -->
+    <header class="top-header">
+      <div class="logo-container">
+        <img src="/uploads/images/ui.png" alt="UTI Digital" style="height: 50px;">
+      </div>
+
+      <div style="margin-left: 30px;">
+        <span class="role-badge" id="roleBadge">...</span>
+      </div>
+
+      <span class="doctor-name" id="doctorName">Carregando...</span>
+
+      <div class="notification-bell" id="notificationBell" title="Notificações">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+        </svg>
+      </div>
+    </header>
+
+    <!-- ===== Main Area ===== -->
+    <div class="main-area">
+
+      <!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+          <a href="/dashboard" class="nav-item">DASHBOARD</a>
+          <a href="/gestao-leitos" class="nav-item active">GESTÃO DE LEITOS</a>
+          <a href="#" class="nav-item">CADASTRO DE PACIENTES</a>
+          <a href="#" class="nav-item">RELATÓRIOS</a>
+          <a href="/auth/logout" class="nav-item logout">SAIR</a>
+        </nav>
+      </aside>
+
+      <!-- Content -->
+      <main class="content">
+
+        <h1 class="page-title">Gestão de leitos</h1>
+
+        <!-- Legend -->
+        <div class="legend">
+          <div class="legend-item">
+            <span class="legend-dot disponivel"></span>
+            <span class="legend-text disponivel">Disponível</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot ocupado"></span>
+            <span class="legend-text ocupado">Ocupado</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot indisponivel"></span>
+            <span class="legend-text indisponivel">Indisponível</span>
+          </div>
+        </div>
+
+        <!-- Beds Grid -->
+        <div class="beds-grid" id="bedsGrid">
+          <p style="padding: 20px;">Carregando leitos...</p>
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <script>
+    async function loadUser() {
+      try {
+        const response = await fetch('/auth/user');
+        if (!response.ok) {
+          window.location.href = '/';
+          return;
+        }
+        const data = await response.json();
+        const user = data.user;
+        document.getElementById('doctorName').textContent = user.name;
+        
+        const roleBadge = document.querySelector('.role-badge');
+        const perfilLabels = { 'Medico': 'Médico', 'Enfermeiro': 'Enfermeiro', 'Admin': 'Administrador' };
+        roleBadge.textContent = perfilLabels[user.perfil] || user.perfil;
+      } catch (error) {
+        console.error('Erro ao carregar usuário:', error);
+      }
+    }
+
+    const statusMap = {
+      'disponivel': 'disponivel',
+      'ocupado': 'ocupado',
+      'indisponivel': 'indisponivel'
+    };
+
+    async function loadBeds() {
+      try {
+        const response = await fetch('/api/leitos');
+        const leitos = await response.json();
+        
+        const grid = document.getElementById('bedsGrid');
+        grid.innerHTML = '';
+        
+        if (leitos.length === 0) {
+          grid.innerHTML = '<p style="padding: 20px;">Nenhum leito cadastrado. Entre em contato com o administrador.</p>';
+          return;
+        }
+        
+        leitos.forEach(leito => {
+          const statusClass = statusMap[leito.status] || 'disponivel';
+          const pacienteNome = leito.paciente_nome || '-';
+          const dataInternacao = leito.data_internacao 
+            ? new Date(leito.data_internacao).toLocaleDateString('pt-BR') 
+            : '-';
+          const observacoes = leito.observacoes || '-';
+          
+          const bedCard = document.createElement('div');
+          bedCard.className = 'bed-card';
+          bedCard.id = 'bed-' + leito.numero;
+          bedCard.innerHTML = `
+            <span class="bed-title ${statusClass}">Leito ${leito.numero}</span>
+            <span class="bed-info">Nome: ${pacienteNome}</span>
+            <span class="bed-info">Situação: ${observacoes}</span>
+            <span class="bed-info">Data de Internação: ${dataInternacao}</span>
+          `;
+          grid.appendChild(bedCard);
+        });
+      } catch (error) {
+        console.error('Erro ao carregar leitos:', error);
+        document.getElementById('bedsGrid').innerHTML = '<p style="padding: 20px; color: red;">Erro ao carregar leitos. Tente novamente mais tarde.</p>';
+      }
+    }
+
+    loadBeds();
+    loadUser();
+  </script>
+</body>
+
+</html>

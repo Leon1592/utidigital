@@ -1,10 +1,11 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const express = require('express');
 const session = require('express-session');
 const flash = require('connect-flash');
-const path = require('path');
 const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/authRoutes');
+const leitoRoutes = require('./routes/leitoRoutes');
 const { isAuthenticated } = require('./middleware/authMiddleware');
 
 const app = express();
@@ -44,8 +45,13 @@ app.get('/dashboard', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../public/html/dashboard.html'));
 });
 
+app.get('/gestao-leitos', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/html/gestao_leitos.html'));
+});
+
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
+app.use('/api/leitos', leitoRoutes);
 
 app.get('/test-static', (req, res) => {
     const testFile = path.join(publicPath, 'styles', 'login_page.css');
