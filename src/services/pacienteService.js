@@ -15,8 +15,13 @@ async function searchByNome(nome) {
     return pacienteModel.findByNome(nome);
 }
 
+async function remove(id) {
+    return pacienteModel.remove(id);
+}
+
 module.exports = {
     create,
     getAll,
-    searchByNome
+    searchByNome,
+    remove
 };

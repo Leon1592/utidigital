@@ -128,6 +128,20 @@
       </div>
     </div>
 
+    <div class="patient-detail-modal" id="patientDetailModal" style="display: none;">
+      <div class="patient-detail-content">
+        <div class="patient-detail-header">
+          <h3>Detalhes do Paciente</h3>
+          <button class="close-modal" id="closeDetailModal">X</button>
+        </div>
+        <div class="patient-detail-body" id="patientDetailBody">
+        </div>
+        <div class="patient-detail-footer">
+          <button class="btn-excluir" id="btnExcluir">Excluir Paciente</button>
+        </div>
+      </div>
+    </div>
+
     <script>
       async function loadUser() {
         try {
@@ -183,7 +197,10 @@
           sexo: document.getElementById('sexo').value,
           estado: document.getElementById('estado').value.trim(),
           contato_paciente: document.getElementById('contato').value.trim(),
-          motivo_admissao: document.getElementById('motivo').value.trim()
+          motivo_admissao: document.getElementById('motivo').value.trim(),
+          logradouro: document.getElementById('logradouro').value.trim(),
+          cidade: document.getElementById('cidade').value.trim(),
+          cep: document.getElementById('cep').value.trim()
         };
 
         if (!paciente.nome || !paciente.data_nascimento || !paciente.cpf || !paciente.sexo || !paciente.estado) {
@@ -242,6 +259,7 @@
             pacientes.forEach(paciente => {
               const card = document.createElement('div');
               card.className = 'patient-card';
+              card.onclick = () => showPatientDetail(paciente);
               card.innerHTML = `
                 <div class="patient-info">
                   <span class="patient-name">${paciente.nome}</span>
@@ -257,6 +275,99 @@
           console.error('Erro ao carregar pacientes:', error);
         }
       }
+
+      let pacienteAtual = null;
+
+      function showPatientDetail(paciente) {
+        pacienteAtual = paciente;
+        const modal = document.getElementById('patientDetailModal');
+        const body = document.getElementById('patientDetailBody');
+        
+        body.innerHTML = `
+          <div class="detail-row">
+            <span class="detail-label">Nome:</span>
+            <span class="detail-value">${paciente.nome}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">CPF:</span>
+            <span class="detail-value">${paciente.cpf}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Data de Nascimento:</span>
+            <span class="detail-value">${paciente.data_nascimento}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Sexo:</span>
+            <span class="detail-value">${paciente.sexo}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Contato:</span>
+            <span class="detail-value">${paciente.contato_paciente || 'Não informado'}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">CEP:</span>
+            <span class="detail-value">${paciente.cep || 'Não informado'}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Endereço:</span>
+            <span class="detail-value">${paciente.logradouro || 'Não informado'}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Cidade/Estado:</span>
+            <span class="detail-value">${paciente.cidade ? paciente.cidade + ' - ' + paciente.estado : 'Não informado'}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Motivo da Admissão:</span>
+            <span class="detail-value">${paciente.motivo_admissao}</span>
+          </div>
+        `;
+        
+        modal.style.display = 'flex';
+      }
+
+      async function excluirPaciente() {
+        if (!pacienteAtual) return;
+        
+        const confirmacao = confirm(`Tem certeza que deseja excluir o paciente "${pacienteAtual.nome}"?`);
+        if (!confirmacao) return;
+        
+        try {
+          console.log('Excluindo paciente ID:', pacienteAtual.id);
+          const response = await fetch(`/api/pacientes/${pacienteAtual.id}`, {
+            method: 'DELETE'
+          });
+          
+          console.log('Response status:', response.status);
+          
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Erro API:', errorData);
+            throw new Error(errorData.error || 'Erro ao excluir paciente');
+          }
+          
+          alert('Paciente excluído com sucesso!');
+          hidePatientDetail();
+          loadPacientes();
+        } catch (error) {
+          console.error('Erro ao excluir:', error);
+          alert(error.message || 'Erro ao excluir paciente');
+        }
+      }
+
+      document.getElementById('btnExcluir').addEventListener('click', excluirPaciente);
+
+      function hidePatientDetail() {
+        const modal = document.getElementById('patientDetailModal');
+        modal.style.display = 'none';
+      }
+
+      document.getElementById('closeDetailModal').addEventListener('click', hidePatientDetail);
+
+      document.getElementById('patientDetailModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          hidePatientDetail();
+        }
+      });
 
       async function searchPacientes(query) {
         try {
@@ -285,6 +396,12 @@
       document.getElementById('searchIcon').addEventListener('click', showSearchModal);
       document.getElementById('closeModal').addEventListener('click', hideSearchModal);
 
+      document.getElementById('searchModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          hideSearchModal();
+        }
+      });
+
       document.getElementById('searchModalInput').addEventListener('input', async function() {
         const query = this.value.trim();
         const resultsDiv = document.getElementById('searchModalResults');
@@ -303,6 +420,10 @@
           pacientes.forEach(paciente => {
             const item = document.createElement('div');
             item.className = 'search-result-item';
+            item.onclick = () => {
+              showPatientDetail(paciente);
+              hideSearchModal();
+            };
             item.innerHTML = `
               <span class="result-name">${paciente.nome}</span>
               <span class="result-detail">${paciente.cpf}</span>
@@ -330,6 +451,7 @@
           pacientes.forEach(paciente => {
             const card = document.createElement('div');
             card.className = 'patient-card';
+            card.onclick = () => showPatientDetail(paciente);
             card.innerHTML = `
               <div class="patient-info">
                 <span class="patient-name">${paciente.nome}</span>

@@ -41,6 +41,7 @@ textarea {
   gap: 10px;
   flex-wrap: wrap;
   margin-bottom: 15px;
+  justify-content: center;
 }
 .radio-option {
   display: inline-flex;
@@ -85,8 +86,10 @@ input[type="submit"]:hover {
   background-color: #00515a;
 }
 #password {
-  border-radius: 7px;
+  width: 97%;
+  padding: 8px;
+  margin-top: 5px;
+  margin-bottom: 15px;
   border: 1px solid #ccc;
-  padding: 4px;
-  width: 100%;
+  border-radius: 7px;
 }
