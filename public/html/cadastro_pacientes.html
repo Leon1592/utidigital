@@ -34,7 +34,8 @@
         <a href="/dashboard" class="nav-item">Dashboard</a>
         <a href="/gestao-leitos" class="nav-item">Gestao de Leitos</a>
         <a href="/cadastro-pacientes" class="nav-item active">Cadastro de Pacientes</a>
-        <a href="#" class="nav-item">Relatorios</a>
+        <a href="/relatorios" class="nav-item">Relatorios</a>
+        <a href="#" class="nav-item" id="navCadastroUsuarios" style="display: none;">Cadastro de Usuarios</a>
         <a href="/auth/logout" class="nav-item">Sair</a>
       </aside>
 
@@ -157,6 +158,11 @@
           const roleBadge = document.getElementById('roleBadge');
           const perfilLabels = { 'Medico': 'Medico', 'Enfermeiro': 'Enfermeiro', 'Admin': 'Administrador' };
           roleBadge.textContent = perfilLabels[user.perfil] || user.perfil;
+
+          if (user.perfil === 'Admin') {
+            document.getElementById('navCadastroUsuarios').style.display = 'flex';
+            document.getElementById('navCadastroUsuarios').href = '/cadastro-usuarios';
+          }
         } catch (error) {
           console.error('Erro ao carregar usuario:', error);
         }

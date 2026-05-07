@@ -33,7 +33,19 @@ async function searchPacientes(req, res) {
 async function deletePaciente(req, res) {
     try {
         await pacienteService.remove(req.params.id);
-        res.status(200).json({ message: 'Paciente excluído com sucesso' });
+        res.status(200).json({ message: 'Paciente excluido com sucesso' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+async function getPacienteById(req, res) {
+    try {
+        const paciente = await pacienteService.getById(req.params.id);
+        if (!paciente) {
+            return res.status(404).json({ error: 'Paciente nao encontrado' });
+        }
+        res.status(200).json(paciente);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -43,5 +55,6 @@ module.exports = {
     createPaciente,
     getPacientes,
     searchPacientes,
-    deletePaciente
+    deletePaciente,
+    getPacienteById
 };

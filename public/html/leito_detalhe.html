@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leito - UTI Digital</title>
+  <link rel="shortcut icon" href="/uploads/images/ui.png" type="image/x-icon" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/public/styles/global.css">
+  <link rel="stylesheet" href="/public/styles/leito_detalhe.css">
+</head>
+
+<body>
+  <div class="app">
+
+    <header>
+      <div class="logo">
+        <img src="/uploads/images/ui.png" alt="UTI Digital" height="50px">
+      </div>
+      <div class="badge-medico" id="roleBadge">...</div>
+      <div class="doctor-name" id="doctorName">Carregando...</div>
+      <div class="header-search" id="notificationBell" title="Notificacoes">
+        <svg viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="7" />
+          <line x1="16.5" y1="16.5" x2="22" y2="22" />
+        </svg>
+      </div>
+    </header>
+
+    <aside>
+      <div class="menu-label">Menu Principal</div>
+
+      <a href="/dashboard" class="nav-item">Dashboard</a>
+      <a href="/gestao-leitos" class="nav-item active">Gestao de Leitos</a>
+      <a href="/cadastro-pacientes" class="nav-item">Cadastro de Pacientes</a>
+      <a href="/relatorios" class="nav-item">Relatorios</a>
+      <a href="#" class="nav-item" id="navCadastroUsuarios" style="display: none;">Cadastro de Usuarios</a>
+      <a href="/auth/logout" class="nav-item">Sair</a>
+    </aside>
+
+    <main>
+      <div class="leito-page-title" id="leitoPageTitle"></div>
+
+      <div id="leitoIndiponivelMsg" class="leito-indisponivel" style="display: none;">
+        <h2>Leito Disponivel</h2>
+        <p>Este leito ainda nao possui paciente cadastrado.</p>
+      </div>
+
+      <div id="leitoContent">
+        <div class="patient-header">
+          <div class="patient-name-row">
+            <span class="patient-main-name" id="pacienteNome">-</span>
+            <span class="patient-badge" id="leitoStatus">Ocupado</span>
+          </div>
+          <div class="patient-info-grid">
+            <div class="patient-info-item">
+              <span class="patient-info-label">Idade</span>
+              <span class="patient-info-value" id="pacienteIdade">-</span>
+            </div>
+            <div class="patient-info-item">
+              <span class="patient-info-label">Motivo da Admissao</span>
+              <span class="patient-info-value" id="pacienteMotivo">-</span>
+            </div>
+            <div class="patient-info-item">
+              <span class="patient-info-label">Medico Responsavel</span>
+              <span class="patient-info-value" id="medicoResponsavel">-</span>
+            </div>
+            <div class="patient-info-item">
+              <span class="patient-info-label">Data de Internacao</span>
+              <span class="patient-info-value" id="dataInternacao">-</span>
+            </div>
+          </div>
+          <div class="patient-actions">
+            <button class="btn-alta" id="btnDarAlta">Dar Alta ao Paciente</button>
+          </div>
+        </div>
+
+        <div class="vitals-section">
+          <h2 class="section-label">Últimas Medições</h2>
+          <div class="vitals-grid" id="vitalsGrid">
+          </div>
+        </div>
+
+        <div class="content-grid">
+          <div class="measurements-section">
+            <div class="measurements-header">
+              <h2 class="section-label">Histórico de Medições</h2>
+              <button class="btn-delete-all" id="btnDeleteAll">Excluir Histórico</button>
+            </div>
+            <div id="measurementsList">
+            </div>
+          </div>
+
+          <div class="medicao-form-card">
+            <h3 class="form-title">Registrar Medição</h3>
+            <div class="success-message" id="successMsg">Medição registrada com sucesso!</div>
+            <div class="medicao-fields">
+              <div class="row-2">
+                <div class="field-group">
+                  <label class="field-label">FC (bpm)</label>
+                  <input class="field-input" type="text" id="fc" placeholder="72">
+                </div>
+                <div class="field-group">
+                  <label class="field-label">PA Sistolica (mmHg)</label>
+                  <input class="field-input" type="text" id="paSistolica" placeholder="120">
+                </div>
+                <div class="field-group">
+                  <label class="field-label">PA Diastolica (mmHg)</label>
+                  <input class="field-input" type="text" id="paDiastolica" placeholder="80">
+                </div>
+              </div>
+              <div class="row-2">
+                <div class="field-group">
+                  <label class="field-label">SpO2 (%)</label>
+                  <input class="field-input" type="text" id="spo2" placeholder="98">
+                </div>
+                <div class="field-group">
+                  <label class="field-label">Temperatura (C)</label>
+                  <input class="field-input" type="text" id="temp" placeholder="36.5">
+                </div>
+              </div>
+              <div class="field-group">
+                <label class="field-label">Observacoes</label>
+                <input class="field-input" type="text" id="obs" placeholder="Observacoes adicionais...">
+              </div>
+              <button class="btn-registrar" id="btnRegistrar">Registrar Medição</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    let leitoId = null;
+    let leitoStatus = null;
+
+    async function loadUser() {
+      try {
+        const response = await fetch('/auth/user', { credentials: 'include' });
+
+        if (!response.ok) {
+          window.location.href = '/';
+          return;
+        }
+        const data = await response.json();
+        const user = data.user;
+        document.getElementById('doctorName').textContent = user.name;
+
+        const roleBadge = document.getElementById('roleBadge');
+        const perfilLabels = { 'Medico': 'Medico', 'Enfermeiro': 'Enfermeiro', 'Admin': 'Administrador' };
+        roleBadge.textContent = perfilLabels[user.perfil] || user.perfil;
+
+        if (user.perfil === 'Admin') {
+          document.getElementById('navCadastroUsuarios').style.display = 'flex';
+          document.getElementById('navCadastroUsuarios').href = '/cadastro-usuarios';
+        }
+      } catch (error) {
+        console.error('Erro ao carregar usuario:', error);
+        window.location.href = '/';
+      }
+    }
+
+    function calcularIdade(dataNascimento) {
+      if (!dataNascimento) return '-';
+      const hoje = new Date();
+      const nasc = new Date(dataNascimento);
+      let idade = hoje.getFullYear() - nasc.getFullYear();
+      const mes = hoje.getMonth() - nasc.getMonth();
+      if (mes < 0 || (mes === 0 && hoje.getDate() < nasc.getDate())) {
+        idade--;
+      }
+      return idade + ' anos';
+    }
+
+    function formatarData(data) {
+      if (!data) return '-';
+      return new Date(data).toLocaleDateString('pt-BR');
+    }
+
+    function formatarDataHora(data) {
+      if (!data) return '-';
+      const d = new Date(data);
+      return d.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' });
+    }
+
+    async function loadLeito() {
+      const pathParts = window.location.pathname.split('/');
+      leitoId = pathParts[pathParts.length - 1];
+
+      if (!leitoId || isNaN(leitoId)) {
+        window.location.href = '/gestao-leitos';
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/leitos/' + leitoId);
+
+        if (!response.ok) {
+          alert('Erro ao carregar leito');
+          return;
+        }
+
+        const leito = await response.json();
+        leitoStatus = leito.status;
+        document.getElementById('leitoPageTitle').textContent = 'Leito ' + leito.numero;
+
+        if (leito.status === 'disponivel') {
+          document.getElementById('leitoIndiponivelMsg').style.display = 'block';
+          return;
+        }
+
+        document.getElementById('leitoContent').style.display = 'block';
+        document.getElementById('pacienteNome').textContent = leito.paciente_nome || '-';
+        document.getElementById('leitoStatus').textContent = 'Leito ' + leito.numero;
+        document.getElementById('pacienteIdade').textContent = calcularIdade(leito.data_nascimento_paciente);
+        document.getElementById('pacienteMotivo').textContent = leito.motivo_admissao || '-';
+        document.getElementById('medicoResponsavel').textContent = leito.medico_responsavel_nome || '-';
+        document.getElementById('dataInternacao').textContent = formatarData(leito.data_internacao);
+
+        await loadMedicoes();
+      } catch (error) {
+        console.error('Erro ao carregar leito:', error);
+        alert('Erro: ' + error.message);
+      }
+    }
+
+    async function loadMedicoes() {
+      try {
+        const response = await fetch('/api/medicoes/leito/' + leitoId);
+        const medicoes = await response.json();
+
+        renderVitals(medicoes);
+        renderMeasurements(medicoes);
+      } catch (error) {
+        console.error('Erro ao carregar medicoes:', error);
+      }
+    }
+
+    function renderVitals(medicoes) {
+      const grid = document.getElementById('vitalsGrid');
+      if (!medicoes || medicoes.length === 0) {
+        grid.innerHTML = '<p style="color: var(--text-light); padding: 20px; grid-column: 1/-1;">Nenhuma medição registrada.</p>';
+        return;
+      }
+
+      const latest = medicoes[0];
+      grid.innerHTML = `
+        <div class="vital-card">
+          <span class="vital-value">${latest.frequencia_cardiaca || '-'}</span>
+          <span class="vital-label">FC (bpm)</span>
+          <span class="vital-time">${formatarDataHora(latest.created_at)}</span>
+        </div>
+        <div class="vital-card">
+          <span class="vital-value">${latest.pressao_sistolica || '-'}/${latest.pressao_diastolica || '-'}</span>
+          <span class="vital-label">PA (mmHg)</span>
+          <span class="vital-time">${formatarDataHora(latest.created_at)}</span>
+        </div>
+        <div class="vital-card">
+          <span class="vital-value">${latest.spo2 || '-'}</span>
+          <span class="vital-label">SpO2 (%)</span>
+          <span class="vital-time">${formatarDataHora(latest.created_at)}</span>
+        </div>
+        <div class="vital-card">
+          <span class="vital-value">${latest.temperatura || '-'}</span>
+          <span class="vital-label">Temp (C)</span>
+          <span class="vital-time">${formatarDataHora(latest.created_at)}</span>
+        </div>
+      `;
+    }
+
+    function renderMeasurements(medicoes) {
+      const list = document.getElementById('measurementsList');
+      if (!medicoes || medicoes.length === 0) {
+        list.innerHTML = '<p style="color: var(--text-light); padding: 20px;">Nenhuma medição registrada.</p>';
+        return;
+      }
+
+      list.innerHTML = '';
+      medicoes.forEach(m => {
+        const card = document.createElement('div');
+        card.className = 'measurement-card';
+        card.innerHTML = `
+          <div class="measurement-header">
+            <span class="measurement-title">Medição</span>
+            <span class="measurement-time">${formatarDataHora(m.created_at)}</span>
+          </div>
+          ${m.registrado_por_nome ? '<span class="measurement-author">Por: ' + m.registrado_por_nome + '</span>' : ''}
+          <div class="measurement-values">
+            <div class="measurement-value-item">
+              <span class="measurement-value-label">FC</span>
+              <span class="measurement-value">${m.frequencia_cardiaca || '-'}</span>
+            </div>
+            <div class="measurement-value-item">
+              <span class="measurement-value-label">PA</span>
+              <span class="measurement-value">${m.pressao_sistolica || '-'}/${m.pressao_diastolica || '-'}</span>
+            </div>
+            <div class="measurement-value-item">
+              <span class="measurement-value-label">SpO2</span>
+              <span class="measurement-value">${m.spo2 || '-'}</span>
+            </div>
+            <div class="measurement-value-item">
+              <span class="measurement-value-label">Temp</span>
+              <span class="measurement-value">${m.temperatura || '-'}</span>
+            </div>
+          </div>
+          ${m.observacoes ? '<p class="measurement-obs">' + m.observacoes + '</p>' : ''}
+        `;
+        list.appendChild(card);
+      });
+    }
+
+document.getElementById('btnRegistrar').addEventListener('click', async function() {
+      const fc = document.getElementById('fc').value.trim();
+      const paSistolica = document.getElementById('paSistolica').value.trim();
+      const paDiastolica = document.getElementById('paDiastolica').value.trim();
+      const spo2 = document.getElementById('spo2').value.trim();
+      const temp = document.getElementById('temp').value.trim();
+      const obs = document.getElementById('obs').value.trim();
+
+      if (!fc || !paSistolica || !paDiastolica || !spo2 || !temp) {
+        alert('Por favor, preencha todos os campos obrigatorios.');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/medicoes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            leito_id: parseInt(leitoId),
+            frequencia_cardiaca: fc,
+            pressao_sistolica: paSistolica,
+            pressao_diastolica: paDiastolica,
+            saturacao: spo2,
+            temperatura: temp,
+            observacoes: obs
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Erro ao registrar medicao');
+        }
+
+        const msg = document.getElementById('successMsg');
+        msg.style.display = 'block';
+        setTimeout(() => { msg.style.display = 'none'; }, 3000);
+
+        document.getElementById('fc').value = '';
+        document.getElementById('paSistolica').value = '';
+        document.getElementById('paDiastolica').value = '';
+        document.getElementById('spo2').value = '';
+        document.getElementById('temp').value = '';
+        document.getElementById('obs').value = '';
+
+        await loadMedicoes();
+      } catch (error) {
+        console.error('Erro ao registrar:', error);
+        alert(error.message || 'Erro ao registrar medicao');
+      }
+    });
+
+    loadUser();
+    loadLeito();
+
+    document.getElementById('btnDeleteAll').addEventListener('click', async function() {
+      if (!confirm('Tem certeza que deseja excluir todo o histórico de medições?')) return;
+
+      try {
+        const response = await fetch('/api/medicoes/leito/' + leitoId + '/delete', { method: 'DELETE' });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Erro ao excluir');
+
+        document.getElementById('measurementsList').innerHTML = '<p style="color: var(--text-light); padding: 20px;">Nenhuma medição registrada.</p>';
+        document.getElementById('vitalsGrid').innerHTML = '<p style="color: var(--text-light); padding: 20px; grid-column: 1/-1;">Nenhuma medição registrada.</p>';
+      } catch (error) {
+        alert('Erro ao excluir histórico: ' + error.message);
+      }
+    });
+
+    document.getElementById('btnDarAlta').addEventListener('click', async function() {
+      if (!confirm('Tem certeza que deseja dar alta ao paciente? Todos os dados serão removidos.')) return;
+
+      try {
+        const response = await fetch('/api/leitos/' + leitoId + '/alta', {
+          method: 'POST',
+          credentials: 'include'
+        });
+        if (!response.ok) {
+          throw new Error('Erro ao dar alta');
+        }
+        const data = await response.json();
+
+        window.location.href = '/gestao-leitos';
+      } catch (error) {
+        alert('Erro ao dar alta: ' + error.message);
+      }
+    });
+  </script>
+</body>
+
+</html>

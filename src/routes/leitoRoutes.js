@@ -2,6 +2,37 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
 
+router.post('/:id/alta', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const leito = await pool.query('SELECT paciente_id FROM leitos WHERE id = $1', [id]);
+        if (leito.rows.length === 0) {
+            return res.status(404).json({ error: 'Leito nao encontrado' });
+        }
+        const pacienteId = leito.rows[0].paciente_id;
+        await pool.query('DELETE FROM medicoes WHERE leito_id = $1', [id]);
+        if (pacienteId) {
+            await pool.query('DELETE FROM pacientes WHERE id = $1', [pacienteId]);
+        }
+        await pool.query(`
+            UPDATE leitos SET
+                status = 'disponivel',
+                paciente_nome = NULL,
+                paciente_id = NULL,
+                medico_responsavel_id = NULL,
+                motivo_admissao = NULL,
+                data_nascimento_paciente = NULL,
+                cpf_paciente = NULL,
+                data_internacao = NULL
+            WHERE id = $1
+        `, [id]);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Erro ao dar alta:', error);
+        res.status(500).json({ error: 'Erro ao dar alta' });
+    }
+});
+
 router.get('/', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM leitos ORDER BY numero');
@@ -9,6 +40,29 @@ router.get('/', async (req, res) => {
     } catch (error) {
         console.error('Erro ao buscar leitos:', error);
         res.status(500).json({ error: 'Erro ao buscar leitos' });
+    }
+});
+
+router.get('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await pool.query(`
+            SELECT l.*,
+                   u.name as medico_responsavel_nome,
+                   u.email as medico_responsavel_email
+            FROM leitos l
+            LEFT JOIN users u ON l.medico_responsavel_id = u.id
+            WHERE l.id = $1
+        `, [id]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Leito nao encontrado' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error('Erro ao buscar leito:', error);
+        res.status(500).json({ error: 'Erro ao buscar leito' });
     }
 });
 
@@ -29,10 +83,14 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { status, paciente_nome, data_internacao, observacoes } = req.body;
+        const { status, paciente_nome, data_internacao, observacoes, paciente_id, medico_responsavel_id, motivo_admissao, data_nascimento_paciente, cpf_paciente } = req.body;
         const result = await pool.query(
-            'UPDATE leitos SET status = $1, paciente_nome = $2, data_internacao = $3, observacoes = $4 WHERE id = $5 RETURNING *',
-            [status, paciente_nome, data_internacao, observacoes, id]
+            `UPDATE leitos SET
+                status = $1, paciente_nome = $2, data_internacao = $3, observacoes = $4,
+                paciente_id = $5, medico_responsavel_id = $6, motivo_admissao = $7,
+                data_nascimento_paciente = $8, cpf_paciente = $9
+            WHERE id = $10 RETURNING *`,
+            [status, paciente_nome, data_internacao, observacoes, paciente_id, medico_responsavel_id, motivo_admissao, data_nascimento_paciente, cpf_paciente, id]
         );
         res.json(result.rows[0]);
     } catch (error) {
@@ -44,6 +102,7 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     try {
         const { id } = req.params;
+        await pool.query('DELETE FROM medicoes WHERE leito_id = $1', [id]);
         await pool.query('DELETE FROM leitos WHERE id = $1', [id]);
         res.json({ success: true });
     } catch (error) {

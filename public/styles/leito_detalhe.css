@@ -1,0 +1,378 @@
+.leito-page-title {
+    font-family: "Playfair Display", serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 24px;
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.breadcrumb a {
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 15px;
+    transition: color 0.2s;
+}
+
+.breadcrumb a:hover {
+    color: var(--white);
+}
+
+.breadcrumb span {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.breadcrumb .current {
+    color: var(--white);
+    font-weight: 600;
+}
+
+.patient-header {
+    background: var(--red-card);
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+}
+
+.patient-name-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.patient-main-name {
+    font-family: "Playfair Display", serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--white);
+}
+
+.patient-badge {
+    background: #4caf50;
+    color: var(--white);
+    padding: 6px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.patient-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 24px;
+}
+
+.patient-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.patient-info-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.patient-info-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--white);
+}
+
+.vitals-section {
+    margin-bottom: 24px;
+}
+
+.section-label {
+    font-family: "Playfair Display", serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 16px;
+}
+
+.vitals-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.vital-card {
+    background: var(--red-card);
+    border-radius: 12px;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.vital-icon {
+    font-size: 24px;
+}
+
+.vital-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--white);
+}
+
+.vital-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-light);
+}
+
+.vital-time {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.vitals-history {
+    background: var(--red-card);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.history-table th {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-light);
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.history-table td {
+    font-size: 14px;
+    color: var(--white);
+    padding: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.history-table tr:last-child td {
+    border-bottom: none;
+}
+
+.history-table .time-col {
+    color: var(--text-light);
+    font-size: 13px;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 24px;
+}
+
+.measurements-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.measurements-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.btn-delete-all {
+    background: #e53935;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-delete-all:hover {
+    background: #c62828;
+}
+
+.measurement-card {
+    background: var(--red-card);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.measurement-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.measurement-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--white);
+}
+
+.measurement-author {
+    font-size: 12px;
+    color: var(--text-light);
+}
+
+.measurement-time {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.measurement-values {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.measurement-value-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.measurement-value-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-light);
+    text-transform: uppercase;
+}
+
+.measurement-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--white);
+}
+
+.measurement-obs {
+    font-size: 14px;
+    color: var(--text-light);
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
+.medicao-form-card {
+    background: var(--red-card);
+    border-radius: 16px;
+    padding: 28px;
+    position: sticky;
+    top: 24px;
+}
+
+.form-title {
+    font-family: "Playfair Display", serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 20px;
+}
+
+.medicao-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.medicao-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.btn-registrar {
+    background: var(--white);
+    color: #222;
+    font-family: "Nunito", sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 24px;
+    width: 100%;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    margin-top: 8px;
+}
+
+.btn-registrar:hover {
+    background: #ececec;
+}
+
+.btn-registrar:active {
+    transform: scale(0.98);
+}
+
+.success-message {
+    background: #4caf50;
+    color: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: none;
+}
+
+.patient-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-alta {
+    background: #ff9800;
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-alta:hover {
+    background: #f57c00;
+}
+
+.leito-indisponivel {
+    text-align: center;
+    padding: 60px;
+}
+
+.leito-indisponivel h2 {
+    font-family: "Playfair Display", serif;
+    font-size: 28px;
+    color: var(--white);
+    margin-bottom: 16px;
+}
+
+.leito-indisponivel p {
+    color: var(--text-light);
+    font-size: 16px;
+}

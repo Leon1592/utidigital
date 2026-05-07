@@ -38,9 +38,18 @@ async function remove(id) {
     await db.query('DELETE FROM pacientes WHERE id = $1', [id]);
 }
 
+async function findById(id) {
+    const result = await db.query(
+        'SELECT id, nome, estado, sexo, data_nascimento, cpf, contato_paciente, motivo_admissao, logradouro, cidade, cep FROM pacientes WHERE id = $1',
+        [id]
+    );
+    return result.rows[0];
+}
+
 module.exports = {
     create,
     findAll,
     findByNome,
-    remove
+    remove,
+    findById
 };

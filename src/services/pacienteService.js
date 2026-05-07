@@ -19,9 +19,14 @@ async function remove(id) {
     return pacienteModel.remove(id);
 }
 
+async function getById(id) {
+    return pacienteModel.findById(id);
+}
+
 module.exports = {
     create,
     getAll,
     searchByNome,
-    remove
+    remove,
+    getById
 };

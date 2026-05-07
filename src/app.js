@@ -7,6 +7,7 @@ const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/authRoutes');
 const leitoRoutes = require('./routes/leitoRoutes');
 const pacienteRoutes = require('./routes/pacienteRoutes');
+const medicaoRoutes = require('./routes/medicaoRoutes');
 const { isAuthenticated } = require('./middleware/authMiddleware');
 
 const app = express();
@@ -30,7 +31,11 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'utidigital_secret_key',
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 3600000 }
+    cookie: { 
+        maxAge: 3600000,
+        httpOnly: true,
+        sameSite: 'lax'
+    }
 }));
 
 app.use(flash());
@@ -46,18 +51,49 @@ app.get('/dashboard', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../public/html/dashboard.html'));
 });
 
-app.get('/gestao-leitos', (req, res) => {
+app.get('/gestao-leitos', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../public/html/gestao_leitos.html'));
 });
 
-app.get('/cadastro-pacientes', (req, res) => {
+app.get('/cadastro-pacientes', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../public/html/cadastro_pacientes.html'));
+});
+
+app.get('/cadastro-usuarios', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/html/cadastro_usuarios.html'));
+});
+
+app.get('/relatorios', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/html/relatorios.html'));
 });
 
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 app.use('/api/leitos', leitoRoutes);
 app.use('/api/pacientes', pacienteRoutes);
+app.use('/api/medicoes', medicaoRoutes);
+app.use('/api/relatorios', require('./routes/relatorioRoutes'));
+
+app.get('/debug-session', (req, res) => {
+    res.json({
+        hasSession: !!req.session,
+        hasUser: !!req.session?.user,
+        user: req.session?.user || null,
+        cookies: req.headers.cookie
+    });
+});
+
+app.get('/leito/:id', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/html/leito_detalhe.html'));
+});
+
+app.get('/test-leito', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/html/test_leito.html'));
+});
+
+app.get('/internar', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/html/internar_paciente.html'));
+});
 
 app.get('/test-static', (req, res) => {
     const testFile = path.join(publicPath, 'styles', 'login_page.css');

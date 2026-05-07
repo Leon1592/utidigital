@@ -1,0 +1,84 @@
+.internar-form-card {
+  background: var(--red-card);
+  border-radius: 16px;
+  padding: 36px 40px;
+  max-width: 700px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.form-row .full {
+  grid-column: 1 / -1;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.btn-internar {
+  background: var(--white);
+  color: #222;
+  font-family: "Nunito", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  padding: 14px 28px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.btn-internar:hover {
+  background: #ececec;
+}
+
+.btn-internar:active {
+  transform: scale(0.97);
+}
+
+.btn-cancelar {
+  background: transparent;
+  color: var(--text-light);
+  font-family: "Nunito", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 14px 24px;
+  cursor: pointer;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.btn-cancelar:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  color: var(--white);
+}
+
+.success-message {
+  background: #4caf50;
+  color: white;
+  padding: 14px 20px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  margin-top: 20px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  display: none;
+}

@@ -1,0 +1,243 @@
+.section-title {
+  font-family: "Playfair Display", serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 20px;
+}
+
+.users-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.user-card {
+  background: var(--red-card);
+  border-radius: 12px;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+}
+
+.user-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.user-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.user-badge {
+  background: var(--red-main);
+  color: var(--white);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.user-email {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-light);
+}
+
+.user-actions {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-excluir-usuario {
+  background: #c0392b;
+  color: var(--white);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-excluir-usuario:hover {
+  background: #e74c3c;
+}
+
+.no-users {
+  font-size: 16px;
+  color: var(--text-light);
+  text-align: center;
+  padding: 40px;
+  grid-column: 1 / -1;
+}
+
+.tabs-container {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.tab-btn {
+  background: var(--red-card);
+  color: var(--text-light);
+  border: none;
+  border-radius: 10px;
+  padding: 12px 24px;
+  font-family: "Nunito", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.tab-btn.active {
+  background: var(--white);
+  color: #222;
+}
+
+.tab-btn:hover:not(.active) {
+  background: var(--red-main);
+  color: var(--white);
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.user-form-card {
+  background: var(--red-card);
+  border-radius: 16px;
+  padding: 32px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.user-form-title {
+  font-family: "Playfair Display", serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+
+.row-2-form {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 18px;
+}
+
+.btn-cadastrar-usuario {
+  background: var(--white);
+  color: #222;
+  font-family: "Nunito", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  justify-content: center;
+}
+
+.btn-cadastrar-usuario:hover {
+  background: #ececec;
+}
+
+.btn-cadastrar-usuario:active {
+  transform: scale(0.97);
+}
+
+.delete-confirm-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.delete-confirm-content {
+  background: var(--dark-teal);
+  border-radius: 16px;
+  padding: 24px;
+  width: 400px;
+  border: 2px solid var(--red-main);
+}
+
+.delete-confirm-header {
+  font-family: "Playfair Display", serif;
+  font-size: 22px;
+  color: var(--white);
+  margin-bottom: 16px;
+}
+
+.delete-confirm-body {
+  font-size: 15px;
+  color: var(--text-light);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.delete-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-cancelar {
+  background: var(--red-card);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-cancelar:hover {
+  background: var(--red-main);
+}
+
+.btn-confirmar-excluir {
+  background: #c0392b;
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-confirmar-excluir:hover {
+  background: #e74c3c;
+}

@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestão de Leitos - UTI Digital</title>
+  <link rel="shortcut icon" href="/uploads/images/ui.png" type="image/x-icon" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/public/styles/global.css">
   <link rel="stylesheet" href="/public/styles/gestao_leitos.css">
@@ -33,12 +34,17 @@
       <a href="/dashboard" class="nav-item">Dashboard</a>
       <a href="/gestao-leitos" class="nav-item active">Gestao de Leitos</a>
       <a href="/cadastro-pacientes" class="nav-item">Cadastro de Pacientes</a>
-      <a href="#" class="nav-item">Relatorios</a>
+      <a href="/relatorios" class="nav-item">Relatorios</a>
+      <a href="#" class="nav-item" id="navCadastroUsuarios" style="display: none;">Cadastro de Usuarios</a>
       <a href="/auth/logout" class="nav-item">Sair</a>
     </aside>
 
     <main>
       <h1 class="page-title">Gestao de Leitos</h1>
+
+      <div class="header-actions">
+        <a href="/internar" class="btn-internar">+ Internar Paciente</a>
+      </div>
 
       <div class="legend">
         <div class="legend-item">
@@ -77,6 +83,11 @@
         const roleBadge = document.querySelector('.badge-medico');
         const perfilLabels = { 'Medico': 'Medico', 'Enfermeiro': 'Enfermeiro', 'Admin': 'Administrador' };
         roleBadge.textContent = perfilLabels[user.perfil] || user.perfil;
+        
+        if (user.perfil === 'Admin') {
+          document.getElementById('navCadastroUsuarios').style.display = 'flex';
+          document.getElementById('navCadastroUsuarios').href = '/cadastro-usuarios';
+        }
       } catch (error) {
         console.error('Erro ao carregar usuario:', error);
       }
@@ -102,14 +113,22 @@
             ? new Date(leito.data_internacao).toLocaleDateString('pt-BR') 
             : '-';
           const observacoes = leito.observacoes || '-';
+          const isClickable = leito.status === 'ocupado';
           
           const bedCard = document.createElement('div');
-          bedCard.className = 'bed-card';
+          bedCard.className = 'bed-card' + (isClickable ? ' clickable' : '');
+          
+          if (isClickable) {
+            bedCard.style.cursor = 'pointer';
+            bedCard.onclick = () => { window.location.href = '/leito/' + leito.id; };
+          }
+          
           bedCard.innerHTML = `
             <span class="bed-title ${statusClass}">Leito ${leito.numero}</span>
             <span class="bed-info">Nome: ${pacienteNome}</span>
             <span class="bed-info">Situacao: ${observacoes}</span>
             <span class="bed-info">Data de Internacao: ${dataInternacao}</span>
+            ${isClickable ? '<span class="bed-info" style="color: #4caf50; font-size: 12px;">Clique para ver detalhes</span>' : ''}
           `;
           grid.appendChild(bedCard);
         });

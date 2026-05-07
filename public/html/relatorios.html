@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relatórios - UTI Digital</title>
+  <link rel="shortcut icon" href="/uploads/images/ui.png" type="image/x-icon" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/public/styles/global.css">
+  <link rel="stylesheet" href="/public/styles/relatorios.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+</head>
+
+<body>
+  <div class="app">
+
+    <header>
+      <div class="logo">
+        <img src="/uploads/images/ui.png" alt="UTI Digital" height="50px">
+      </div>
+      <div class="badge-medico" id="roleBadge">...</div>
+      <div class="doctor-name" id="doctorName">Carregando...</div>
+    </header>
+
+    <aside>
+      <div class="menu-label">Menu Principal</div>
+      <a href="/dashboard" class="nav-item">Dashboard</a>
+      <a href="/gestao-leitos" class="nav-item">Gestao de Leitos</a>
+      <a href="/cadastro-pacientes" class="nav-item">Cadastro de Pacientes</a>
+      <a href="/relatorios" class="nav-item active">Relatorios</a>
+      <a href="#" class="nav-item" id="navCadastroUsuarios" style="display: none;">Cadastro de Usuarios</a>
+      <a href="/auth/logout" class="nav-item">Sair</a>
+    </aside>
+
+    <main>
+      <div class="page-title">Relatório</div>
+
+      <div class="report-controls">
+        <div class="form-row">
+          <div class="field-group">
+            <label class="field-label">Paciente</label>
+            <select class="field-input" id="selectPaciente">
+              <option value="">Selecione o paciente</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Periodo</label>
+            <select class="field-input" id="selectPeriodo">
+              <option value="1">Últimas 24 horas</option>
+              <option value="2">Últimos 2 dias</option>
+              <option value="5">Últimos 5 dias</option>
+              <option value="7" selected>Últimos 7 dias</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Tipo de Relatório</label>
+          <div class="report-type-cards">
+            <label class="type-card">
+              <input type="radio" name="tipoRelatorio" value="completo" checked>
+              <div class="type-card-content">
+                <div class="type-card-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                  </svg>
+                </div>
+                <div class="type-card-text">
+                  <span class="type-card-title">Completo</span>
+                  <span class="type-card-desc">Sinais vitais + Observações</span>
+                </div>
+              </div>
+            </label>
+            <label class="type-card">
+              <input type="radio" name="tipoRelatorio" value="sinais_vitais">
+              <div class="type-card-content">
+                <div class="type-card-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                  </svg>
+                </div>
+                <div class="type-card-text">
+                  <span class="type-card-title">Sinais Vitais</span>
+                  <span class="type-card-desc">FC, PA, SpO2, Temperatura</span>
+                </div>
+              </div>
+            </label>
+            <label class="type-card">
+              <input type="radio" name="tipoRelatorio" value="internacao">
+              <div class="type-card-content">
+                <div class="type-card-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 8l9-5 9 5v10H3V8z"></path>
+                    <path d="M9 22V12h6v10"></path>
+                  </svg>
+                </div>
+                <div class="type-card-text">
+                  <span class="type-card-title">Internação</span>
+                  <span class="type-card-desc">Dados de internação</span>
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <button class="btn-preview" id="btnPreview">Pré-visualização</button>
+      </div>
+
+      <div class="report-preview" id="reportPreview" style="display: none;">
+        <div class="preview-header">
+          <div class="preview-logo">
+            <img src="/uploads/images/ui.png" alt="UTI Digital" height="40px">
+          </div>
+          <div class="preview-title">UTI DIGITAL</div>
+        </div>
+
+        <div class="preview-info">
+          <div class="preview-info-item">
+            <span class="preview-info-label">Paciente</span>
+            <span class="preview-info-value" id="previewPaciente">-</span>
+          </div>
+          <div class="preview-info-item">
+            <span class="preview-info-label">Leito</span>
+            <span class="preview-info-value" id="previewLeito">-</span>
+          </div>
+          <div class="preview-info-item">
+            <span class="preview-info-label">Data de Internacao</span>
+            <span class="preview-info-value" id="previewInternacao">-</span>
+          </div>
+          <div class="preview-info-item">
+            <span class="preview-info-label">Periodo</span>
+            <span class="preview-info-value" id="previewPeriodo">-</span>
+          </div>
+        </div>
+
+        <div class="preview-section" id="sectionSinaisVitais">
+          <div class="preview-section-title">SINAIS VITAIS</div>
+          <table class="preview-table" id="tableSinaisVitais">
+            <thead>
+              <tr>
+                <th>Data/Hora</th>
+                <th>FC (bpm)</th>
+                <th>PA (mmHg)</th>
+                <th>SpO2 (%)</th>
+                <th>Temperatura (°C)</th>
+              </tr>
+            </thead>
+            <tbody id="tbodySinaisVitais">
+            </tbody>
+          </table>
+        </div>
+
+        <div class="preview-section" id="sectionObservacoes" style="display: none;">
+          <div class="preview-section-title">OBSERVAÇÕES</div>
+          <div class="preview-obs" id="previewObservacoes"></div>
+        </div>
+
+        <div class="preview-footer">
+          Gerado em: <span id="previewGeradoEm">-</span>
+        </div>
+      </div>
+
+      <div class="report-actions" id="reportActions" style="display: none;">
+        <button class="btn-voltar" id="btnVoltar">Voltar</button>
+        <button class="btn-gerar-pdf" id="btnGerarPdf">Gerar PDF</button>
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    let reportData = null;
+
+    async function loadUser() {
+      try {
+        const response = await fetch('/auth/user', { credentials: 'include' });
+        if (!response.ok) { window.location.href = '/'; return; }
+        const data = await response.json();
+        const user = data.user;
+        document.getElementById('doctorName').textContent = user.name;
+        const roleBadge = document.getElementById('roleBadge');
+        const perfilLabels = { 'Medico': 'Medico', 'Enfermeiro': 'Enfermeiro', 'Admin': 'Administrador' };
+        roleBadge.textContent = perfilLabels[user.perfil] || user.perfil;
+        if (user.perfil === 'Admin') {
+          document.getElementById('navCadastroUsuarios').style.display = 'flex';
+          document.getElementById('navCadastroUsuarios').href = '/cadastro-usuarios';
+        }
+      } catch (error) {
+        window.location.href = '/';
+      }
+    }
+
+    async function loadPacientes() {
+      try {
+        const response = await fetch('/api/relatorios/pacientes-internados', { credentials: 'include' });
+        if (!response.ok) return;
+        const pacientes = await response.json();
+        const select = document.getElementById('selectPaciente');
+        pacientes.forEach(p => {
+          const option = document.createElement('option');
+          option.value = p.id;
+          option.textContent = p.nome;
+          select.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Erro ao carregar pacientes:', error);
+      }
+    }
+
+    document.getElementById('btnPreview').addEventListener('click', async function() {
+      const pacienteId = document.getElementById('selectPaciente').value;
+      const periodo = document.getElementById('selectPeriodo').value;
+      const tipoRelatorio = document.querySelector('input[name="tipoRelatorio"]:checked').value;
+
+      if (!pacienteId) {
+        alert('Selecione um paciente.');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/relatorios/paciente/${pacienteId}?periodo=${periodo}&tipo=${tipoRelatorio}`, {
+          credentials: 'include'
+        });
+        if (!response.ok) throw new Error('Erro ao gerar relatório');
+
+        reportData = await response.json();
+        console.log('Report data received:', reportData);
+        renderPreview(reportData, periodo);
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+
+    function formatarDataHora(data) {
+      if (!data) return '-';
+      const d = new Date(data);
+      return d.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' });
+    }
+
+    function renderPreview(data, periodo) {
+      document.getElementById('previewPaciente').textContent = data.paciente?.nome || '-';
+      document.getElementById('previewLeito').textContent = 'Leito ' + (data.leito?.numero || '-');
+      const rawInternacao = data.paciente?.data_internacao || data.leito?.data_internacao;
+      document.getElementById('previewInternacao').textContent = rawInternacao ? formatarDataHora(rawInternacao).split(' ')[0] : '-';
+      document.getElementById('previewPeriodo').textContent = `Últimos ${periodo} ${periodo == 1 ? 'dia' : 'dias'}`;
+      document.getElementById('previewGeradoEm').textContent = formatarDataHora(new Date());
+
+      const tbody = document.getElementById('tbodySinaisVitais');
+      tbody.innerHTML = '';
+      if (data.medicoes && data.medicoes.length > 0) {
+        data.medicoes.forEach(m => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${formatarDataHora(m.created_at)}</td>
+            <td>${m.frequencia_cardiaca || '-'}</td>
+            <td>${m.pressao_sistolica || '-'}/${m.pressao_diastolica || '-'}</td>
+            <td>${m.spo2 || '-'}</td>
+            <td>${m.temperatura || '-'}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } else {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td colspan="5" style="text-align: center; padding: 20px;">Nenhuma medição registrada no período.</td>';
+        tbody.appendChild(tr);
+      }
+
+      const tipo = document.querySelector('input[name="tipoRelatorio"]:checked').value;
+      document.getElementById('sectionSinaisVitais').style.display = (tipo === 'completo' || tipo === 'sinais_vitais') ? 'block' : 'none';
+
+      const obsSection = document.getElementById('sectionObservacoes');
+      const obsDiv = document.getElementById('previewObservacoes');
+      if (tipo === 'completo') {
+        const obsTexts = data.medicoes.filter(m => m.observacoes).map(m => formatarDataHora(m.created_at) + ': ' + m.observacoes);
+        if (obsTexts.length > 0) {
+          obsSection.style.display = 'block';
+          obsDiv.innerHTML = obsTexts.map(o => '<p>' + o + '</p>').join('');
+        } else {
+          obsSection.style.display = 'none';
+        }
+      } else {
+        obsSection.style.display = 'none';
+      }
+
+      document.getElementById('reportPreview').style.display = 'block';
+      document.getElementById('reportActions').style.display = 'flex';
+    }
+
+    document.getElementById('btnVoltar').addEventListener('click', function() {
+      document.getElementById('reportPreview').style.display = 'none';
+      document.getElementById('reportActions').style.display = 'none';
+    });
+
+    function formatDateOnly(data) {
+      if (!data) return '-';
+      const d = new Date(data);
+      return d.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+    }
+
+    document.getElementById('btnGerarPdf').addEventListener('click', async function() {
+      if (!reportData) return;
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0);
+      doc.text('UTI DIGITAL', 15, 20);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Relatorio de Paciente', 15, 28);
+
+      doc.setDrawColor(0);
+      doc.setLineWidth(0.5);
+      doc.line(15, 32, 195, 32);
+
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0);
+      doc.text('Paciente:', 15, 42);
+      doc.setFont('helvetica', 'normal');
+      doc.text(reportData.paciente?.nome || '-', 50, 42);
+
+      doc.setFont('helvetica', 'bold');
+      doc.text('Leito:', 15, 50);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Leito ' + (reportData.leito?.numero || '-'), 50, 50);
+
+      doc.setFont('helvetica', 'bold');
+      doc.text('Medico:', 110, 42);
+      doc.setFont('helvetica', 'normal');
+      doc.text(reportData.leito?.medico_responsavel_nome || '-', 145, 42);
+
+      doc.setFont('helvetica', 'bold');
+      doc.text('Data Internacao:', 110, 50);
+      doc.setFont('helvetica', 'normal');
+      const rawInt = reportData.paciente?.data_internacao || reportData.leito?.data_internacao;
+      doc.text(rawInt ? formatDateOnly(rawInt) : '-', 148, 50);
+
+      doc.setDrawColor(0);
+      doc.setLineWidth(0.3);
+      doc.line(15, 56, 195, 56);
+
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0);
+      doc.text('SINAIS VITAIS', 15, 64);
+
+      const tipo = document.querySelector('input[name="tipoRelatorio"]:checked').value;
+      if (tipo === 'completo' || tipo === 'sinais_vitais') {
+        if (reportData.medicoes && reportData.medicoes.length > 0) {
+          const tableData = reportData.medicoes.map(m => [
+            formatarDataHora(m.created_at),
+            m.frequencia_cardiaca || '-',
+            (m.pressao_sistolica || '-') + '/' + (m.pressao_diastolica || '-'),
+            m.spo2 || '-',
+            m.temperatura || '-'
+          ]);
+
+          doc.autoTable({
+            startY: 66,
+            head: [['Data/Hora', 'FC (bpm)', 'PA (mmHg)', 'SpO2 (%)', 'Temp (°C)']],
+            body: tableData,
+            theme: 'grid',
+            headStyles: { fillColor: [50], textColor: 255, fontStyle: 'bold' },
+            styles: { fontSize: 9, cellPadding: 3 },
+            alternateRowStyles: { fillColor: [245, 245, 245] },
+            columnStyles: { 0: { cellWidth: 45 } }
+          });
+        } else {
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(80);
+          doc.text('Nenhuma medicao registrada no periodo.', 15, 72);
+        }
+      }
+
+      if (tipo === 'completo') {
+        const obsWithNotes = reportData.medicoes ? reportData.medicoes.filter(m => m.observacoes) : [];
+        if (obsWithNotes.length > 0) {
+          let y = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : 80;
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(0);
+          doc.text('OBSERVACOES', 15, y);
+          y += 6;
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'normal');
+          obsWithNotes.forEach(m => {
+            doc.text(formatarDataHora(m.created_at) + ': ' + m.observacoes, 15, y, { maxWidth: 180 });
+            y += 6;
+          });
+        }
+      }
+
+      const pageHeight = doc.internal.pageSize.getHeight();
+      doc.setFontSize(8);
+      doc.setTextColor(80);
+      doc.text('Gerado em: ' + formatarDataHora(new Date()), 15, pageHeight - 8);
+
+      const pacienteNome = (reportData.paciente?.nome || 'utidigital').replace(/\s+/g, '_');
+      doc.save('relatorio_paciente_' + pacienteNome + '.pdf');
+    });
+
+    loadUser();
+    loadPacientes();
+  </script>
+</body>
+
+</html>
