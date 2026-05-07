@@ -6,6 +6,7 @@ const flash = require('connect-flash');
 const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/authRoutes');
 const leitoRoutes = require('./routes/leitoRoutes');
+const pacienteRoutes = require('./routes/pacienteRoutes');
 const { isAuthenticated } = require('./middleware/authMiddleware');
 
 const app = express();
@@ -49,9 +50,14 @@ app.get('/gestao-leitos', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/html/gestao_leitos.html'));
 });
 
+app.get('/cadastro-pacientes', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/html/cadastro_pacientes.html'));
+});
+
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 app.use('/api/leitos', leitoRoutes);
+app.use('/api/pacientes', pacienteRoutes);
 
 app.get('/test-static', (req, res) => {
     const testFile = path.join(publicPath, 'styles', 'login_page.css');

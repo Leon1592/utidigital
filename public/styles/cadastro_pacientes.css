@@ -1,0 +1,295 @@
+/* Cadastro de Pacientes - Page Specific Styles */
+
+.page-title {
+  font-family: "Playfair Display", serif;
+  font-size: 52px;
+  font-weight: 700;
+  color: var(--white);
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.form-card {
+  background: var(--red-card);
+  border-radius: 16px;
+  padding: 36px 40px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.field-input {
+  background: var(--red-input);
+  border: none;
+  border-radius: 10px;
+  padding: 16px 18px;
+  color: var(--white);
+  font-family: "Nunito", sans-serif;
+  font-size: 15px;
+  outline: none;
+  transition: background 0.2s, box-shadow 0.2s;
+  width: 100%;
+}
+
+.field-input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.field-input:focus {
+  background: #6a1f14;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18);
+}
+
+select.field-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 40px;
+}
+
+.row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 18px;
+}
+
+.row-2 {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 18px;
+}
+
+.bottom-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  align-items: end;
+}
+
+.btn-admitir {
+  background: var(--white);
+  color: #222;
+  font-family: "Nunito", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 28px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  white-space: nowrap;
+  justify-content: center;
+}
+
+.btn-admitir:hover {
+  background: #ececec;
+}
+
+.btn-admitir:active {
+  transform: scale(0.97);
+}
+
+.search-section {
+  margin-top: 40px;
+  max-width: 980px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.search-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 20px;
+}
+
+.search-title {
+  font-family: "Playfair Display", serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.search-input {
+  background: var(--red-input);
+  border: none;
+  border-radius: 10px;
+  padding: 12px 18px;
+  color: var(--white);
+  font-family: "Nunito", sans-serif;
+  font-size: 15px;
+  outline: none;
+  width: 300px;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.search-input:focus {
+  background: #6a1f14;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18);
+}
+
+.patients-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.patient-card {
+  background: var(--red-card);
+  border-radius: 12px;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.patient-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.patient-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.patient-detail {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-light);
+}
+
+.no-patients {
+  font-size: 16px;
+  color: var(--text-light);
+  text-align: center;
+  padding: 40px;
+  grid-column: 1 / -1;
+}
+
+.search-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 120px;
+  z-index: 1000;
+}
+
+.search-modal-content {
+  background: var(--dark-teal);
+  border-radius: 16px;
+  padding: 24px;
+  width: 500px;
+  max-height: 500px;
+  overflow-y: auto;
+  border: 2px solid var(--red-main);
+}
+
+.search-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.search-modal-header h3 {
+  font-family: "Playfair Display", serif;
+  font-size: 24px;
+  color: var(--white);
+}
+
+.close-modal {
+  background: var(--red-main);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.search-modal-input {
+  background: var(--red-input);
+  border: none;
+  border-radius: 10px;
+  padding: 14px 18px;
+  color: var(--white);
+  font-family: "Nunito", sans-serif;
+  font-size: 16px;
+  outline: none;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.search-modal-input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.search-modal-results {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.search-result-item {
+  background: var(--red-card);
+  border-radius: 10px;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.search-result-item:hover {
+  background: var(--red-main);
+}
+
+.result-name {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 4px;
+}
+
+.result-detail {
+  display: block;
+  font-size: 13px;
+  color: var(--text-light);
+}
+
+.no-results {
+  font-size: 15px;
+  color: var(--text-light);
+  text-align: center;
+  padding: 20px;
+}

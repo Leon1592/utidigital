@@ -1,0 +1,147 @@
+/* Base styles for all pages */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --dark-teal: #0d3140;
+  --sidebar-bg: #9b3828;
+  --red-main: #a03020;
+  --red-card: #922b1e;
+  --red-input: #7d2418;
+  --red-btn-bg: #c0392b;
+  --white: #ffffff;
+  --text-light: #e8e8e8;
+  --label-color: #ffffff;
+  --sidebar-w: 230px;
+  --header-h: 64px;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: "Nunito", sans-serif;
+  background: var(--dark-teal);
+  color: var(--white);
+}
+
+.app {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  grid-template-rows: var(--header-h) 1fr;
+  height: 100vh;
+}
+
+header {
+  grid-column: 1 / -1;
+  background: var(--dark-teal);
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  gap: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  margin-right: 12px;
+}
+
+.logo img {
+  border-radius: 8px;
+}
+
+.badge-medico {
+  background: var(--red-main);
+  color: var(--white);
+  font-weight: 700;
+  font-size: 15px;
+  padding: 7px 22px;
+  border-radius: 6px;
+}
+
+.doctor-name {
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--white);
+}
+
+.header-search {
+  margin-left: auto;
+  width: 42px;
+  height: 42px;
+  background: var(--red-main);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.header-search:hover {
+  background: #c0392b;
+}
+
+.header-search svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+
+aside {
+  background: var(--sidebar-bg);
+  padding-top: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.menu-label {
+  font-size: 9.5px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #5c8a9a;
+  padding: 0 22px 10px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 22px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-light);
+  cursor: pointer;
+  border-radius: 0;
+  transition: background 0.15s, color 0.15s;
+  text-decoration: none;
+  border: none;
+  background: none;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.nav-item.active {
+  color: #fff;
+  background: rgba(160, 48, 32, 0.25);
+}
+
+main {
+  background: var(--dark-teal);
+  padding: 40px 48px;
+  overflow-y: auto;
+}

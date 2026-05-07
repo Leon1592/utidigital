@@ -1,195 +1,34 @@
-/* ===== Reset & Base ===== */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+/* Gestao de Leitos - Page Specific Styles */
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html, body {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  font-family: 'Inter', Arial, sans-serif;
-}
-
-/* ===== Layout ===== */
-.page-wrapper {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100vh;
-  background-color: #0a2a33;
-}
-
-/* ===== Top Header Bar ===== */
-.top-header {
-  display: flex;
-  align-items: center;
-  background-color: #0d3039;
-  border-bottom: 2px solid #1a4a55;
-  padding: 12px 24px;
-  min-height: 70px;
-  flex-shrink: 0;
-}
-
-.logo {
-  display: flex;
-  align-items: baseline;
-  gap: 0;
-  margin-right: 30px;
-  flex-shrink: 0;
-}
-
-.logo-container {
-  display: flex;
-  align-items: center;
-}
-
-.role-badge {
-  background-color: #d32f2f;
-  color: #ffffff;
-  font-size: 18px;
-  font-weight: 700;
-  padding: 8px 30px;
-  border-radius: 4px;
-  margin-right: 20px;
-  flex-shrink: 0;
-}
-
-.doctor-name {
-  font-size: 22px;
-  font-weight: 700;
-  color: #ffffff;
-  flex-grow: 1;
-}
-
-.notification-bell {
-  width: 44px;
-  height: 44px;
-  background-color: #d32f2f;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
-  margin-left: auto;
-}
-
-.notification-bell svg {
-  width: 22px;
-  height: 22px;
-  fill: #ffffff;
-}
-
-/* ===== Main Content Area ===== */
-.main-area {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-}
-
-/* ===== Sidebar ===== */
-.sidebar {
-  width: 260px;
-  background-color: #d32f2f;
-  flex-shrink: 0;
-  padding: 20px 0;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-}
-
-.sidebar-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: #ffffff;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  margin-bottom: 20px;
-  padding: 0 20px;
-}
-
-.sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.nav-item {
-  display: block;
-  padding: 14px 20px;
-  color: rgba(255, 255, 255, 0.85);
-  text-decoration: none;
-  font-size: 15px;
-  font-weight: 500;
-  text-transform: uppercase;
-  transition: all 0.2s ease;
-}
-
-.nav-item:hover {
-  background-color: rgba(255, 255, 255, 0.15);
-  color: #ffffff;
-}
-
-.nav-item.active {
-  background-color: rgba(255, 255, 255, 0.25);
-  color: #ffffff;
-  border-left: 4px solid #ffffff;
-  padding-left: 16px;
-}
-
-.nav-item.logout {
-  margin-top: auto;
-  border-top: 1px solid rgba(255, 255, 255, 0.25);
-  padding-top: 20px;
-}
-
-/* ===== Content ===== */
-.content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 30px 40px 20px;
-  overflow-y: auto;
-}
-
-/* ===== Page Title ===== */
 .page-title {
-  font-family: 'Playfair Display', 'Georgia', serif;
-  font-size: 42px;
+  font-family: "Playfair Display", serif;
+  font-size: 52px;
   font-weight: 700;
-  font-style: normal;
-  color: #ffffff;
-  margin-bottom: 16px;
+  color: var(--white);
   text-align: center;
+  margin-bottom: 32px;
 }
 
-/* ===== Legend ===== */
 .legend {
   display: flex;
   align-items: center;
-  gap: 30px;
+  justify-content: center;
+  gap: 40px;
   margin-bottom: 35px;
 }
 
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 15px;
-  font-weight: 600;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 700;
 }
 
 .legend-dot {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  display: inline-block;
-  flex-shrink: 0;
 }
 
 .legend-dot.disponivel {
@@ -216,35 +55,34 @@ html, body {
   color: #d32f2f;
 }
 
-/* ===== Beds Grid ===== */
 .beds-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 25px;
+  max-width: 980px;
+  margin: 0 auto;
   width: 100%;
-  max-width: 1050px;
 }
 
-/* ===== Bed Card ===== */
 .bed-card {
-  background-color: #6fd4e8;
-  border-radius: 10px;
-  padding: 20px 22px;
-  min-height: 155px;
+  background-color: var(--red-card);
+  border-radius: 16px;
+  padding: 24px 26px;
+  min-height: 160px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 8px;
 }
 
 .bed-title {
   font-size: 22px;
   font-weight: 700;
   text-decoration: underline;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .bed-title.disponivel {
-  color: #2e7d32;
+  color: #4caf50;
 }
 
 .bed-title.ocupado {
@@ -258,6 +96,6 @@ html, body {
 .bed-info {
   font-size: 16px;
   font-weight: 500;
-  color: #1a1a1a;
-  line-height: 1.6;
+  color: var(--text-light);
+  line-height: 1.5;
 }
