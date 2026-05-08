@@ -1,226 +1,268 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-br">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - UTI Digital</title>
-  <link rel="shortcut icon" href="/uploads/images/ui.png" type="image/x-icon" />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/public/styles/global.css">
-  <style>
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      margin-top: 30px;
-      max-width: 900px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .stat-card {
-      background: var(--sidebar-bg);
-      border-radius: 10px;
-      padding: 25px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-    .stat-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 6px;
-    }
-    .stat-card.blue::before { background: #00B4D8; }
-    .stat-card.green::before { background: #4CAF50; }
-    .stat-card.red::before { background: #ff4444; }
-    .stat-card.red { border: 2px solid #ff4444; }
-    .stat-value {
-      font-size: 42px;
-      font-weight: bold;
-      color: #ffffff;
-      display: block;
-      margin-bottom: 8px;
-      margin-top: 8px;
-    }
-    .stat-label {
-      font-size: 16px;
-      color: #e8e8e8;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    .alerts-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      max-width: 600px;
-      margin: 30px auto 0;
-    }
-    .alert-row {
-      display: flex;
-      align-items: center;
-      background: #1a1a2e;
-      border-radius: 8px;
-      padding: 12px 15px;
-      border-left: 4px solid #FF6B6B;
-    }
-    .alert-patient-name {
-      color: #ffffff;
-      font-size: 14px;
-      font-weight: bold;
-    }
-    .alert-bed-num {
-      color: #aaa;
-      font-size: 13px;
-      margin-left: 10px;
-    }
-    .alert-issue-item {
-      margin-top: 5px;
-    }
-    .alert-issue-name {
-      color: #FF6B6B;
-      font-size: 14px;
-      font-weight: bold;
-    }
-    .alert-issue-val {
-      color: #FF6B6B;
-      font-weight: bold;
-    }
-  </style>
-</head>
-
-<body>
-  <div class="app">
-
-    <header>
-      <div class="logo">
-        <img src="/uploads/images/ui.png" alt="UTI Digital" height="50px">
-      </div>
-      <div class="badge-medico" id="roleBadge">...</div>
-      <div class="doctor-name" id="doctorName">Carregando...</div>
-    </header>
-
-    <aside>
-      <div class="menu-label">Menu Principal</div>
-      <a href="/dashboard" class="nav-item active">Dashboard</a>
-      <a href="/gestao-leitos" class="nav-item">Gestao de Leitos</a>
-      <a href="/cadastro-pacientes" class="nav-item">Cadastro de Pacientes</a>
-      <a href="/relatorios" class="nav-item">Relatorios</a>
-      <a href="#" class="nav-item" id="navCadastroUsuarios" style="display: none;">Cadastro de Usuarios</a>
-      <a href="/auth/logout" class="nav-item">Sair</a>
-    </aside>
-
-    <main>
-      <div class="stats-grid">
-        <div class="stat-card blue">
-          <span class="stat-value" id="leitosOcupados">0</span>
-          <span class="stat-label">Leitos Ocupados</span>
-        </div>
-        <div class="stat-card green">
-          <span class="stat-value" id="altas">0</span>
-          <span class="stat-label">Altas (24h)</span>
-        </div>
-        <div class="stat-card red">
-          <span class="stat-value" id="estadosCriticos">0</span>
-          <span class="stat-label">Estados Críticos</span>
-        </div>
-      </div>
-
-      <div id="alertsSection" style="display: none;">
-        <h2 style="color: #ffffff; text-align: center; margin-top: 40px; margin-bottom: 20px;">⚠️ ALERTAS</h2>
-        <div id="alertsList" class="alerts-list"></div>
-      </div>
-    </main>
-
-  </div>
-
-  <script>
-    async function loadUser() {
-      try {
-        const response = await fetch('/auth/user');
-        if (!response.ok) {
-          window.location.href = '/';
-          return;
-        }
-        const data = await response.json();
-        const user = data.user;
-        document.getElementById('doctorName').textContent = user.name;
-
-        const roleBadge = document.getElementById('roleBadge');
-        const perfilLabels = { 'Medico': 'Medico', 'Enfermeiro': 'Enfermeiro', 'Admin': 'Administrador' };
-        roleBadge.textContent = perfilLabels[user.perfil] || user.perfil;
-
-        if (user.perfil === 'Admin') {
-          document.getElementById('navCadastroUsuarios').style.display = 'flex';
-          document.getElementById('navCadastroUsuarios').href = '/cadastro-usuarios';
-        }
-      } catch (error) {
-        console.error('Erro ao carregar usuario:', error);
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - UTI Digital</title>
+    <link
+      rel="shortcut icon"
+      href="../../uploads/images/ui.png"
+      type="image/x-icon"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Nunito:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles/global.css" />
+    <style>
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-top: 30px;
+        max-width: 900px;
+        margin-left: auto;
+        margin-right: auto;
       }
-    }
-
-    async function loadStats() {
-      try {
-        const response = await fetch('/api/relatorios/estatisticas');
-        if (!response.ok) {
-          throw new Error('Erro ao buscar estatísticas');
-        }
-        const stats = await response.json();
-
-        document.getElementById('leitosOcupados').textContent = stats.leitosOcupados;
-        document.getElementById('altas').textContent = stats.altas;
-        document.getElementById('estadosCriticos').textContent = stats.estadosCriticos;
-      } catch (error) {
-        console.error('Erro ao carregar estatísticas:', error);
+      .stat-card {
+        background: var(--sidebar-bg);
+        border-radius: 10px;
+        padding: 25px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
       }
-    }
+      .stat-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+      }
+      .stat-card.blue::before {
+        background: #00b4d8;
+      }
+      .stat-card.green::before {
+        background: #4caf50;
+      }
+      .stat-card.red::before {
+        background: #ff4444;
+      }
+      .stat-card.red {
+        border: 2px solid #ff4444;
+      }
+      .stat-value {
+        font-size: 42px;
+        font-weight: bold;
+        color: #ffffff;
+        display: block;
+        margin-bottom: 8px;
+        margin-top: 8px;
+      }
+      .stat-label {
+        font-size: 16px;
+        color: #e8e8e8;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .alerts-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 600px;
+        margin: 30px auto 0;
+      }
+      .alert-row {
+        display: flex;
+        align-items: center;
+        background: #1a1a2e;
+        border-radius: 8px;
+        padding: 12px 15px;
+        border-left: 4px solid #ff6b6b;
+      }
+      .alert-patient-name {
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: bold;
+      }
+      .alert-bed-num {
+        color: #aaa;
+        font-size: 13px;
+        margin-left: 10px;
+      }
+      .alert-issue-item {
+        margin-top: 5px;
+      }
+      .alert-issue-name {
+        color: #ff6b6b;
+        font-size: 14px;
+        font-weight: bold;
+      }
+      .alert-issue-val {
+        color: #ff6b6b;
+        font-weight: bold;
+      }
+    </style>
+  </head>
 
-    async function loadAlerts() {
-      try {
-        const response = await fetch('/api/relatorios/alertas');
-        if (!response.ok) {
-          return;
+  <body>
+    <div class="app">
+      <header>
+        <div class="logo">
+          <img src="/uploads/images/ui.png" alt="UTI Digital" height="50px" />
+        </div>
+        <div class="badge-medico" id="roleBadge">...</div>
+        <div class="doctor-name" id="doctorName">Carregando...</div>
+      </header>
+
+      <aside>
+        <div class="menu-label">Menu Principal</div>
+        <a href="/dashboard" class="nav-item active">Dashboard</a>
+        <a href="/gestao-leitos" class="nav-item">Gestao de Leitos</a>
+        <a href="/cadastro-pacientes" class="nav-item">Cadastro de Pacientes</a>
+        <a href="/relatorios" class="nav-item">Relatorios</a>
+        <a
+          href="#"
+          class="nav-item"
+          id="navCadastroUsuarios"
+          style="display: none"
+          >Cadastro de Usuarios</a
+        >
+        <a href="/auth/logout" class="nav-item">Sair</a>
+      </aside>
+
+      <main>
+        <div class="stats-grid">
+          <div class="stat-card blue">
+            <span class="stat-value" id="leitosOcupados">0</span>
+            <span class="stat-label">Leitos Ocupados</span>
+          </div>
+          <div class="stat-card green">
+            <span class="stat-value" id="altas">0</span>
+            <span class="stat-label">Altas (24h)</span>
+          </div>
+          <div class="stat-card red">
+            <span class="stat-value" id="estadosCriticos">0</span>
+            <span class="stat-label">Estados Críticos</span>
+          </div>
+        </div>
+
+        <div id="alertsSection" style="display: none">
+          <h2
+            style="
+              color: #ffffff;
+              text-align: center;
+              margin-top: 40px;
+              margin-bottom: 20px;
+            "
+          >
+            ⚠️ ALERTAS
+          </h2>
+          <div id="alertsList" class="alerts-list"></div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      async function loadUser() {
+        try {
+          const response = await fetch("/auth/user");
+          if (!response.ok) {
+            window.location.href = "/";
+            return;
+          }
+          const data = await response.json();
+          const user = data.user;
+          document.getElementById("doctorName").textContent = user.name;
+
+          const roleBadge = document.getElementById("roleBadge");
+          const perfilLabels = {
+            Medico: "Medico",
+            Enfermeiro: "Enfermeiro",
+            Admin: "Administrador",
+          };
+          roleBadge.textContent = perfilLabels[user.perfil] || user.perfil;
+
+          if (user.perfil === "Admin") {
+            document.getElementById("navCadastroUsuarios").style.display =
+              "flex";
+            document.getElementById("navCadastroUsuarios").href =
+              "/cadastro-usuarios";
+          }
+        } catch (error) {
+          console.error("Erro ao carregar usuario:", error);
         }
-        const alerts = await response.json();
+      }
 
-        const section = document.getElementById('alertsSection');
-        const list = document.getElementById('alertsList');
+      async function loadStats() {
+        try {
+          const response = await fetch("/api/relatorios/estatisticas");
+          if (!response.ok) {
+            throw new Error("Erro ao buscar estatísticas");
+          }
+          const stats = await response.json();
 
-        if (!alerts || alerts.length === 0) {
-          section.style.display = 'none';
-          return;
+          document.getElementById("leitosOcupados").textContent =
+            stats.leitosOcupados;
+          document.getElementById("altas").textContent = stats.altas;
+          document.getElementById("estadosCriticos").textContent =
+            stats.estadosCriticos;
+        } catch (error) {
+          console.error("Erro ao carregar estatísticas:", error);
         }
+      }
 
-        section.style.display = 'block';
-        list.innerHTML = alerts.map(alert => `
+      async function loadAlerts() {
+        try {
+          const response = await fetch("/api/relatorios/alertas");
+          if (!response.ok) {
+            return;
+          }
+          const alerts = await response.json();
+
+          const section = document.getElementById("alertsSection");
+          const list = document.getElementById("alertsList");
+
+          if (!alerts || alerts.length === 0) {
+            section.style.display = "none";
+            return;
+          }
+
+          section.style.display = "block";
+          list.innerHTML = alerts
+            .map(
+              (alert) => `
           <div class="alert-row">
             <div class="alert-info">
               <div>
-                <span class="alert-patient-name">${alert.pacienteNome || 'Paciente'}</span>
+                <span class="alert-patient-name">${alert.pacienteNome || "Paciente"}</span>
                 <span class="alert-bed-num">- Leito ${alert.leitoNumero}</span>
               </div>
-              ${alert.issues.map(issue => `
+              ${alert.issues
+                .map(
+                  (issue) => `
                 <div class="alert-issue-item">
                   <span class="alert-issue-name">${issue.param}:</span>
                   <span class="alert-issue-val"> ${issue.value}</span>
                   <span style="color: #888; font-size: 12px;"> (${issue.normal})</span>
                 </div>
-              `).join('')}
+              `,
+                )
+                .join("")}
             </div>
           </div>
-        `).join('');
-      } catch (error) {
-        console.error('Erro ao carregar alertas:', error);
+        `,
+            )
+            .join("");
+        } catch (error) {
+          console.error("Erro ao carregar alertas:", error);
+        }
       }
-    }
 
-    loadUser();
-    loadStats();
-    loadAlerts();
-  </script>
-</body>
-
+      loadUser();
+      loadStats();
+      loadAlerts();
+    </script>
+  </body>
 </html>
