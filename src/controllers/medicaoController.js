@@ -47,7 +47,6 @@ async function getLatestMedicao(req, res) {
 
 async function deleteAllByLeito(req, res) {
     try {
-        console.log('deleteAllByLeito called with leitoId:', req.params.leitoId);
         const { leitoId } = req.params;
         await medicaoModel.deleteAllByLeito(leitoId);
         res.status(200).json({ message: 'Histórico excluído' });

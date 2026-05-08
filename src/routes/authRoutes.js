@@ -1,12 +1,11 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
-const db = require('../db');
+const db = require('../config/db');
 
 const router = express.Router();
 
 router.post('/login', async (req, res) => {
     try {
-        console.log('Login attempt:', req.body);
         const { email, password, acesso } = req.body;
 
         const result = await db.query(

@@ -5,13 +5,15 @@ const pool = require('../config/db');
 router.post('/:id/alta', async (req, res) => {
     try {
         const { id } = req.params;
-        const leito = await pool.query('SELECT paciente_id FROM leitos WHERE id = $1', [id]);
+        const leito = await pool.query('SELECT paciente_id, paciente_nome FROM leitos WHERE id = $1', [id]);
         if (leito.rows.length === 0) {
             return res.status(404).json({ error: 'Leito nao encontrado' });
         }
         const pacienteId = leito.rows[0].paciente_id;
+        const pacienteNome = leito.rows[0].paciente_nome;
         await pool.query('DELETE FROM medicoes WHERE leito_id = $1', [id]);
         if (pacienteId) {
+            await pool.query('INSERT INTO altas (paciente_id, paciente_nome, data_alta) VALUES ($1, $2, NOW())', [pacienteId, pacienteNome]);
             await pool.query('DELETE FROM pacientes WHERE id = $1', [pacienteId]);
         }
         await pool.query(`
@@ -69,6 +71,12 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
     try {
         const { numero, status, paciente_nome, data_internacao, observacoes } = req.body;
+        
+        const checkExisting = await pool.query('SELECT id FROM leitos WHERE numero = $1', [numero]);
+        if (checkExisting.rows.length > 0) {
+            return res.status(400).json({ error: 'Leito ' + numero + ' ja existe' });
+        }
+        
         const result = await pool.query(
             'INSERT INTO leitos (numero, status, paciente_nome, data_internacao, observacoes) VALUES ($1, $2, $3, $4, $5) RETURNING *',
             [numero, status || 'disponivel', paciente_nome || null, data_internacao || null, observacoes || null]

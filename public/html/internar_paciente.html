@@ -185,6 +185,15 @@
       }
 
       try {
+        const allLeitosResp = await fetch('/api/leitos');
+        const allLeitos = await allLeitosResp.json();
+        
+        const pacienteJaInternado = allLeitos.find(l => l.paciente_id === parseInt(pacienteId) && l.status === 'ocupado');
+        if (pacienteJaInternado) {
+          alert('Este paciente já está internado no leito ' + pacienteJaInternado.numero + '.Não é possível internar em outro leito.');
+          return;
+        }
+
         const pacienteResp = await fetch('/api/pacientes/' + pacienteId);
         if (!pacienteResp.ok) throw new Error('Erro ao buscar dados do paciente');
         const paciente = await pacienteResp.json();
