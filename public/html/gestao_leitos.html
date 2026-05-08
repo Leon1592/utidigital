@@ -189,7 +189,8 @@ let isUserAdmin = false;
           const dataInternacao = leito.data_internacao 
             ? new Date(leito.data_internacao).toLocaleDateString('pt-BR') 
             : '-';
-          const observacoes = leito.observacoes || '-';
+          const statusLabels = { 'disponivel': 'Disponivel', 'ocupado': 'Ocupado', 'indisponivel': 'Indisponivel' };
+          const statusDisplay = statusLabels[leito.status] || leito.status || '-';
           const isClickable = leito.status === 'ocupado';
           
           const bedCard = document.createElement('div');
@@ -205,7 +206,7 @@ let isUserAdmin = false;
           bedCard.innerHTML = `
             <span class="bed-title ${statusClass}">Leito ${leito.numero}${deleteBtn}</span>
             <span class="bed-info">Nome: ${pacienteNome}</span>
-            <span class="bed-info">Situacao: ${observacoes}</span>
+            <span class="bed-info">Situacao: ${statusDisplay}</span>
             <span class="bed-info">Data de Internacao: ${dataInternacao}</span>
             ${isClickable ? '<span class="bed-info" style="color: #4caf50; font-size: 12px;">Clique para ver detalhes</span>' : ''}
           `;

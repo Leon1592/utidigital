@@ -161,7 +161,7 @@ utidigital/
 │       ├── migrate.js
 │       ├── seedLeitos.js
 │       ├── seedMedicos.js
-│       └── createTestUsers.js
+│       └── seedAdmin.js
 ├── public/
 │   ├── html/              # Páginas HTML
 │   │   ├── index.html    # Login
@@ -790,7 +790,8 @@ npm install
 node src/scripts/migrate.js
 node src/scripts/seedLeitos.js
 node src/scripts/seedMedicos.js
-node src/scripts/createTestUsers.js
+node src/scripts/seedAdmin.js
+node src/scripts/seedTestUsers.js
 ```
 
 ### 11.3 Execução
@@ -805,13 +806,21 @@ http://localhost:3000
 
 ---
 
-## 12. Usuários de Teste
+## 12. Usuários Padrão
+
+### Usuários Principais (criados por seedAdmin.js)
 
 | Perfil | Email | Senha |
 |--------|-------|-------|
 | Admin | devjoaopedrofepereira2009@gmail.com | 123456 |
 | Médico | joaopedroferreirapereira0701@gmail.com | 123456 |
-| Enfermeiro | maria@uti.com | 123456 |
+
+### Usuários de Teste (criados por seedTestUsers.js)
+
+| Perfil | Email | Senha |
+|--------|-------|-------|
+| Médico | medicoteste@uti.com | 123456 |
+| Enfermeiro | enfermeiroteste@uti.com | 123456 |
 
 ---
 
@@ -916,7 +925,8 @@ cp .env.example .env
 node src/scripts/migrate.js
 node src/scripts/seedLeitos.js
 node src/scripts/seedMedicos.js
-node src/scripts/createTestUsers.js
+node src/scripts/seedAdmin.js
+node src/scripts/seedTestUsers.js
 
 # Start server
 node src/server.js
@@ -925,11 +935,15 @@ node src/server.js
 http://localhost:3000
 ```
 
-### 15.3 Testing
+### 15.3 Default Accounts
 
-Use the test accounts:
+**Main accounts:**
 - **Admin**: devjoaopedrofepereira2009@gmail.com / 123456
 - **Médico**: joaopedroferreirapereira0701@gmail.com / 123456
+
+**Test accounts:**
+- **Médico**: medicoteste@uti.com / 123456
+- **Enfermeiro**: enfermeiroteste@uti.com / 123456
 
 ---
 
