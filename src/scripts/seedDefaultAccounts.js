@@ -7,13 +7,14 @@ const pool = new Pool({
     ssl: { rejectUnauthorized: false }
 });
 
-async function seedMainUsers() {
+async function seedDefaultAccounts() {
     try {
-        const password = await bcrypt.hash('123456', 10);
+        const password = await bcrypt.hash('654321', 10);
 
         const users = [
-            { name: 'Dr. João Pedro', email: 'joaopedroferreirapereira0701@gmail.com', perfil: 'Medico' },
-            { name: 'Admin João Pedro', email: 'devjoaopedrofepereira2009@gmail.com', perfil: 'Admin' }
+            { name: 'Admin Sistema', email: 'adminsistemageral@uti.com', perfil: 'Admin' },
+            { name: 'Dr. Teste', email: 'medicoteste@uti.com', perfil: 'Medico' },
+            { name: 'Enfermeiro Teste', email: 'enfermeiroteste@uti.com', perfil: 'Enfermeiro' }
         ];
 
         for (const user of users) {
@@ -36,12 +37,13 @@ async function seedMainUsers() {
                 [user.name, user.email, user.perfil, password]
             );
 
-            console.log(`Usuário principal ${user.name} cadastrado com sucesso!`);
+            console.log(`Usuário ${user.name} cadastrado com sucesso!`);
         }
 
-        console.log('Usuários principais criados com sucesso!');
-        console.log('Email: joaopedroferreirapereira0701@gmail.com / Senha: 123456 (Médico)');
-        console.log('Email: devjoaopedrofepereira2009@gmail.com / Senha: 123456 (Admin)');
+        console.log('\nContas padrão criadas com sucesso!');
+        console.log('Admin: adminsistemageral@uti.com / 654321');
+        console.log('Médico: medicoteste@uti.com / 654321');
+        console.log('Enfermeiro: enfermeiroteste@uti.com / 654321');
         process.exit(0);
     } catch (error) {
         console.error('Erro ao criar usuários:', error);
@@ -49,4 +51,4 @@ async function seedMainUsers() {
     }
 }
 
-seedMainUsers();
+seedDefaultAccounts();

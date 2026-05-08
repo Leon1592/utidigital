@@ -125,6 +125,35 @@ O backend implementa o padrão **MVC (Model-View-Controller)** adaptado para API
 | **JavaScript (ES6+)** | Lógica client-side |
 | **Fetch API** | Comunicação com backend |
 
+### 3.4 APIs Externas
+
+| API | Descrição |
+|-----|------------|
+| **ViaCEP** | API pública para consulta de CEPs brasileiros. Utilizada no cadastro de pacientes para auto-preenchimento de endereço (logradouro, bairro, cidade, estado) ao digitar o CEP. |
+
+### 3.5 Integração com ViaCEP
+
+O sistema utiliza a API pública ViaCEP para facilitar o cadastro de pacientes:
+
+```javascript
+// Ao digitar o CEP e sair do campo (blur), faz a consulta
+const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+
+// Retorna os dados do endereço
+{
+  logradouro: "Rua Example",
+  bairro: "Centro",
+  localidade: "São Paulo",
+  uf: "SP"
+}
+```
+
+**Fluxo:**
+1. Usuário digita o CEP no campo de cadastro
+2. Ao sair do campo (evento blur), o sistema consulta a API ViaCEP
+3. Os campos logradouro, bairro, cidade e estado são preenchidos automaticamente
+4. Caso o CEP não seja encontrado, o usuário preenche manualmente
+
 ---
 
 ## 4. Estrutura de Diretórios
@@ -806,12 +835,13 @@ http://localhost:3000
 
 ---
 
-## 12. Usuários de Teste (criados por seedTestUsers.js)
+## 12. Usuários Padrão (criados por seedDefaultAccounts.js)
 
 | Perfil | Email | Senha |
 |--------|-------|-------|
-| Médico | medicoteste@uti.com | 123456 |
-| Enfermeiro | enfermeiroteste@uti.com | 123456 |
+| Admin | adminsistemageral@uti.com | 654321 |
+| Médico | medicoteste@uti.com | 654321 |
+| Enfermeiro | enfermeiroteste@uti.com | 654321 |
 
 ---
 
@@ -915,9 +945,7 @@ cp .env.example .env
 # Run database setup
 node src/scripts/migrate.js
 node src/scripts/seedLeitos.js
-node src/scripts/seedMedicos.js
-node src/scripts/seedAdmin.js
-node src/scripts/seedTestUsers.js
+node src/scripts/seedDefaultAccounts.js
 
 # Start server
 node src/server.js
@@ -926,10 +954,11 @@ node src/server.js
 http://localhost:3000
 ```
 
-### 15.3 Test Accounts
+### 15.3 Default Accounts
 
-- **Médico**: medicoteste@uti.com / 123456
-- **Enfermeiro**: enfermeiroteste@uti.com / 123456
+- **Admin**: adminsistemageral@uti.com / 654321
+- **Médico**: medicoteste@uti.com / 654321
+- **Enfermeiro**: enfermeiroteste@uti.com / 654321
 
 ---
 

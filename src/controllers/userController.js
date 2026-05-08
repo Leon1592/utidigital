@@ -1,6 +1,6 @@
 const userModel = require('../models/userModel');
 
-const ADMIN_GERAL_EMAIL = 'devjoaopedrofepereira2009@gmail.com';
+const ADMIN_GERAL_EMAIL = 'adminsistemageral@uti.com';
 
 async function createUser(req, res) {
     try {
