@@ -287,7 +287,7 @@ O sistema disponibiliza as seguintes APIs RESTful:
 // Request
 POST /auth/login
 {
-  "email": "vitor2008bergamasco@gmail.com",
+  "email": "medicoteste@uti.com",
   "password": "123456",
   "acesso": "Medico"
 }
@@ -806,16 +806,7 @@ http://localhost:3000
 
 ---
 
-## 12. Usuários Padrão
-
-### Usuários Principais (criados por seedAdmin.js)
-
-| Perfil | Email | Senha |
-|--------|-------|-------|
-| Admin | devjoaopedrofepereira2009@gmail.com | 123456 |
-| Médico | joaopedroferreirapereira0701@gmail.com | 123456 |
-
-### Usuários de Teste (criados por seedTestUsers.js)
+## 12. Usuários de Teste (criados por seedTestUsers.js)
 
 | Perfil | Email | Senha |
 |--------|-------|-------|
@@ -935,13 +926,8 @@ node src/server.js
 http://localhost:3000
 ```
 
-### 15.3 Default Accounts
+### 15.3 Test Accounts
 
-**Main accounts:**
-- **Admin**: devjoaopedrofepereira2009@gmail.com / 123456
-- **Médico**: joaopedroferreirapereira0701@gmail.com / 123456
-
-**Test accounts:**
 - **Médico**: medicoteste@uti.com / 123456
 - **Enfermeiro**: enfermeiroteste@uti.com / 123456
 
