@@ -20,7 +20,7 @@ const uploadsPath = path.join(__dirname, '../uploads');
 console.log('Public path:', publicPath);
 console.log('Uploads path:', uploadsPath);
 
-app.use('/public', express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, '../public')));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.get('/', (req, res) => {

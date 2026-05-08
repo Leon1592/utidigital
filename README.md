@@ -25,6 +25,8 @@ Sistema web completo para gerenciamento de Unidade de Terapia Intensiva (UTI), d
 13. [Fluxo de Uso](#13-fluxo-de-uso)
 14. [Decisões de Design](#14-decisões-de-design)
 15. [Installation and Setup](#15-installation-and-setup)
+16. [Geração de Relatórios em PDF](#16-geração-de-relatórios-em-pdf)
+17. [Conclusão](#17-conclusão)
 
 ---
 
@@ -124,36 +126,6 @@ O backend implementa o padrão **MVC (Model-View-Controller)** adaptado para API
 | **CSS3** | Estilos (sem frameworks) |
 | **JavaScript (ES6+)** | Lógica client-side |
 | **Fetch API** | Comunicação com backend |
-
-### 3.4 APIs Externas
-
-| API | Descrição |
-|-----|------------|
-| **ViaCEP** | API pública para consulta de CEPs brasileiros. Utilizada no cadastro de pacientes para auto-preenchimento de endereço (logradouro, bairro, cidade, estado) ao digitar o CEP. |
-
-### 3.5 Integração com ViaCEP
-
-O sistema utiliza a API pública ViaCEP para facilitar o cadastro de pacientes:
-
-```javascript
-// Ao digitar o CEP e sair do campo (blur), faz a consulta
-const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-
-// Retorna os dados do endereço
-{
-  logradouro: "Rua Example",
-  bairro: "Centro",
-  localidade: "São Paulo",
-  uf: "SP"
-}
-```
-
-**Fluxo:**
-1. Usuário digita o CEP no campo de cadastro
-2. Ao sair do campo (evento blur), o sistema consulta a API ViaCEP
-3. Os campos logradouro, bairro, cidade e estado são preenchidos automaticamente
-4. Caso o CEP não seja encontrado, o usuário preenche manualmente
-
 ---
 
 ## 4. Estrutura de Diretórios
@@ -839,7 +811,7 @@ http://localhost:3000
 
 | Perfil | Email | Senha |
 |--------|-------|-------|
-| Admin | adminsistemageral@uti.com | 654321 |
+| Admin | adminsistemageral@uit.com | 654321 |
 | Médico | medicoteste@uti.com | 654321 |
 | Enfermeiro | enfermeiroteste@uti.com | 654321 |
 
@@ -956,13 +928,136 @@ http://localhost:3000
 
 ### 15.3 Default Accounts
 
-- **Admin**: adminsistemageral@uti.com / 654321
+- **Admin**: adminsistemageral@uit.com / 654321
 - **Médico**: medicoteste@uti.com / 654321
 - **Enfermeiro**: enfermeiroteste@uti.com / 654321
 
 ---
 
-## 16. Conclusão
+## 16. Geração de Relatórios em PDF
+
+### 16.1 Visão Geral
+
+O sistema permite a geração de relatórios em PDF para acompanhamento dos pacientes. Os relatórios são gerados inteiramente no **frontend** utilizando as bibliotecas **jsPDF** e **jspdf-autotable**, não havendo processamento no backend para esta funcionalidade.
+
+### 16.2 Bibliotecas Utilizadas
+
+| Biblioteca | Versão | Descrição |
+|------------|--------|-----------|
+| **jsPDF** | 2.5.1 | Biblioteca para criação de documentos PDF via JavaScript |
+| **jspdf-autotable** | 3.5.31 | Plugin para criação de tabelas dentro dos PDFs |
+
+### 16.3 Inclusão no HTML
+
+```html
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+```
+
+### 16.4 Fluxo de Geração do PDF
+
+```
+1. Usuário seleciona paciente na página Relatórios
+2. Usuário escolhe o período (24h, 2 dias, 5 dias, 7 dias)
+3. Usuário seleciona o tipo de relatório:
+   ├── Completo (Sinais vitais + Observações)
+   ├── Sinais Vitais (apenas medições)
+   └── Internação (dados de admissão)
+4. Usuário clica em "Pré-visualização"
+5. Sistema busca dados via API: GET /api/relatorios/paciente/:id
+6. Preview é exibido na tela
+7. Usuário clica em "Gerar PDF"
+8. jsPDF gera o documento e faz download automático
+```
+
+### 16.5 Endpoint Consumido
+
+| Método | Endpoint | Descrição |
+|--------|----------|------------|
+| GET | `/api/relatorios/paciente/:id` | Retorna dados do paciente, leito e medições |
+
+**Parâmetros de query:**
+- `periodo`: Número de dias para buscar histórico (1, 2, 5 ou 7)
+- `tipo`: Tipo de relatório (`completo`, `sinais_vitais`, `internacao`)
+
+### 16.6 Estrutura do PDF Gerado
+
+O PDF contém as seguintes seções:
+
+```
+┌─────────────────────────────────────────────┐
+│              UTI DIGITAL                    │
+│           Relatório de Paciente             │
+├─────────────────────────────────────────────┤
+│ Paciente: [Nome do Paciente]                │
+│ Leito: [Número]    Médico: [Nome]           │
+│ Data Internação: [Data]                    │
+├─────────────────────────────────────────────┤
+│              SINAIS VITAIS                   │
+│ ┌────────┬─────────┬──────────┬─────┬────┐ │
+│ │Data/Hora│FC(bpm) │PA(mmHg)  │SpO2 │Temp│ │
+│ ├────────┼─────────┼──────────┼─────┼────┤ │
+│ │ ...    │  ...    │   ...    │ ... │... │ │
+│ └────────┴─────────┴──────────┴─────┴────┘ │
+├─────────────────────────────────────────────┤
+│            OBSERVAÇÕES                       │
+│ [Lista de observações registradas]          │
+├─────────────────────────────────────────────┤
+│ Gerado em: [Data/Hora]                      │
+└─────────────────────────────────────────────┘
+```
+
+### 16.7 Código de Geração (JavaScript)
+
+```javascript
+document.getElementById('btnGerarPdf').addEventListener('click', async function() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Título e informações do paciente
+    doc.setFontSize(20);
+    doc.text('UTI DIGITAL', 15, 20);
+
+    // Tabela de sinais vitais
+    const tableData = medicoes.map(m => [
+        formatarDataHora(m.created_at),
+        m.frequencia_cardiaca,
+        m.pressao_sistolica + '/' + m.pressao_diastolica,
+        m.spo2,
+        m.temperatura
+    ]);
+
+    doc.autoTable({
+        head: [['Data/Hora', 'FC (bpm)', 'PA (mmHg)', 'SpO2 (%)', 'Temp (°C)']],
+        body: tableData,
+        theme: 'grid'
+    });
+
+    // Download do arquivo
+    doc.save('relatorio_paciente_' + nomePaciente + '.pdf');
+});
+```
+
+### 16.8 Tipos de Relatório
+
+| Tipo | Conteúdo | Uso |
+|------|----------|-----|
+| **Completo** | Sinais vitais + Observações médicas | Relatório detalhado para equipe |
+| **Sinais Vitais** | Apenas tabela de medições | Análise rápida de tendências |
+| **Internação** | Dados de admissão | Resumo do histórico do paciente |
+
+### 16.9 Nomenclatura do Arquivo
+
+O arquivo é salvo com o formato:
+```
+relatorio_paciente_[NOME_PACIENTE].pdf
+```
+
+Exemplo: `relatorio_paciente_Joao_Silva.pdf`
+
+---
+
+## 17. Conclusão
 
 O UTI Digital é um sistema completo que demonstra:
 
