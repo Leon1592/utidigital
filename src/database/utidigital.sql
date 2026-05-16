@@ -1,0 +1,2 @@
+-- código do PostgreSQL para o repositório do github
+-- Prof. Matheus pediu pra fazer isso (fomos obrigados)
