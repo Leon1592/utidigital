@@ -56,6 +56,110 @@ header {
   border-radius: 8px;
 }
 
+/* Search Modal - shared across pages */
+.search-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 120px;
+  z-index: 1000;
+}
+
+.search-modal-content {
+  background: var(--dark-teal);
+  border-radius: 16px;
+  padding: 24px;
+  width: 500px;
+  max-height: 500px;
+  overflow-y: auto;
+  border: 2px solid var(--red-main);
+}
+
+.search-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.search-modal-header h3 {
+  font-family: "Playfair Display", serif;
+  font-size: 24px;
+  color: var(--white);
+}
+
+.close-modal {
+  background: var(--red-main);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.search-modal-input {
+  background: var(--red-input);
+  border: none;
+  border-radius: 10px;
+  padding: 14px 18px;
+  color: var(--white);
+  font-family: "Nunito", sans-serif;
+  font-size: 16px;
+  outline: none;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.search-modal-input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.search-modal-results {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.search-result-item {
+  background: var(--red-card);
+  border-radius: 10px;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.search-result-item:hover {
+  background: var(--red-main);
+}
+
+.result-name {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 4px;
+}
+
+.result-detail {
+  display: block;
+  font-size: 13px;
+  color: var(--text-light);
+}
+
+.no-results {
+  font-size: 15px;
+  color: var(--text-light);
+  text-align: center;
+  padding: 20px;
+}
+
 .badge-medico {
   background: var(--red-main);
   color: var(--white);

@@ -127,6 +127,8 @@ O sistema segue uma arquitetura **RESTful** com separação clara entre backend 
 | **express-session** | ^1.19 | Gerenciamento de sessões |
 | **connect-flash** | ^0.1 | Mensagens flash |
 | **dotenv** | ^17.4 | Variáveis de ambiente |
+| **helmet** | ^8.1 | Headers de segurança HTTP |
+| **express-rate-limit** | ^7.5 | Rate limiting no login |
 
 ### 4.2 Banco de Dados
 
@@ -530,11 +532,34 @@ POST /users
 
 | Método | Endpoint | Descrição |
 |--------|----------|-----------|
-| GET | `/api/pacientes` | Lista todos os pacientes |
-| GET | `/api/pacientes?nome=Joao` | Busca pacientes por nome |
+| GET | `/api/pacientes` | Lista todos os pacientes (sem filtro) |
+| GET | `/api/pacientes?nome=Joao` | Busca pacientes por nome (`ILIKE %termo%`) |
 | GET | `/api/pacientes/:id` | Detalhes de um paciente |
 | POST | `/api/pacientes` | Cria novo paciente |
 | DELETE | `/api/pacientes/:id` | Exclui paciente |
+
+**Exemplo - Buscar Pacientes por Nome:**
+
+```javascript
+// GET /api/pacientes?nome=maria
+
+// Response
+[
+  {
+    "id": 2,
+    "nome": "Maria Oliveira",
+    "cpf": "987.654.321-02",
+    "sexo": "Feminino",
+    "data_nascimento": "1992-08-22",
+    "contato_paciente": "(21) 98888-0002",
+    "motivo_admissao": "AVC isquêmico",
+    "logradouro": "Rua Exemplo, 123",
+    "cidade": "Rio de Janeiro",
+    "estado": "RJ",
+    "cep": "20000-000"
+  }
+]
+```
 
 **Exemplo - Criar Paciente:**
 
@@ -722,8 +747,18 @@ function escapeHTML(str) {
         .replace(/'/g, '&#039;');
 }
 
+function escapeHTML(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 function loadUser() {
-    fetch('/auth/user')
+    return fetch('/auth/user')
         .then(response => {
             if (!response.ok) {
                 window.location.href = '/';
@@ -732,17 +767,24 @@ function loadUser() {
             return response.json();
         })
         .then(data => {
-            if (!data) return;
+            if (!data) return null;
             const user = data.user;
-            // Preenche nome e perfil no header
+            const labels = { Medico: 'Médico(a)', Enfermeiro: 'Enfermeiro(a)', Admin: 'Administrador' };
             document.getElementById('doctorName').textContent = user.name;
             document.getElementById('roleBadge').textContent =
-                perfilLabels[user.perfil] || user.perfil;
+                labels[user.perfil] || user.perfil;
             // Mostra link de Cadastro de Usuários apenas para Admin
-            document.getElementById('navCadastroUsuarios').style.display =
-                user.perfil === 'Admin' ? 'flex' : 'none';
+            const navCadastro = document.getElementById('navCadastroUsuarios');
+            if (navCadastro) {
+                navCadastro.style.display = user.perfil === 'Admin' ? 'flex' : 'none';
+                navCadastro.href = '/cadastro-usuarios';
+            }
+            return user; // retorna o usuário para uso em initPage()
         })
-        .catch(() => { window.location.href = '/'; });
+        .catch(() => {
+            window.location.href = '/';
+            return null;
+        });
 }
 ```
 
@@ -790,8 +832,9 @@ Grid visual dos leitos da UTI.
 **Funcionalidades:**
 - Grid de cards com cor por status (verde=disponível, vermelho=ocupado, cinza=indisponível)
 - Clique em leito ocupado → redireciona para `/leito/:id`
-- Busca por número ou nome do paciente
-- **Admin:** botão "+ Adicionar Leito" com modal, botão "[Excluir]" em cada card
+- **Busca por número ou nome do paciente** via modal de busca (ícone de lupa no header) com filtragem client-side
+- **Prevenção de XSS:** Todos os dados exibidos via `innerHTML` usam `escapeHTML()`
+- **Admin:** botão "+ Adicionar Leito" com modal, botão "[Excluir]" em cada card do leito
 
 **Tratamento de XSS:** Todos os dados inseridos via `innerHTML` usam `escapeHTML()`. onde há concatenação com dados do usuário.
 
@@ -846,9 +889,25 @@ Cadastro e gerenciamento de pacientes.
 **Funcionalidades:**
 - Formulário completo: nome, data de nascimento, CPF, sexo, CEP (com busca automática via ViaCEP), cidade, estado, logradouro, contato, motivo da admissão
 - Lista de pacientes cadastrados em cards
-- Busca por nome
-- Modal de detalhes do paciente
+- **Busca por nome em dois modos:**
+  - **Modal de busca** (ícone de lupa no header): com debounce de 300ms, mínimo de 2 caracteres, e resultados clicáveis que abrem o modal de detalhes
+  - **Busca inline** no topo da listagem: com debounce de 300ms, filtra a lista diretamente
+- Modal de detalhes do paciente (nome, CPF, contato, endereço, motivo)
 - Botão de exclusão com confirmação
+
+**Detalhe do debounce implementado:**
+```javascript
+let searchTimer;
+searchInput.addEventListener('input', function() {
+    clearTimeout(searchTimer); // cancela chamada anterior
+    const query = this.value.trim();
+    if (query.length < 2) return; // mínimo de caracteres
+    searchTimer = setTimeout(async () => {
+        const results = await searchPacientes(query);
+        renderResults(results);
+    }, 300); // aguarda 300ms de inatividade
+});
+```
 
 #### 8.2.7 `cadastro_usuarios.html` - Cadastro de Usuários
 
@@ -919,15 +978,54 @@ function isAuthenticated(req, res, next) {
 }
 ```
 
-### 9.3 Perfis de Usuário
+### 9.3 Autorização Baseada em Perfil (Role-Based Access)
+
+O middleware `authorize()` é utilizado em operações restritas a administradores, como CRUD de usuários e criação/exclusão de leitos:
+
+```javascript
+// src/middleware/authMiddleware.js
+function authorize(...allowedProfiles) {
+    return (req, res, next) => {
+        if (!req.session.user || !allowedProfiles.includes(req.session.user.perfil)) {
+            return res.status(403).json({ error: 'Acesso negado' });
+        }
+        next();
+    };
+}
+```
+
+**Exemplo de uso nas rotas:**
+```javascript
+router.get('/', authorize('Admin'), userController.listUsers);
+router.post('/', authorize('Admin'), userController.createUser);
+router.delete('/:id', authorize('Admin'), userController.deleteUser);
+router.post('/', authorize('Admin'), leitoController.createLeito);
+router.delete('/:id', authorize('Admin'), leitoController.deleteLeito);
+```
+
+### 9.4 Perfis de Usuário
 
 | Perfil | Descrição | Permissões |
 |--------|-----------|------------|
-| **Admin** | Administrador do sistema | Acesso total: CRUD de leitos, CRUD de usuários, todas as páginas |
+| **Admin** | Administrador do sistema | Acesso total: CRUD de leitos, CRUD de usuários, todas as páginas, botão "[Excluir]" nos leitos |
 | **Médico** | Médico da UTI | Visualizar leitos, registrar medições, dar alta |
 | **Enfermeiro** | Enfermeiro da UTI | Visualizar leitos, registrar medições |
 
-### 9.4 Proteção de Rotas
+### 9.5 Navegação Condicional no Frontend
+
+O menu lateral exibe o item **"Cadastro de Usuarios"** apenas para usuários com perfil `Admin`, controlado via JavaScript:
+
+```javascript
+const navCadastro = document.getElementById('navCadastroUsuarios');
+if (navCadastro) {
+    navCadastro.style.display = user.perfil === 'Admin' ? 'flex' : 'none';
+    navCadastro.href = '/cadastro-usuarios';
+}
+```
+
+Além disso, na página **Gestão de Leitos**, o botão "+ Adicionar Leito" e os botões "[Excluir]" nos cards só aparecem para administradores.
+
+### 9.6 Proteção de Rotas
 
 | Rota | Protegida | Observação |
 |------|-----------|------------|
@@ -949,13 +1047,29 @@ function isAuthenticated(req, res, next) {
 
 ## 10. Segurança
 
-### 10.1 Proteção CSRF - Logout via POST
+### 10.1 Rate Limiting no Login
 
-O logout é feito exclusivamente via `POST /auth/logout` usando um formulário HTML. Links `<a href="/auth/logout">` não funcionam mais, prevenindo logout acidental por CSRF.
+O endpoint `POST /auth/login` é protegido por rate limit (`express-rate-limit`) que permite no máximo **10 tentativas** em uma janela de **15 minutos** por IP. Após exceder o limite, o IP fica bloqueado temporariamente.
 
-### 10.2 Anti-XSS via escapeHTML()
+```javascript
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 10,                    // 10 tentativas
+    message: { error: 'Muitas tentativas de login. Tente novamente em 15 minutos.' }
+});
+```
 
-Todas as páginas HTML utilizam a função `escapeHTML()` para sanitizar dados do usuário antes de inseri-los no DOM via `innerHTML`.
+### 10.2 Headers de Segurança (Helmet)
+
+O sistema utiliza `helmet` para configurar headers HTTP de segurança, incluindo:
+- `Content-Security-Policy` — Restringe fontes de conteúdo
+- `X-Content-Type-Options: nosniff` — Previne MIME-type sniffing
+- `X-Frame-Options: DENY` — Previne clickjacking
+- `Strict-Transport-Security` — Força HTTPS (em produção)
+
+### 10.3 XSS - Sanitização com escapeHTML()
+
+Todas as páginas HTML utilizam a função `escapeHTML()` (definida em `public/js/auth.js`) para sanitizar dados do usuário antes de inseri-los no DOM via `innerHTML`. A função substitui os caracteres especiais HTML (`&`, `<`, `>`, `"`, `'`) por suas entidades HTML correspondentes, prevenindo ataques de Cross-Site Scripting (XSS).
 
 ```javascript
 function escapeHTML(str) {
@@ -969,7 +1083,13 @@ function escapeHTML(str) {
 }
 ```
 
-### 10.3 Ocultação de Erros Internos
+A função é aplicada em todas as páginas que constroem HTML dinamicamente: gestão de leitos, cadastro de pacientes, dashboard, relatórios, etc.
+
+### 10.4 Proteção CSRF - Logout via POST
+
+O logout é feito exclusivamente via `POST /auth/logout` usando um formulário HTML. Links `<a href="/auth/logout">` não funcionam mais, prevenindo logout acidental por CSRF.
+
+### 10.5 Ocultação de Erros Internos
 
 Os controllers retornam mensagens de erro genéricas ao cliente. Detalhes internos (como `error.message`) são logados no servidor mas nunca expostos na resposta HTTP.
 
@@ -986,15 +1106,30 @@ catch (error) {
 }
 ```
 
-### 10.4 Cookie Seguro Condicional
+### 10.6 Cookie Seguro Condicional
 
 O cookie de sessão usa `secure: true` apenas quando `NODE_ENV=production` (HTTPS). Em desenvolvimento (HTTP local), fica como `false` para funcionar sem certificado SSL.
 
-### 10.5 Hashing de Senhas
+### 10.7 Hashing de Senhas
 
 Todas as senhas são armazenadas com bcrypt (cost factor 10). Não há armazenamento de senhas em texto plano.
 
-### 10.6 Validação de Campos no Backend
+### 10.8 Prevenção de Duplo Envio (Anti Double-Submit)
+
+Botões de ações críticas (internar, registrar medição, dar alta) são **desabilitados** durante a requisição assíncrona para evitar envios duplicados acidentais:
+
+```javascript
+btn.disabled = true;
+btn.textContent = 'Registrando...';
+try {
+    // requisição fetch
+} finally {
+    btn.disabled = false;
+    btn.textContent = textoOriginal;
+}
+```
+
+### 10.8 Validação de Campos no Backend
 
 Todos os endpoints que recebem dados do cliente validam os campos antes de persistir no banco (ver seção 13).
 
@@ -1028,7 +1163,44 @@ Todos os endpoints que recebem dados do cliente validam os campos antes de persi
 - Seleção de médico responsável
 - Validação: paciente não pode estar internado em outro leito
 
-### 11.5 Sistema de Alertas
+### 11.5 Busca de Pacientes e Leitos
+
+O sistema oferece **busca em dois níveis** nas páginas de pacientes e leitos:
+
+- **Ícone de busca no header** (todas as páginas): Um botão com ícone de lupa (SVG) no canto superior direito abre um modal de busca com campo de texto e resultados dinâmicos
+- **Busca inline** (`cadastro_pacientes.html`): Campo de busca diretamente na listagem de pacientes para filtrar em tempo real
+- **Debounce de 300ms**: Tanto a busca modal quanto a inline utilizam um timer de 300ms para evitar chamadas excessivas à API enquanto o usuário digita
+- **Mínimo de caracteres**: A busca modal exige pelo menos 2 caracteres para disparar a consulta
+
+**Pacientes (`GET /api/pacientes?nome=...`):**
+- Busca por nome via `ILIKE %termo%` no backend
+- Retorna resultados ordenados por ID decrescente
+- Ao clicar em um resultado, abre o modal de detalhes do paciente
+
+**Leitos (`gestao_leitos.html`):**
+- Busca local (client-side) por número do leito ou nome do paciente internado
+- Resultados filtrados instantaneamente sem chamada ao servidor
+
+### 11.6 Modal de Detalhes do Paciente
+
+Ao clicar em um card de paciente (na lista ou nos resultados da busca), um modal é aberto com:
+
+- Nome completo, CPF, data de nascimento, sexo
+- Contato, endereço completo (CEP, logradouro, cidade/estado)
+- Motivo da admissão
+- Botão "Excluir Paciente" com confirmação
+
+O modal fecha ao clicar no "X", no fundo escuro, ou via JavaScript.
+
+### 11.7 Busca Automática de CEP
+
+No formulário de cadastro de pacientes (`cadastro_pacientes.html`):
+
+- Ao sair do campo CEP (evento `blur`), o sistema consulta a **API pública ViaCEP** (`https://viacep.com.br/ws/{cep}/json/`)
+- Preenche automaticamente os campos de logradouro/bairro, cidade e estado
+- Caso o CEP não seja encontrado, exibe alerta e permite preenchimento manual
+
+### 11.8 Sistema de Alertas
 
 O sistema gera alertas automáticos para parâmetros fora da faixa normal:
 
