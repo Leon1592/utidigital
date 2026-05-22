@@ -35,7 +35,9 @@
         <a href="/cadastro-pacientes" class="nav-item">Cadastro de Pacientes</a>
         <a href="/relatorios" class="nav-item">Relatorios</a>
         <a href="#" class="nav-item" id="navCadastroUsuarios" style="display: none;">Cadastro de Usuarios</a>
-        <a href="/auth/logout" class="nav-item">Sair</a>
+        <form action="/auth/logout" method="POST" style="display:inline">
+          <button type="submit" class="nav-item logout-btn" style="background:none;border:none;color:inherit;font:inherit;cursor:pointer;width:100%;text-align:left;padding:12px 16px;">Sair</button>
+        </form>
       </aside>
 
       <main>
@@ -51,7 +53,7 @@
           <div class="form-row">
             <div class="field-group full">
               <label class="field-label">Paciente</label>
-              <select class="field-input" id="selectPaciente">
+              <select class="field-input" id="selectPaciente" required>
                 <option value="">Selecione um paciente...</option>
               </select>
             </div>
@@ -60,13 +62,13 @@
           <div class="form-row">
             <div class="field-group">
               <label class="field-label">Leito</label>
-              <select class="field-input" id="selectLeito">
+              <select class="field-input" id="selectLeito" required>
                 <option value="">Selecione um leito...</option>
               </select>
             </div>
             <div class="field-group">
               <label class="field-label">Medico Responsavel</label>
-              <select class="field-input" id="selectMedico">
+              <select class="field-input" id="selectMedico" required>
                 <option value="">Selecione um medico...</option>
               </select>
             </div>
@@ -80,6 +82,7 @@
                 type="text"
                 id="motivoAdmissao"
                 placeholder="Ex: Infarto agudo do miocardio"
+                required minlength="5"
               />
             </div>
           </div>
@@ -98,37 +101,8 @@
       </main>
     </div>
 
+    <script src="/js/auth.js"></script>
     <script>
-      async function loadUser() {
-        try {
-          const response = await fetch("/auth/user");
-          if (!response.ok) {
-            window.location.href = "/";
-            return;
-          }
-          const data = await response.json();
-          const user = data.user;
-          document.getElementById("doctorName").textContent = user.name;
-
-          const roleBadge = document.getElementById("roleBadge");
-          const perfilLabels = {
-            Medico: "Medico",
-            Enfermeiro: "Enfermeiro",
-            Admin: "Administrador",
-          };
-          roleBadge.textContent = perfilLabels[user.perfil] || user.perfil;
-
-          if (user.perfil === "Admin") {
-            document.getElementById("navCadastroUsuarios").style.display =
-              "flex";
-            document.getElementById("navCadastroUsuarios").href =
-              "/cadastro-usuarios";
-          }
-        } catch (error) {
-          console.error("Erro ao carregar usuario:", error);
-        }
-      }
-
       async function loadPacientes() {
         try {
           const response = await fetch("/api/pacientes");

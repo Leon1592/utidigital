@@ -32,9 +32,10 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: { 
-        maxAge: 3600000,
+        maxAge: parseInt(process.env.SESSION_MAX_AGE) || 3600000,
         httpOnly: true,
-        sameSite: 'lax'
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production'
     }
 }));
 
@@ -68,36 +69,18 @@ app.get('/relatorios', isAuthenticated, (req, res) => {
 });
 
 app.use('/auth', authRoutes);
-app.use('/users', userRoutes);
-app.use('/api/leitos', leitoRoutes);
-app.use('/api/pacientes', pacienteRoutes);
-app.use('/api/medicoes', medicaoRoutes);
-app.use('/api/relatorios', require('./routes/relatorioRoutes'));
-
-app.get('/debug-session', (req, res) => {
-    res.json({
-        hasSession: !!req.session,
-        hasUser: !!req.session?.user,
-        user: req.session?.user || null,
-        cookies: req.headers.cookie
-    });
-});
+app.use('/users', isAuthenticated, userRoutes);
+app.use('/api/leitos', isAuthenticated, leitoRoutes);
+app.use('/api/pacientes', isAuthenticated, pacienteRoutes);
+app.use('/api/medicoes', isAuthenticated, medicaoRoutes);
+app.use('/api/relatorios', isAuthenticated, require('./routes/relatorioRoutes'));
 
 app.get('/leito/:id', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../public/html/leito_detalhe.html'));
 });
 
-app.get('/test-leito', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/html/test_leito.html'));
-});
-
-app.get('/internar', (req, res) => {
+app.get('/internar', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../public/html/internar_paciente.html'));
-});
-
-app.get('/test-static', (req, res) => {
-    const testFile = path.join(publicPath, 'styles', 'login_page.css');
-    res.sendFile(testFile);
 });
 
 module.exports = app;

@@ -47,9 +47,43 @@ async function deleteAllByLeito(leitoId) {
     return result.rows;
 }
 
+async function countCritical() {
+    const result = await db.query(`
+        WITH latest_medicoes AS (
+            SELECT m.*, ROW_NUMBER() OVER (PARTITION BY m.leito_id ORDER BY m.created_at DESC) as rn
+            FROM medicoes m
+        )
+        SELECT COUNT(*) as total FROM latest_medicoes lm
+        WHERE lm.rn = 1 AND (
+            lm.temperatura > 37.5 OR
+            lm.pressao_sistolica > 140 OR
+            lm.pressao_diastolica > 90 OR
+            lm.spo2 < 90 OR
+            lm.frequencia_cardiaca > 100 OR
+            lm.frequencia_cardiaca < 50
+        )
+    `);
+    return parseInt(result.rows[0]?.total || 0);
+}
+
+async function findByLeitoWithPeriod(leitoId, periodo) {
+    const result = await db.query(`
+        SELECT m.*, u.name as registrado_por_nome,
+               (m.created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/Sao_Paulo') as created_at
+        FROM medicoes m
+        LEFT JOIN users u ON m.registrado_por = u.id
+        WHERE m.leito_id = $1
+        AND m.created_at >= NOW() - INTERVAL '1 day' * $2
+        ORDER BY m.created_at DESC
+    `, [leitoId, periodo]);
+    return result.rows;
+}
+
 module.exports = {
     create,
     findByLeito,
     getLatest,
-    deleteAllByLeito
+    deleteAllByLeito,
+    countCritical,
+    findByLeitoWithPeriod
 };

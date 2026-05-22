@@ -37,7 +37,9 @@
       <a href="/cadastro-pacientes" class="nav-item">Cadastro de Pacientes</a>
       <a href="/relatorios" class="nav-item">Relatorios</a>
       <a href="#" class="nav-item" id="navCadastroUsuarios" style="display: none;">Cadastro de Usuarios</a>
-      <a href="/auth/logout" class="nav-item">Sair</a>
+      <form action="/auth/logout" method="POST" style="display:inline">
+        <button type="submit" class="nav-item logout-btn" style="background:none;border:none;color:inherit;font:inherit;cursor:pointer;width:100%;text-align:left;padding:12px 16px;">Sair</button>
+      </form>
     </aside>
 
     <main>
@@ -53,7 +55,7 @@
           <h3 style="color: #00B4D8; margin-top: 0;">Adicionar Novo Leito</h3>
           <div style="margin-bottom: 15px;">
             <label style="color: #fff; display: block; margin-bottom: 5px;">Número do Leito:</label>
-            <input type="number" id="novoLeitoNumero" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #00B4D8; background: #1a1a2e; color: #fff;">
+            <input type="number" id="novoLeitoNumero" min="1" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #00B4D8; background: #1a1a2e; color: #fff;">
           </div>
           <div style="display: flex; gap: 10px; justify-content: flex-end;">
             <button id="btnCancelAdd" style="padding: 10px 20px; border-radius: 8px; border: none; background: #666; color: #fff; cursor: pointer;">Cancelar</button>
@@ -97,6 +99,7 @@
     </div>
   </div>
 
+<script src="/js/auth.js"></script>
 <script>
 let isUserAdmin = false;
     
@@ -205,9 +208,9 @@ let isUserAdmin = false;
           
           bedCard.innerHTML = `
             <span class="bed-title ${statusClass}">Leito ${leito.numero}${deleteBtn}</span>
-            <span class="bed-info">Nome: ${pacienteNome}</span>
-            <span class="bed-info">Situacao: ${statusDisplay}</span>
-            <span class="bed-info">Data de Internacao: ${dataInternacao}</span>
+            <span class="bed-info">Nome: ${escapeHTML(pacienteNome)}</span>
+            <span class="bed-info">Situacao: ${escapeHTML(statusDisplay)}</span>
+            <span class="bed-info">Data de Internacao: ${escapeHTML(dataInternacao)}</span>
             ${isClickable ? '<span class="bed-info" style="color: #4caf50; font-size: 12px;">Clique para ver detalhes</span>' : ''}
           `;
           grid.appendChild(bedCard);
@@ -299,11 +302,14 @@ let isUserAdmin = false;
 
         resultsDiv.innerHTML = filtered.map(item => {
           const isOcupado = item.status === 'ocupado';
-          const clickAction = isOcupado ? 'onclick="window.location.href=\'/leito/' + item.id + '\'"' : '';
+          const itemNumero = escapeHTML(String(item.numero));
+          const itemStatus = escapeHTML(item.status || 'disponivel');
+          const itemPacienteNome = escapeHTML(item.paciente_nome || '');
+          const clickAction = isOcupado ? 'onclick="window.location.href=\'/leito/' + escapeHTML(String(item.id)) + '\'"' : '';
           return '<div class="search-result-item" style="padding:10px;cursor:' + (isOcupado ? 'pointer' : 'default') + ';' + (isOcupado ? '' : 'opacity:0.5;') + '" ' + clickAction + '>' +
-            '<span style="font-weight:bold; color:#00B4D8;">Leito ' + item.numero + '</span>' +
-            '<span style="color:#aaa;"> - ' + (item.status || 'disponivel') + '</span>' +
-            (item.paciente_nome ? '<span style="display:block; color:#fff;">Paciente: ' + item.paciente_nome + '</span>' : '') +
+            '<span style="font-weight:bold; color:#00B4D8;">Leito ' + itemNumero + '</span>' +
+            '<span style="color:#aaa;"> - ' + itemStatus + '</span>' +
+            (itemPacienteNome ? '<span style="display:block; color:#fff;">Paciente: ' + itemPacienteNome + '</span>' : '') +
           '</div>';
         }).join('');
       } catch (err) {

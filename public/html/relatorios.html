@@ -31,7 +31,9 @@
       <a href="/cadastro-pacientes" class="nav-item">Cadastro de Pacientes</a>
       <a href="/relatorios" class="nav-item active">Relatorios</a>
       <a href="#" class="nav-item" id="navCadastroUsuarios" style="display: none;">Cadastro de Usuarios</a>
-      <a href="/auth/logout" class="nav-item">Sair</a>
+      <form action="/auth/logout" method="POST" style="display:inline">
+        <button type="submit" class="nav-item logout-btn" style="background:none;border:none;color:inherit;font:inherit;cursor:pointer;width:100%;text-align:left;padding:12px 16px;">Sair</button>
+      </form>
     </aside>
 
     <main>
@@ -174,27 +176,9 @@
 
   </div>
 
-  <script>
+    <script src="/js/auth.js"></script>
+    <script>
     let reportData = null;
-
-    async function loadUser() {
-      try {
-        const response = await fetch('/auth/user', { credentials: 'include' });
-        if (!response.ok) { window.location.href = '/'; return; }
-        const data = await response.json();
-        const user = data.user;
-        document.getElementById('doctorName').textContent = user.name;
-        const roleBadge = document.getElementById('roleBadge');
-        const perfilLabels = { 'Medico': 'Medico', 'Enfermeiro': 'Enfermeiro', 'Admin': 'Administrador' };
-        roleBadge.textContent = perfilLabels[user.perfil] || user.perfil;
-        if (user.perfil === 'Admin') {
-          document.getElementById('navCadastroUsuarios').style.display = 'flex';
-          document.getElementById('navCadastroUsuarios').href = '/cadastro-usuarios';
-        }
-      } catch (error) {
-        window.location.href = '/';
-      }
-    }
 
     async function loadPacientes() {
       try {
@@ -257,11 +241,11 @@
         data.medicoes.forEach(m => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
-            <td>${formatarDataHora(m.created_at)}</td>
-            <td>${m.frequencia_cardiaca || '-'}</td>
-            <td>${m.pressao_sistolica || '-'}/${m.pressao_diastolica || '-'}</td>
-            <td>${m.spo2 || '-'}</td>
-            <td>${m.temperatura || '-'}</td>
+            <td>${escapeHTML(formatarDataHora(m.created_at))}</td>
+            <td>${escapeHTML(String(m.frequencia_cardiaca)) || '-'}</td>
+            <td>${escapeHTML(String(m.pressao_sistolica)) || '-'}/${escapeHTML(String(m.pressao_diastolica)) || '-'}</td>
+            <td>${escapeHTML(String(m.spo2)) || '-'}</td>
+            <td>${escapeHTML(String(m.temperatura)) || '-'}</td>
           `;
           tbody.appendChild(tr);
         });
@@ -280,7 +264,7 @@
         const obsTexts = data.medicoes.filter(m => m.observacoes).map(m => formatarDataHora(m.created_at) + ': ' + m.observacoes);
         if (obsTexts.length > 0) {
           obsSection.style.display = 'block';
-          obsDiv.innerHTML = obsTexts.map(o => '<p>' + o + '</p>').join('');
+          obsDiv.innerHTML = obsTexts.map(o => '<p>' + escapeHTML(o) + '</p>').join('');
         } else {
           obsSection.style.display = 'none';
         }

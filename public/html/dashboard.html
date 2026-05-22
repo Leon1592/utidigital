@@ -129,7 +129,9 @@
           style="display: none"
           >Cadastro de Usuarios</a
         >
-        <a href="/auth/logout" class="nav-item">Sair</a>
+        <form action="/auth/logout" method="POST" style="display:inline">
+          <button type="submit" class="nav-item logout-btn" style="background:none;border:none;color:inherit;font:inherit;cursor:pointer;width:100%;text-align:left;padding:12px 16px;">Sair</button>
+        </form>
       </aside>
 
       <main>
@@ -164,37 +166,8 @@
       </main>
     </div>
 
+    <script src="/js/auth.js"></script>
     <script>
-      async function loadUser() {
-        try {
-          const response = await fetch("/auth/user");
-          if (!response.ok) {
-            window.location.href = "/";
-            return;
-          }
-          const data = await response.json();
-          const user = data.user;
-          document.getElementById("doctorName").textContent = user.name;
-
-          const roleBadge = document.getElementById("roleBadge");
-          const perfilLabels = {
-            Medico: "Medico",
-            Enfermeiro: "Enfermeiro",
-            Admin: "Administrador",
-          };
-          roleBadge.textContent = perfilLabels[user.perfil] || user.perfil;
-
-          if (user.perfil === "Admin") {
-            document.getElementById("navCadastroUsuarios").style.display =
-              "flex";
-            document.getElementById("navCadastroUsuarios").href =
-              "/cadastro-usuarios";
-          }
-        } catch (error) {
-          console.error("Erro ao carregar usuario:", error);
-        }
-      }
-
       async function loadStats() {
         try {
           const response = await fetch("/api/relatorios/estatisticas");
@@ -236,16 +209,16 @@
           <div class="alert-row">
             <div class="alert-info">
               <div>
-                <span class="alert-patient-name">${alert.pacienteNome || "Paciente"}</span>
-                <span class="alert-bed-num">- Leito ${alert.leitoNumero}</span>
+                <span class="alert-patient-name">${escapeHTML(alert.pacienteNome) || "Paciente"}</span>
+                <span class="alert-bed-num">- Leito ${escapeHTML(String(alert.leitoNumero))}</span>
               </div>
               ${alert.issues
                 .map(
                   (issue) => `
                 <div class="alert-issue-item">
-                  <span class="alert-issue-name">${issue.param}:</span>
-                  <span class="alert-issue-val"> ${issue.value}</span>
-                  <span style="color: #888; font-size: 12px;"> (${issue.normal})</span>
+                  <span class="alert-issue-name">${escapeHTML(issue.param)}:</span>
+                  <span class="alert-issue-val"> ${escapeHTML(issue.value)}</span>
+                  <span style="color: #888; font-size: 12px;"> (${escapeHTML(issue.normal)})</span>
                 </div>
               `,
                 )

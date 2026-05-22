@@ -46,10 +46,21 @@ async function findById(id) {
     return result.rows[0];
 }
 
+async function findInternados() {
+    const result = await db.query(`
+        SELECT p.* FROM pacientes p
+        INNER JOIN leitos l ON l.paciente_id = p.id
+        WHERE l.status = 'ocupado'
+        ORDER BY p.nome
+    `);
+    return result.rows;
+}
+
 module.exports = {
     create,
     findAll,
     findByNome,
     remove,
-    findById
+    findById,
+    findInternados
 };
