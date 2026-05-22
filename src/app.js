@@ -3,22 +3,23 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const express = require('express');
 const session = require('express-session');
 const flash = require('connect-flash');
+const helmet = require('helmet');
 const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/authRoutes');
 const leitoRoutes = require('./routes/leitoRoutes');
 const pacienteRoutes = require('./routes/pacienteRoutes');
 const medicaoRoutes = require('./routes/medicaoRoutes');
+const relatorioRoutes = require('./routes/relatorioRoutes');
 const { isAuthenticated } = require('./middleware/authMiddleware');
 
 const app = express();
 
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const publicPath = path.join(__dirname, '../public');
 const uploadsPath = path.join(__dirname, '../uploads');
-console.log('Public path:', publicPath);
-console.log('Uploads path:', uploadsPath);
 
 app.use(express.static(path.join(__dirname, '../public')));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
@@ -27,12 +28,13 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(publicPath, 'index.html'));
 });
 
+const sessionMaxAge = parseInt(process.env.SESSION_MAX_AGE, 10);
 app.use(session({
     secret: process.env.SESSION_SECRET || 'utidigital_secret_key',
     resave: false,
     saveUninitialized: false,
     cookie: { 
-        maxAge: parseInt(process.env.SESSION_MAX_AGE) || 3600000,
+        maxAge: (Number.isFinite(sessionMaxAge) && sessionMaxAge > 0) ? sessionMaxAge : 3600000,
         httpOnly: true,
         sameSite: 'lax',
         secure: process.env.NODE_ENV === 'production'
@@ -69,11 +71,11 @@ app.get('/relatorios', isAuthenticated, (req, res) => {
 });
 
 app.use('/auth', authRoutes);
-app.use('/users', isAuthenticated, userRoutes);
+app.use('/api/users', isAuthenticated, userRoutes);
 app.use('/api/leitos', isAuthenticated, leitoRoutes);
 app.use('/api/pacientes', isAuthenticated, pacienteRoutes);
 app.use('/api/medicoes', isAuthenticated, medicaoRoutes);
-app.use('/api/relatorios', isAuthenticated, require('./routes/relatorioRoutes'));
+app.use('/api/relatorios', isAuthenticated, relatorioRoutes);
 
 app.get('/leito/:id', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../public/html/leito_detalhe.html'));

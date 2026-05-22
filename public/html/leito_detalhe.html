@@ -132,7 +132,6 @@
   <script src="/js/auth.js"></script>
   <script>
     let leitoId = null;
-    let leitoStatus = null;
 
     function calcularIdade(dataNascimento) {
       if (!dataNascimento) return '-';
@@ -175,7 +174,6 @@
         }
 
         const leito = await response.json();
-        leitoStatus = leito.status;
         document.getElementById('leitoPageTitle').textContent = 'Leito ' + leito.numero;
 
         if (leito.status === 'disponivel') {
@@ -284,6 +282,7 @@
     }
 
 document.getElementById('btnRegistrar').addEventListener('click', async function() {
+      const btn = this;
       const fc = document.getElementById('fc').value.trim();
       const paSistolica = document.getElementById('paSistolica').value.trim();
       const paDiastolica = document.getElementById('paDiastolica').value.trim();
@@ -312,6 +311,9 @@ document.getElementById('btnRegistrar').addEventListener('click', async function
         return;
       }
 
+      btn.disabled = true;
+      btn.textContent = 'Registrando...';
+
       try {
         const response = await fetch('/api/medicoes', {
           method: 'POST',
@@ -321,7 +323,7 @@ document.getElementById('btnRegistrar').addEventListener('click', async function
             frequencia_cardiaca: fc,
             pressao_sistolica: paSistolica,
             pressao_diastolica: paDiastolica,
-            saturacao: spo2,
+            spo2: spo2,
             temperatura: temp,
             observacoes: obs
           })
@@ -347,6 +349,9 @@ document.getElementById('btnRegistrar').addEventListener('click', async function
       } catch (error) {
         console.error('Erro ao registrar:', error);
         alert(error.message || 'Erro ao registrar medicao');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Registrar Medição';
       }
     });
 
@@ -355,6 +360,7 @@ document.getElementById('btnRegistrar').addEventListener('click', async function
 
     document.getElementById('btnDeleteAll').addEventListener('click', async function() {
       if (!confirm('Tem certeza que deseja excluir todo o histórico de medições?')) return;
+      this.disabled = true;
 
       try {
         const response = await fetch('/api/medicoes/leito/' + leitoId + '/delete', { method: 'DELETE' });
@@ -365,11 +371,15 @@ document.getElementById('btnRegistrar').addEventListener('click', async function
         document.getElementById('vitalsGrid').innerHTML = '<p style="color: var(--text-light); padding: 20px; grid-column: 1/-1;">Nenhuma medição registrada.</p>';
       } catch (error) {
         alert('Erro ao excluir histórico: ' + error.message);
+      } finally {
+        this.disabled = false;
       }
     });
 
     document.getElementById('btnDarAlta').addEventListener('click', async function() {
       if (!confirm('Tem certeza que deseja dar alta ao paciente? Todos os dados serão removidos.')) return;
+      this.disabled = true;
+      this.textContent = 'Dando alta...';
 
       try {
         const response = await fetch('/api/leitos/' + leitoId + '/alta', {
@@ -379,11 +389,12 @@ document.getElementById('btnRegistrar').addEventListener('click', async function
         if (!response.ok) {
           throw new Error('Erro ao dar alta');
         }
-        const data = await response.json();
 
         window.location.href = '/gestao-leitos';
       } catch (error) {
         alert('Erro ao dar alta: ' + error.message);
+        this.disabled = false;
+        this.textContent = 'Dar Alta';
       }
     });
   </script>

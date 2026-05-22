@@ -57,22 +57,6 @@ textarea {
   font-weight: bold;
 }
 .radio-option:hover {
-  background: #0288D1;
-}
-input[type="submit"] {
-  background-color: #003640;
-  color: #ffffff;
-  padding: 12px 40px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 16px;
-}
-input[type="submit"]:hover {
-  background-color: #002A33;
-}
-.radio-option:hover {
   background: #0277BD;
 }
 .radio-option input {

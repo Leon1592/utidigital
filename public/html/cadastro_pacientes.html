@@ -342,16 +342,12 @@
         if (!confirmacao) return;
         
         try {
-          console.log('Excluindo paciente ID:', pacienteAtual.id);
           const response = await fetch(`/api/pacientes/${pacienteAtual.id}`, {
             method: 'DELETE'
           });
           
-          console.log('Response status:', response.status);
-          
           if (!response.ok) {
             const errorData = await response.json();
-            console.error('Erro API:', errorData);
             throw new Error(errorData.error || 'Erro ao excluir paciente');
           }
           
@@ -412,7 +408,9 @@
         }
       });
 
-      document.getElementById('searchModalInput').addEventListener('input', async function() {
+      let searchModalTimer;
+      document.getElementById('searchModalInput').addEventListener('input', function() {
+        clearTimeout(searchModalTimer);
         const query = this.value.trim();
         const resultsDiv = document.getElementById('searchModalResults');
 
@@ -421,29 +419,33 @@
           return;
         }
 
-        const pacientes = await searchPacientes(query);
+        searchModalTimer = setTimeout(async () => {
+          const pacientes = await searchPacientes(query);
 
-        if (pacientes.length === 0) {
-          resultsDiv.innerHTML = '<p class="no-results">Nenhum paciente encontrado.</p>';
-        } else {
-          resultsDiv.innerHTML = '';
-          pacientes.forEach(paciente => {
-            const item = document.createElement('div');
-            item.className = 'search-result-item';
-            item.onclick = () => {
-              showPatientDetail(paciente);
-              hideSearchModal();
-            };
-            item.innerHTML = `
-              <span class="result-name">${escapeHTML(paciente.nome)}</span>
-              <span class="result-detail">${escapeHTML(paciente.cpf)}</span>
-            `;
-            resultsDiv.appendChild(item);
-          });
-        }
+          if (pacientes.length === 0) {
+            resultsDiv.innerHTML = '<p class="no-results">Nenhum paciente encontrado.</p>';
+          } else {
+            resultsDiv.innerHTML = '';
+            pacientes.forEach(paciente => {
+              const item = document.createElement('div');
+              item.className = 'search-result-item';
+              item.onclick = () => {
+                showPatientDetail(paciente);
+                hideSearchModal();
+              };
+              item.innerHTML = `
+                <span class="result-name">${escapeHTML(paciente.nome)}</span>
+                <span class="result-detail">${escapeHTML(paciente.cpf)}</span>
+              `;
+              resultsDiv.appendChild(item);
+            });
+          }
+        }, 300);
       });
 
-      document.getElementById('searchInput').addEventListener('input', async function() {
+      let searchInputTimer;
+      document.getElementById('searchInput').addEventListener('input', function() {
+        clearTimeout(searchInputTimer);
         const query = this.value.trim();
 
         if (query.length === 0) {
@@ -451,29 +453,31 @@
           return;
         }
 
-        const pacientes = await searchPacientes(query);
-        const patientsList = document.getElementById('patientsList');
+        searchInputTimer = setTimeout(async () => {
+          const pacientes = await searchPacientes(query);
+          const patientsList = document.getElementById('patientsList');
 
-        if (pacientes.length === 0) {
-          patientsList.innerHTML = '<p class="no-patients">Nenhum paciente encontrado.</p>';
-        } else {
-          patientsList.innerHTML = '';
-          pacientes.forEach(paciente => {
-            const card = document.createElement('div');
-            card.className = 'patient-card';
-            card.onclick = () => showPatientDetail(paciente);
-            card.innerHTML = `
-              <div class="patient-info">
-                <span class="patient-name">${escapeHTML(paciente.nome)}</span>
-                <span class="patient-detail">CPF: ${escapeHTML(paciente.cpf)}</span>
-                <span class="patient-detail">Sexo: ${escapeHTML(paciente.sexo)}</span>
-                <span class="patient-detail">Motivo: ${escapeHTML(paciente.motivo_admissao)}</span>
-              </div>
-            `;
-            patientsList.appendChild(card);
-          });
-        }
-      });
+          if (pacientes.length === 0) {
+            patientsList.innerHTML = '<p class="no-patients">Nenhum paciente encontrado.</p>';
+          } else {
+            patientsList.innerHTML = '';
+            pacientes.forEach(paciente => {
+              const card = document.createElement('div');
+              card.className = 'patient-card';
+              card.onclick = () => showPatientDetail(paciente);
+              card.innerHTML = `
+                <div class="patient-info">
+                  <span class="patient-name">${escapeHTML(paciente.nome)}</span>
+                  <span class="patient-detail">CPF: ${escapeHTML(paciente.cpf)}</span>
+                  <span class="patient-detail">Sexo: ${escapeHTML(paciente.sexo)}</span>
+                  <span class="patient-detail">Motivo: ${escapeHTML(paciente.motivo_admissao)}</span>
+                </div>
+              `;
+              patientsList.appendChild(card);
+            });
+          }
+      }, 300);
+    });
 
       loadUser();
       loadPacientes();

@@ -2,7 +2,7 @@ const medicaoModel = require('../models/medicaoModel');
 
 async function createMedicao(req, res) {
     try {
-        const { leito_id, frequencia_cardiaca, pressao_sistolica, pressao_diastolica, saturacao, temperatura, observacoes } = req.body;
+        const { leito_id, frequencia_cardiaca, pressao_sistolica, pressao_diastolica, spo2, temperatura, observacoes } = req.body;
         
         if (!leito_id) {
             return res.status(400).json({ error: 'Leito nao informado' });
@@ -16,7 +16,7 @@ async function createMedicao(req, res) {
         if (!pressao_diastolica || isNaN(pressao_diastolica) || pressao_diastolica < 0 || pressao_diastolica > 300) {
             return res.status(400).json({ error: 'Pressao diastolica invalida (0-300 mmHg)' });
         }
-        if (!saturacao || isNaN(saturacao) || saturacao < 0 || saturacao > 100) {
+        if (!spo2 || isNaN(spo2) || spo2 < 0 || spo2 > 100) {
             return res.status(400).json({ error: 'SpO2 invalido (0-100%)' });
         }
         if (!temperatura || isNaN(temperatura) || temperatura < 30 || temperatura > 45) {
@@ -28,7 +28,7 @@ async function createMedicao(req, res) {
             frequencia_cardiaca,
             pressao_sistolica,
             pressao_diastolica,
-            saturacao,
+            spo2,
             temperatura,
             observacoes,
             registrado_por: req.session.user ? req.session.user.id : null

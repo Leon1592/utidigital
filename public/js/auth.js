@@ -9,7 +9,7 @@ function escapeHTML(str) {
 }
 
 function loadUser() {
-    fetch('/auth/user')
+    return fetch('/auth/user')
         .then(response => {
             if (!response.ok) {
                 window.location.href = '/';
@@ -18,7 +18,7 @@ function loadUser() {
             return response.json();
         })
         .then(data => {
-            if (!data) return;
+            if (!data) return null;
             const user = data.user;
             const doctorName = document.getElementById('doctorName');
             const roleBadge = document.getElementById('roleBadge');
@@ -32,8 +32,10 @@ function loadUser() {
                 cadastroUsers.style.display = user.perfil === 'Admin' ? 'flex' : 'none';
                 cadastroUsers.href = '/cadastro-usuarios';
             }
+            return user;
         })
         .catch(() => {
             window.location.href = '/';
+            return null;
         });
 }

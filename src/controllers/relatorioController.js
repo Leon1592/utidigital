@@ -59,7 +59,8 @@ async function getAlertas(req, res) {
 
         res.json(alerts);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Erro ao buscar alertas:', error);
+        res.status(500).json({ error: 'Erro ao buscar alertas' });
     }
 }
 

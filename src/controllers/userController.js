@@ -1,6 +1,5 @@
+const bcrypt = require('bcrypt');
 const userModel = require('../models/userModel');
-
-const ADMIN_GERAL_EMAIL = 'adminsistemageral@uti.com';
 
 async function createUser(req, res) {
     try {
@@ -19,7 +18,8 @@ async function createUser(req, res) {
             return res.status(400).json({ error: 'Perfil invalido' });
         }
 
-        const user = await userModel.create(req.body);
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = await userModel.create({ ...req.body, password: hashedPassword });
         res.status(201).json(user);
     } catch (error) {
         res.status(400).json({ error: 'Erro ao criar usuario' });
@@ -44,12 +44,16 @@ async function getUsers(req, res) {
 async function deleteUser(req, res) {
     try {
         const user = await userModel.findById(req.params.id);
-        if (user && user.email === ADMIN_GERAL_EMAIL) {
-            return res.status(403).json({ error: 'Este usuario nao pode ser excluido.' });
+        if (!user) {
+            return res.status(404).json({ error: 'Usuario nao encontrado' });
+        }
+        if (user.perfil === 'Admin') {
+            return res.status(403).json({ error: 'Usuarios Admin nao podem ser excluidos.' });
         }
         await userModel.remove(req.params.id);
         res.status(200).json({ message: 'Usuario excluido com sucesso' });
     } catch (error) {
+        console.error('Erro ao excluir usuario:', error);
         res.status(500).json({ error: 'Erro ao excluir usuario' });
     }
 }

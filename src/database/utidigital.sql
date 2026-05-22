@@ -1,5 +1,4 @@
--- código do PostgreSQL para o repositório do github
--- Prof. Matheus pediu pra fazer isso (fomos obrigados)
+-- PostgreSQL schema for UTI Digital
 
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,

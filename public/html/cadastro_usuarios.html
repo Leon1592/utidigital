@@ -240,37 +240,18 @@
     <script>
       let usuarioAtual = null;
 
-      async function loadUser() {
-        try {
-          const response = await fetch("/auth/user");
-          if (!response.ok) {
-            window.location.href = "/";
-            return;
-          }
-          const data = await response.json();
-          const user = data.user;
-          document.getElementById("doctorName").textContent = user.name;
-
-          const roleBadge = document.getElementById("roleBadge");
-          const perfilLabels = {
-            Medico: "Medico",
-            Enfermeiro: "Enfermeiro",
-            Admin: "Administrador",
-          };
-          roleBadge.textContent = perfilLabels[user.perfil] || user.perfil;
-
-          if (user.perfil !== "Admin") {
-            window.location.href = "/dashboard";
-            return;
-          }
-        } catch (error) {
-          console.error("Erro ao carregar usuario:", error);
+      async function initPage() {
+        const user = await loadUser();
+        if (!user) return;
+        if (user.perfil !== "Admin") {
+          window.location.href = "/dashboard";
         }
       }
 
       async function loadUsers() {
         try {
-          const response = await fetch("/users");
+          const response = await fetch("/api/users");
+          if (!response.ok) throw new Error('Erro ao carregar usuarios');
           const users = await response.json();
 
           const medicos = users.filter((u) => u.perfil === "Medico");
@@ -307,22 +288,32 @@
               : user.perfil === "Enfermeiro"
                 ? "Enfermeiro"
                 : "Admin";
-          const isAdminGeral = user.email === "adminsistemageral@uti.com";
+          const isProtected = user.perfil === "Admin";
 
           const card = document.createElement("div");
           card.className = "user-card";
           const userName = escapeHTML(user.name);
           const userEmail = escapeHTML(user.email);
+
+          const deleteButton = document.createElement('button');
+          deleteButton.className = 'btn-excluir-usuario';
+          if (isProtected) {
+            deleteButton.textContent = 'Protegido';
+            deleteButton.style.cssText = 'color: rgba(255,255,255,0.3); font-size: 12px; background: none; border: none; cursor: default;';
+          } else {
+            deleteButton.textContent = 'Excluir';
+            deleteButton.addEventListener('click', () => showDeleteModal(user.id, userName));
+          }
+
           card.innerHTML = `
           <div class="user-card-header">
-            <span class="user-name">${userName}${isAdminGeral ? ' <span style="font-size: 11px; background: #9c27b0; padding: 2px 6px; border-radius: 4px; margin-left: 6px;">Admin Geral</span>' : ""}</span>
+            <span class="user-name">${userName}</span>
             <span class="user-badge" style="background: ${badgeColor}">${badgeText}</span>
           </div>
           <span class="user-email">${userEmail}</span>
-          <div class="user-actions">
-            ${isAdminGeral ? '<span style="color: rgba(255,255,255,0.3); font-size: 12px;">Protegido</span>' : '<button class="btn-excluir-usuario" onclick="showDeleteModal(' + user.id + ", '" + userName.replace(/'/g, "\\'") + "')\">Excluir</button>"}
-          </div>
+          <div class="user-actions"></div>
         `;
+          card.querySelector('.user-actions').appendChild(deleteButton);
           container.appendChild(card);
         });
       }
@@ -347,7 +338,7 @@
           if (!usuarioAtual) return;
 
           try {
-            const response = await fetch(`/users/${usuarioAtual}`, {
+            const response = await fetch(`/api/users/${usuarioAtual}`, {
               method: "DELETE",
             });
 
@@ -401,16 +392,16 @@
           }
 
           try {
-            const response = await fetch("/users", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                name: nome,
-                email: email,
-                password: senha,
-                perfil: perfil,
-              }),
-            });
+const response = await fetch("/api/users", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+        name: nome,
+        email: email,
+        password: senha,
+        perfil: perfil
+    })
+});
 
             if (!response.ok) {
               const error = await response.json();
@@ -447,7 +438,7 @@
         });
       });
 
-      loadUser();
+      initPage();
       loadUsers();
     </script>
   </body>

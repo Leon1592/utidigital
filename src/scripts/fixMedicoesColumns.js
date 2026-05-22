@@ -1,1 +1,0 @@
-console.log('Verificação concluída! O esquema completo está definido em src/database/utidigital.sql');

@@ -51,8 +51,19 @@ async function createLeito(req, res) {
 async function updateLeito(req, res) {
     try {
         const { id } = req.params;
-        const leito = await leitoModel.update(id, req.body);
-        res.json(leito);
+        const leito = await leitoModel.findById(id);
+        if (!leito) {
+            return res.status(404).json({ error: 'Leito nao encontrado' });
+        }
+        const allowedFields = ['status', 'paciente_nome', 'paciente_id', 'data_internacao', 'observacoes', 'medico_responsavel_id', 'motivo_admissao', 'data_nascimento_paciente', 'cpf_paciente'];
+        const data = {};
+        for (const field of allowedFields) {
+            if (req.body[field] !== undefined) {
+                data[field] = req.body[field];
+            }
+        }
+        const updated = await leitoModel.update(id, data);
+        res.json(updated);
     } catch (error) {
         console.error('Erro ao atualizar leito:', error);
         res.status(500).json({ error: 'Erro ao atualizar leito' });
@@ -80,8 +91,6 @@ async function darAlta(req, res) {
         }
 
         const { paciente_id, paciente_nome } = leito;
-
-        await medicaoModel.deleteAllByLeito(id);
 
         if (paciente_id) {
             await altasModel.create(paciente_id, paciente_nome);

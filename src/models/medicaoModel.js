@@ -9,7 +9,7 @@ async function create(medicao) {
         medicao.frequencia_cardiaca,
         medicao.pressao_sistolica,
         medicao.pressao_diastolica,
-        medicao.saturacao,
+        medicao.spo2,
         medicao.temperatura,
         medicao.observacoes || null,
         medicao.registrado_por
@@ -43,8 +43,7 @@ async function getLatest(leitoId) {
 }
 
 async function deleteAllByLeito(leitoId) {
-    const result = await db.query('DELETE FROM medicoes WHERE leito_id = $1', [leitoId]);
-    return result.rows;
+    await db.query('DELETE FROM medicoes WHERE leito_id = $1', [leitoId]);
 }
 
 async function countCritical() {

@@ -1,1 +1,0 @@
-console.log('Migração concluída! O esquema do banco está definido em src/database/utidigital.sql');

@@ -9,7 +9,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles/global.css">
   <link rel="stylesheet" href="/styles/gestao_leitos.css">
-  <link rel="stylesheet" href="/styles/cadastro_pacientes.css">
 </head>
 
 <body>
@@ -103,77 +102,61 @@
 <script>
 let isUserAdmin = false;
     
-    async function loadUser() {
-      try {
-        const response = await fetch('/auth/user');
-        if (!response.ok) {
-          window.location.href = '/';
-          return;
-        }
-        const data = await response.json();
-        const user = data.user;
-        document.getElementById('doctorName').textContent = user.name;
+    async function initGestaoLeitos() {
+      const user = await loadUser();
+      if (!user) return;
+      isUserAdmin = user.perfil === 'Admin';
+      
+      if (isUserAdmin) {
+        document.getElementById('btnAddLeito').style.display = 'inline-block';
         
-        const roleBadge = document.querySelector('.badge-medico');
-        const perfilLabels = { 'Medico': 'Medico', 'Enfermeiro': 'Enfermeiro', 'Admin': 'Administrador' };
-        roleBadge.textContent = perfilLabels[user.perfil] || user.perfil;
+        document.getElementById('btnAddLeito').addEventListener('click', () => {
+          document.getElementById('addLeitoModal').style.display = 'flex';
+          document.getElementById('novoLeitoNumero').value = '';
+          document.getElementById('novoLeitoNumero').focus();
+        });
         
-        isUserAdmin = user.perfil === 'Admin';
+        document.getElementById('btnCancelAdd').addEventListener('click', () => {
+          document.getElementById('addLeitoModal').style.display = 'none';
+        });
         
-        if (isUserAdmin) {
-          document.getElementById('navCadastroUsuarios').style.display = 'flex';
-          document.getElementById('navCadastroUsuarios').href = '/cadastro-usuarios';
-          document.getElementById('btnAddLeito').style.display = 'inline-block';
-          
-          document.getElementById('btnAddLeito').addEventListener('click', () => {
-            document.getElementById('addLeitoModal').style.display = 'flex';
-            document.getElementById('novoLeitoNumero').value = '';
-            document.getElementById('novoLeitoNumero').focus();
-          });
-          
-          document.getElementById('btnCancelAdd').addEventListener('click', () => {
+        document.getElementById('addLeitoModal').addEventListener('click', (e) => {
+          if (e.target === document.getElementById('addLeitoModal')) {
             document.getElementById('addLeitoModal').style.display = 'none';
-          });
-          
-          document.getElementById('addLeitoModal').addEventListener('click', (e) => {
-            if (e.target === document.getElementById('addLeitoModal')) {
+          }
+        });
+        
+        document.getElementById('btnConfirmAdd').addEventListener('click', async () => {
+          const numero = parseInt(document.getElementById('novoLeitoNumero').value);
+          if (!numero || numero <= 0) {
+            alert('Por favor, insira um número válido para o leito.');
+            return;
+          }
+          try {
+            const res = await fetch('/api/leitos', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ numero: numero, status: 'disponivel' })
+            });
+            if (res.ok) {
+              alert('Leito adicionado com sucesso!');
               document.getElementById('addLeitoModal').style.display = 'none';
+              loadBeds();
+            } else {
+              const err = await res.json();
+              alert('Erro ao adicionar leito: ' + (err.error || 'Erro desconhecido'));
             }
-          });
-          
-          document.getElementById('btnConfirmAdd').addEventListener('click', async () => {
-            const numero = parseInt(document.getElementById('novoLeitoNumero').value);
-            if (!numero || numero <= 0) {
-              alert('Por favor, insira um número válido para o leito.');
-              return;
-            }
-            try {
-              const res = await fetch('/api/leitos', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ numero: numero, status: 'disponivel' })
-              });
-              if (res.ok) {
-                alert('Leito adicionado com sucesso!');
-                document.getElementById('addLeitoModal').style.display = 'none';
-                loadBeds();
-              } else {
-                const err = await res.json();
-                alert('Erro ao adicionar leito: ' + (err.error || 'Erro desconhecido'));
-              }
-            } catch (err) {
-              alert('Erro ao adicionar leito');
-            }
-          });
-        }
-      } catch (error) {
-        console.error('Erro ao carregar usuario:', error);
+          } catch (err) {
+            alert('Erro ao adicionar leito');
+          }
+        });
       }
     }
 
     async function loadBeds() {
       try {
         const response = await fetch('/api/leitos');
+        if (!response.ok) throw new Error('Erro ao carregar leitos');
         const leitos = await response.json();
         
         const grid = document.getElementById('bedsGrid');
@@ -244,7 +227,7 @@ let isUserAdmin = false;
     }
 
     loadBeds();
-    loadUser();
+    initGestaoLeitos();
 
     if (document.getElementById('searchIcon')) {
       document.getElementById('searchIcon').addEventListener('click', showSearchModal);

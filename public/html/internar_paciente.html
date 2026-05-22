@@ -106,6 +106,7 @@
       async function loadPacientes() {
         try {
           const response = await fetch("/api/pacientes");
+          if (!response.ok) throw new Error('Erro ao carregar pacientes');
           const pacientes = await response.json();
           const select = document.getElementById("selectPaciente");
           pacientes.forEach((p) => {
@@ -122,6 +123,7 @@
       async function loadLeitos() {
         try {
           const response = await fetch("/api/leitos");
+          if (!response.ok) throw new Error('Erro ao carregar leitos');
           const leitos = await response.json();
           const select = document.getElementById("selectLeito");
           const disponiveis = leitos.filter((l) => l.status === "disponivel");
@@ -144,7 +146,8 @@
 
       async function loadMedicos() {
         try {
-          const response = await fetch("/users?perfil=Medico");
+          const response = await fetch("/api/users?perfil=Medico");
+          if (!response.ok) throw new Error('Erro ao carregar medicos');
           const medicos = await response.json();
           const select = document.getElementById("selectMedico");
           medicos.forEach((m) => {
@@ -161,6 +164,7 @@
       document
         .getElementById("btnInternar")
         .addEventListener("click", async function () {
+          const btn = this;
           const pacienteId = document.getElementById("selectPaciente").value;
           const leitoId = document.getElementById("selectLeito").value;
           const medicoId = document.getElementById("selectMedico").value;
@@ -171,8 +175,12 @@
             return;
           }
 
+          btn.disabled = true;
+          btn.textContent = 'Internando...';
+
           try {
             const allLeitosResp = await fetch("/api/leitos");
+            if (!allLeitosResp.ok) throw new Error('Erro ao carregar leitos');
             const allLeitos = await allLeitosResp.json();
 
             const pacienteJaInternado = allLeitos.find(
@@ -227,6 +235,9 @@
           } catch (error) {
             console.error("Erro ao internar:", error);
             alert(error.message || "Erro ao internar paciente");
+          } finally {
+            btn.disabled = false;
+            btn.textContent = 'Internar Paciente';
           }
         });
 
