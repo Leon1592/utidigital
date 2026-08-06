@@ -29,6 +29,7 @@
       <a href="/gestao-leitos" class="nav-item active">Gestão de Leitos</a>
       <a href="/cadastro-pacientes" class="nav-item">Cadastro de Pacientes</a>
       <a href="/historico-de-altas" class="nav-item">Histórico de Altas</a>
+      <a href="/historico-internacoes" class="nav-item">Histórico de Internações</a>
       <a href="/relatorios" class="nav-item">Relatórios</a>
       <a href="#" class="nav-item" id="navCadastroUsuarios" style="display: none;">Cadastro de Usuários</a>
       <form action="/auth/logout" method="POST" style="display:inline">
@@ -39,9 +40,10 @@
     <main>
       <div class="leito-page-title" id="leitoPageTitle"></div>
 
-      <div id="leitoIndiponivelMsg" class="leito-indisponivel" style="display: none;">
-        <h2>Leito Disponível</h2>
-        <p>Este leito ainda não possui paciente cadastrado.</p>
+      <div id="leitoMsg" class="leito-indisponivel" style="display: none;">
+        <h2 id="leitoMsgTitle">Leito Disponível</h2>
+        <p id="leitoMsgDesc">Este leito ainda não possui paciente cadastrado.</p>
+        <div id="leitoMsgActions"></div>
       </div>
 
       <div id="leitoContent">
@@ -69,6 +71,14 @@
             </div>
           </div>
           <div class="patient-actions">
+            <div class="alta-options" style="flex:1; margin-right:16px;">
+              <label class="alta-option">
+                <input type="checkbox" id="checkMarcarIndisponivel">
+                Marcar leito como indisponível após a alta
+              </label>
+              <input class="field-input" type="text" id="motivoIndisponivel" placeholder="Motivo da indisponibilidade" style="display:none; margin-top:8px;">
+            </div>
+            <button class="btn-transferir" id="btnTransferir" style="display:none;">Transferir Paciente</button>
             <button class="btn-alta" id="btnDarAlta">Dar Alta ao Paciente</button>
           </div>
         </div>
@@ -130,10 +140,26 @@
 
   </div>
 
+  <div class="delete-confirm-modal" id="transferModal">
+    <div class="delete-confirm-content">
+      <div class="delete-confirm-header">Transferir Paciente</div>
+      <div class="delete-confirm-body">
+        Selecione o leito de destino (deve estar disponível).
+      </div>
+      <select id="transferSelect" style="width:100%;box-sizing:border-box;background:var(--red-card);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:10px 12px;color:var(--white);font-size:14px;margin-bottom:24px;"></select>
+      <div class="delete-confirm-actions">
+        <button class="btn-cancelar" id="btnCancelarTransferir">Cancelar</button>
+        <button class="btn-confirmar-excluir" id="btnConfirmarTransferir">Confirmar Transferência</button>
+      </div>
+    </div>
+  </div>
+
   <script src="/js/auth.js"></script>
   <script>
+
     let leitoId = null;
     let dataInternacao = null;
+    let canManageStatus = false;
 
     function calcularIdade(dataNascimento) {
       if (!dataNascimento) return '-';
@@ -159,6 +185,14 @@
     }
 
     async function loadLeito() {
+      const user = await loadUser();
+      if (user) {
+        canManageStatus = (user.perfil === 'Admin' || user.perfil === 'Enfermeiro');
+      }
+
+      const btnTransferir = document.getElementById('btnTransferir');
+      if (btnTransferir) btnTransferir.style.display = canManageStatus ? 'inline-block' : 'none';
+
       const pathParts = window.location.pathname.split('/');
       leitoId = pathParts[pathParts.length - 1];
 
@@ -178,8 +212,73 @@
         const leito = await response.json();
         document.getElementById('leitoPageTitle').textContent = 'Leito ' + leito.numero;
 
-        if (leito.status === 'disponivel') {
-          document.getElementById('leitoIndiponivelMsg').style.display = 'block';
+        if (leito.status !== 'ocupado') {
+          const msg = document.getElementById('leitoMsg');
+          msg.style.display = 'block';
+
+          const isIndisponivel = leito.status === 'indisponivel';
+          document.getElementById('leitoMsgTitle').textContent = isIndisponivel ? 'Leito Indisponível' : 'Leito Disponível';
+          document.getElementById('leitoMsgDesc').textContent = isIndisponivel
+            ? (leito.motivo_indisponivel ? 'Motivo: ' + leito.motivo_indisponivel : 'Leito temporariamente indisponível.')
+            : 'Este leito ainda não possui paciente cadastrado.';
+
+          const actions = document.getElementById('leitoMsgActions');
+          actions.innerHTML = '';
+
+          if (canManageStatus) {
+            const btn = document.createElement('button');
+            btn.className = 'btn-alta';
+            btn.textContent = isIndisponivel ? 'Disponibilizar Leito' : 'Indisponibilizar Leito';
+            btn.onclick = async () => {
+              if (isIndisponivel) {
+                if (!confirm('Deseja tornar este leito disponível novamente?')) return;
+                btn.disabled = true;
+                try {
+                  const r = await fetch('/api/leitos/' + leitoId, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'disponivel' })
+                  });
+                  if (r.ok) {
+                    window.location.reload();
+                  } else {
+                    const err = await r.json();
+                    alert('Erro: ' + (err.error || 'Não foi possível disponibilizar'));
+                  }
+                } catch (err) {
+                  alert('Erro ao disponibilizar leito');
+                } finally {
+                  btn.disabled = false;
+                }
+              } else {
+                const motivo = prompt('Informe o motivo da indisponibilidade:', '');
+                if (motivo === null) return;
+                if (!motivo.trim()) {
+                  alert('Informe o motivo da indisponibilidade.');
+                  return;
+                }
+                btn.disabled = true;
+                try {
+                  const r = await fetch('/api/leitos/' + leitoId, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'indisponivel', motivo_indisponivel: motivo.trim() })
+                  });
+                  if (r.ok) {
+                    window.location.reload();
+                  } else {
+                    const err = await r.json();
+                    alert('Erro: ' + (err.error || 'Não foi possível indisponibilizar'));
+                  }
+                } catch (err) {
+                  alert('Erro ao indisponibilizar leito');
+                } finally {
+                  btn.disabled = false;
+                }
+              }
+            };
+            actions.appendChild(btn);
+          }
           return;
         }
 
@@ -290,7 +389,7 @@
       });
     }
 
-document.getElementById('btnRegistrar').addEventListener('click', async function() {
+    document.getElementById('btnRegistrar').addEventListener('click', async function() {
       const btn = this;
       const fc = document.getElementById('fc').value.trim();
       const paSistolica = document.getElementById('paSistolica').value.trim();
@@ -386,7 +485,12 @@ document.getElementById('btnRegistrar').addEventListener('click', async function
     });
 
     document.getElementById('btnDarAlta').addEventListener('click', async function() {
-      if (!confirm('Tem certeza que deseja dar alta ao paciente? O leito será liberado e o paciente irá para o histórico de altas. As medições registradas serão mantidas.')) return;
+      const marcarIndisponivel = document.getElementById('checkMarcarIndisponivel').checked;
+      let mensagem = 'Tem certeza que deseja dar alta ao paciente? O leito será liberado e o paciente irá para o histórico de altas. As medições registradas serão mantidas.';
+      if (marcarIndisponivel) {
+        mensagem = 'Dar alta ao paciente e marcar o leito como indisponível? O paciente irá para o histórico de altas.';
+      }
+      if (!confirm(mensagem)) return;
       this.disabled = true;
       this.textContent = 'Dando alta...';
 
@@ -399,11 +503,91 @@ document.getElementById('btnRegistrar').addEventListener('click', async function
           throw new Error('Erro ao dar alta');
         }
 
+        if (marcarIndisponivel) {
+          const motivo = document.getElementById('motivoIndisponivel').value.trim() || 'Aguardando limpeza';
+          const resStatus = await fetch('/api/leitos/' + leitoId, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'indisponivel', motivo_indisponivel: motivo })
+          });
+          if (!resStatus.ok) {
+            alert('Alta realizada, mas não foi possível marcar o leito como indisponível. Ele ficou disponível.');
+          }
+        }
+
         window.location.href = '/gestao-leitos';
       } catch (error) {
         alert('Erro ao dar alta: ' + error.message);
         this.disabled = false;
         this.textContent = 'Dar Alta';
+      }
+    });
+
+    document.getElementById('checkMarcarIndisponivel').addEventListener('change', function() {
+      document.getElementById('motivoIndisponivel').style.display = this.checked ? 'block' : 'none';
+    });
+
+    document.getElementById('btnTransferir').addEventListener('click', async function() {
+      const modal = document.getElementById('transferModal');
+      const select = document.getElementById('transferSelect');
+      select.innerHTML = '<option value="">Carregando leitos...</option>';
+      document.getElementById('btnConfirmarTransferir').disabled = true;
+      modal.style.display = 'flex';
+
+      try {
+        const r = await fetch('/api/leitos');
+        if (!r.ok) throw new Error('Erro ao carregar leitos');
+        const leitos = await r.json();
+        const destinos = (leitos || []).filter(l => l.status === 'disponivel' && l.id !== leitoId);
+        select.innerHTML = '';
+        if (destinos.length === 0) {
+          select.innerHTML = '<option value="">Nenhum leito disponível</option>';
+          return;
+        }
+        document.getElementById('btnConfirmarTransferir').disabled = false;
+        destinos.forEach(l => {
+          const opt = document.createElement('option');
+          opt.value = l.id;
+          opt.textContent = 'Leito ' + l.numero;
+          select.appendChild(opt);
+        });
+      } catch (err) {
+        select.innerHTML = '<option value="">Erro ao carregar leitos</option>';
+      }
+    });
+
+    document.getElementById('btnCancelarTransferir').addEventListener('click', function() {
+      document.getElementById('transferModal').style.display = 'none';
+    });
+
+    document.getElementById('transferModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        this.style.display = 'none';
+      }
+    });
+
+    document.getElementById('btnConfirmarTransferir').addEventListener('click', async function() {
+      const destinoId = parseInt(document.getElementById('transferSelect').value, 10);
+      if (!destinoId) return;
+      this.disabled = true;
+      this.textContent = 'Transferindo...';
+
+      try {
+        const r = await fetch('/api/leitos/' + leitoId + '/transferir', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ destino_leito_id: destinoId })
+        });
+        if (!r.ok) {
+          const err = await r.json();
+          throw new Error(err.error || 'Erro ao transferir paciente');
+        }
+        alert('Paciente transferido com sucesso!');
+        window.location.href = '/gestao-leitos';
+      } catch (error) {
+        alert('Erro ao transferir: ' + error.message);
+        this.disabled = false;
+        this.textContent = 'Confirmar Transferência';
       }
     });
   </script>

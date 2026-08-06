@@ -1,4 +1,5 @@
 const pacienteModel = require('../models/pacienteModel');
+const leitoModel = require('../models/leitoModel');
 
 async function searchPacientes(req, res) {
     try {
@@ -60,6 +61,16 @@ async function createPaciente(req, res) {
 
 async function deletePaciente(req, res) {
     try {
+        const paciente = await pacienteModel.findById(req.params.id);
+        if (!paciente) {
+            return res.status(404).json({ error: 'Paciente nao encontrado' });
+        }
+
+        const leito = await leitoModel.findByPacienteId(req.params.id);
+        if (leito) {
+            return res.status(400).json({ error: 'Paciente esta internado e nao pode ser excluido' });
+        }
+
         await pacienteModel.remove(req.params.id);
         res.status(200).json({ message: 'Paciente excluido com sucesso' });
     } catch (error) {

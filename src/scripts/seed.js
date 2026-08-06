@@ -85,9 +85,9 @@ async function seed() {
 
                 // ========== MEDICOES DE EXEMPLO ==========
                 const medicoesData = [
-                    { leito_id: leito.id, frequencia_cardiaca: 88, pressao_sistolica: 135, pressao_diastolica: 85, saturacao: 97, temperatura: 36.8, observacoes: 'Paciente consciente, orientado', registrado_por: medicoId },
-                    { leito_id: leito.id, frequencia_cardiaca: 92, pressao_sistolica: 142, pressao_diastolica: 88, saturacao: 96, temperatura: 37.1, observacoes: 'PA levemente elevada, monitorar', registrado_por: medicoId },
-                    { leito_id: leito.id, frequencia_cardiaca: 76, pressao_sistolica: 128, pressao_diastolica: 82, saturacao: 98, temperatura: 36.5, observacoes: 'Estavel, sem intercorrencias', registrado_por: medicoId }
+                    { leito_id: leito.id, frequencia_cardiaca: 88, pressao_sistolica: 135, pressao_diastolica: 85, spo2: 97, temperatura: 36.8, observacoes: 'Paciente consciente, orientado', registrado_por: medicoId },
+                    { leito_id: leito.id, frequencia_cardiaca: 92, pressao_sistolica: 142, pressao_diastolica: 88, spo2: 96, temperatura: 37.1, observacoes: 'PA levemente elevada, monitorar', registrado_por: medicoId },
+                    { leito_id: leito.id, frequencia_cardiaca: 76, pressao_sistolica: 128, pressao_diastolica: 82, spo2: 98, temperatura: 36.5, observacoes: 'Estavel, sem intercorrencias', registrado_por: medicoId }
                 ];
 
                 for (const m of medicoesData) {

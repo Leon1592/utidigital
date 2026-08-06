@@ -2,6 +2,7 @@ const leitoModel = require('../models/leitoModel');
 const altasModel = require('../models/altasModel');
 const medicaoModel = require('../models/medicaoModel');
 const pacienteModel = require('../models/pacienteModel');
+const internacaoModel = require('../models/internacaoModel');
 
 function isNumeric(n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
@@ -10,7 +11,7 @@ function isNumeric(n) {
 async function getAlertas(req, res) {
     try {
         const checkBeds = await leitoModel.findAll();
-        const occupiedBeds = checkBeds.filter(b => b.status === 'ocupado').slice(0, 5);
+        const occupiedBeds = checkBeds.filter(b => b.status === 'ocupado');
 
         if (occupiedBeds.length === 0) {
             return res.json([]);
@@ -67,11 +68,17 @@ async function getAlertas(req, res) {
 async function getEstatisticas(req, res) {
     try {
         const leitosOcupados = await leitoModel.countByStatus('ocupado');
+        const leitosDisponiveis = await leitoModel.countByStatus('disponivel');
+        const leitosIndisponiveis = await leitoModel.countByStatus('indisponivel');
+        const leitosTotais = leitosOcupados + leitosDisponiveis + leitosIndisponiveis;
         const altas = await altasModel.countRecent24h();
         const estadosCriticos = await medicaoModel.countCritical();
 
         res.json({
             leitosOcupados,
+            leitosDisponiveis,
+            leitosIndisponiveis,
+            leitosTotais,
             altas,
             estadosCriticos
         });
@@ -101,6 +108,16 @@ async function getAltas(req, res) {
     }
 }
 
+async function getInternacoes(req, res) {
+    try {
+        const internacoes = await internacaoModel.findAll();
+        res.json(internacoes);
+    } catch (error) {
+        console.error('Erro ao buscar internacoes:', error);
+        res.status(500).json({ error: 'Erro ao buscar internacoes' });
+    }
+}
+
 async function deleteAlta(req, res) {
     try {
         const { id } = req.params;
@@ -116,6 +133,7 @@ async function deleteAlta(req, res) {
             }
             await pacienteModel.remove(alta.paciente_id);
             await altasModel.removeByPaciente(alta.paciente_id);
+            await internacaoModel.removeByPaciente(alta.paciente_id);
         } else {
             await altasModel.removeById(id);
         }
@@ -198,6 +216,7 @@ module.exports = {
     getEstatisticas,
     getPacientesInternados,
     getAltas,
+    getInternacoes,
     deleteAlta,
     getRelatorioPaciente
 };

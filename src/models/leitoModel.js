@@ -1,5 +1,7 @@
 const db = require('../config/db');
 
+const UPDATABLE_FIELDS = ['status', 'paciente_nome', 'data_internacao', 'observacoes', 'paciente_id', 'medico_responsavel_id', 'motivo_admissao', 'data_nascimento_paciente', 'cpf_paciente', 'motivo_indisponivel'];
+
 async function findAll() {
     const result = await db.query('SELECT * FROM leitos ORDER BY numero');
     return result.rows;
@@ -42,14 +44,21 @@ async function create(data) {
 }
 
 async function update(id, data) {
-    const { status, paciente_nome, data_internacao, observacoes, paciente_id, medico_responsavel_id, motivo_admissao, data_nascimento_paciente, cpf_paciente } = data;
+    const sets = [];
+    const values = [];
+    for (const field of UPDATABLE_FIELDS) {
+        if (data[field] !== undefined) {
+            sets.push(`${field} = $${values.length + 1}`);
+            values.push(data[field]);
+        }
+    }
+    if (sets.length === 0) {
+        return findById(id);
+    }
+    values.push(id);
     const result = await db.query(
-        `UPDATE leitos SET
-            status = $1, paciente_nome = $2, data_internacao = $3, observacoes = $4,
-            paciente_id = $5, medico_responsavel_id = $6, motivo_admissao = $7,
-            data_nascimento_paciente = $8, cpf_paciente = $9
-        WHERE id = $10 RETURNING *`,
-        [status, paciente_nome, data_internacao, observacoes, paciente_id, medico_responsavel_id, motivo_admissao, data_nascimento_paciente, cpf_paciente, id]
+        `UPDATE leitos SET ${sets.join(', ')} WHERE id = $${values.length} RETURNING *`,
+        values
     );
     return result.rows[0];
 }
@@ -78,7 +87,8 @@ async function resetPacienteData(id) {
             motivo_admissao = NULL,
             data_nascimento_paciente = NULL,
             cpf_paciente = NULL,
-            data_internacao = NULL
+            data_internacao = NULL,
+            motivo_indisponivel = NULL
         WHERE id = $1
     `, [id]);
 }

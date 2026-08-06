@@ -74,6 +74,10 @@ app.get('/historico-de-altas', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../public/html/historico_altas.html'));
 });
 
+app.get('/historico-internacoes', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/html/historico_internacoes.html'));
+});
+
 app.use('/auth', authRoutes);
 app.use('/api/users', isAuthenticated, userRoutes);
 app.use('/api/leitos', isAuthenticated, leitoRoutes);

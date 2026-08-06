@@ -376,3 +376,142 @@
     color: var(--text-light);
     font-size: 16px;
 }
+
+.alta-options {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.alta-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-light);
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.alta-option input {
+    accent-color: #ff9800;
+    width: 16px;
+    height: 16px;
+}
+
+.charts-section {
+    margin-bottom: 24px;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.chart-card {
+    background: var(--red-card);
+    border-radius: 12px;
+    padding: 18px;
+    min-height: 220px;
+}
+
+.chart-card h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+
+.chart-card canvas {
+    max-height: 200px;
+}
+
+.btn-transferir {
+    background: #0f3460;
+    color: var(--white);
+    font-size: 14px;
+    font-weight: 700;
+    border: 1px solid #00b4d8;
+    border-radius: 8px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-left: 10px;
+}
+
+.btn-transferir:hover {
+    background: #00b4d8;
+}
+
+.delete-confirm-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.delete-confirm-content {
+    background: var(--dark-teal);
+    border-radius: 16px;
+    padding: 24px;
+    width: 420px;
+    border: 2px solid var(--red-main);
+}
+
+.delete-confirm-header {
+    font-family: "Playfair Display", serif;
+    font-size: 22px;
+    color: var(--white);
+    margin-bottom: 16px;
+}
+
+.delete-confirm-body {
+    font-size: 15px;
+    color: var(--text-light);
+    margin-bottom: 24px;
+    line-height: 1.5;
+}
+
+.delete-confirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn-cancelar {
+    background: var(--red-card);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-cancelar:hover {
+    background: var(--red-main);
+}
+
+.btn-confirmar-excluir {
+    background: #c0392b;
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-confirmar-excluir:hover {
+    background: #e74c3c;
+}

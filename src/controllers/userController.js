@@ -58,8 +58,74 @@ async function deleteUser(req, res) {
     }
 }
 
+async function updateUser(req, res) {
+    try {
+        const user = await userModel.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ error: 'Usuario nao encontrado' });
+        }
+
+        const { name, email, perfil } = req.body;
+        const data = {};
+
+        if (name !== undefined) {
+            if (name.trim().length < 3) {
+                return res.status(400).json({ error: 'Nome deve ter no minimo 3 caracteres' });
+            }
+            data.name = name.trim();
+        }
+        if (email !== undefined) {
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                return res.status(400).json({ error: 'Email invalido' });
+            }
+            const exist = await userModel.findByEmail(email.trim());
+            if (exist && exist.id !== user.id) {
+                return res.status(400).json({ error: 'Email ja cadastrado' });
+            }
+            data.email = email.trim();
+        }
+        if (perfil !== undefined) {
+            if (!['Medico', 'Enfermeiro', 'Admin'].includes(perfil)) {
+                return res.status(400).json({ error: 'Perfil invalido' });
+            }
+            if (user.perfil === 'Admin' && req.session.user.id === user.id && perfil !== 'Admin') {
+                return res.status(400).json({ error: 'Voce nao pode remover seu proprio perfil Admin' });
+            }
+            data.perfil = perfil;
+        }
+
+        const updated = await userModel.update(user.id, data);
+        res.json(updated);
+    } catch (error) {
+        console.error('Erro ao atualizar usuario:', error);
+        res.status(500).json({ error: 'Erro ao atualizar usuario' });
+    }
+}
+
+async function resetPassword(req, res) {
+    try {
+        const user = await userModel.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ error: 'Usuario nao encontrado' });
+        }
+        const { novaSenha } = req.body;
+        if (!novaSenha || novaSenha.length < 6) {
+            return res.status(400).json({ error: 'Senha deve ter no minimo 6 caracteres' });
+        }
+
+        const hashedPassword = await bcrypt.hash(novaSenha, 10);
+        await userModel.update(user.id, { password: hashedPassword });
+        res.json({ success: true, message: 'Senha redefinida com sucesso' });
+    } catch (error) {
+        console.error('Erro ao redefinir senha:', error);
+        res.status(500).json({ error: 'Erro ao redefinir senha' });
+    }
+}
+
 module.exports = {
   getUsers: getUsers,
   createUser: createUser,
-  deleteUser: deleteUser
+  deleteUser: deleteUser,
+  updateUser: updateUser,
+  resetPassword: resetPassword
 }

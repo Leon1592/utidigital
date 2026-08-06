@@ -11,14 +11,14 @@ async function login(req, res) {
         );
 
         if (result.rows.length === 0) {
-            return res.status(401).json({ error: 'Usuário não encontrado ou perfil incorreto' });
+            return res.status(401).json({ error: 'Email, senha ou perfil incorretos' });
         }
 
         const user = result.rows[0];
         const passwordMatch = await bcrypt.compare(password, user.password);
 
         if (!passwordMatch) {
-            return res.status(401).json({ error: 'Senha incorreta' });
+            return res.status(401).json({ error: 'Email, senha ou perfil incorretos' });
         }
 
         req.session.user = {

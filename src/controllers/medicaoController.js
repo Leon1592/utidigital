@@ -1,4 +1,5 @@
 const medicaoModel = require('../models/medicaoModel');
+const leitoModel = require('../models/leitoModel');
 
 async function createMedicao(req, res) {
     try {
@@ -6,6 +7,14 @@ async function createMedicao(req, res) {
         
         if (!leito_id) {
             return res.status(400).json({ error: 'Leito nao informado' });
+        }
+
+        const leito = await leitoModel.findById(leito_id);
+        if (!leito) {
+            return res.status(400).json({ error: 'Leito nao encontrado' });
+        }
+        if (leito.status !== 'ocupado') {
+            return res.status(400).json({ error: 'Medicoes so podem ser registradas em leitos ocupados' });
         }
         if (!frequencia_cardiaca || isNaN(frequencia_cardiaca) || frequencia_cardiaca < 0 || frequencia_cardiaca > 300) {
             return res.status(400).json({ error: 'Frequencia cardiaca invalida (0-300 bpm)' });

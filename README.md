@@ -280,6 +280,7 @@ CREATE TABLE IF NOT EXISTS leitos (
     motivo_admissao TEXT,
     data_nascimento_paciente DATE,
     cpf_paciente VARCHAR(14),
+    motivo_indisponivel TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -1152,6 +1153,7 @@ Todos os endpoints que recebem dados do cliente validam os campos antes de persi
 - Clique em leito ocupado → detalhes
 - Busca por número do leito ou nome do paciente
 - Admin: criar e excluir leitos
+- **Admin/Enfermeiro**: marcar leito como **Indisponível** (com motivo) ou **Disponibilizá-lo**; o motivo aparece exibido no card do leito
 
 ### 11.3 Detalhe do Leito
 - Dados completos do paciente internado
@@ -1159,6 +1161,8 @@ Todos os endpoints que recebem dados do cliente validam os campos antes de persi
 - Histórico completo de medições em ordem cronológica
 - Formulário de registro de nova medição
 - Alta do paciente (remove medições, registra alta, libera leito)
+- **Opção de dar alta e marcar o leito como indisponível** (aguardando limpeza), com motivo opcional
+- **Admin/Enfermeiro**: toggativa Indisponibilizar/Disponibilizar leito diretamente na página (para leitos não ocupados)
 
 ### 11.4 Internação
 - Busca de paciente já cadastrado
@@ -1249,6 +1253,12 @@ O sistema gera alertas automáticos para parâmetros fora da faixa normal:
 - Não é possível criar dois leitos com o mesmo número
 - Ao excluir um leito, todas as medições associadas são excluídas
 - A exclusão de leito não é permitida se há regras de negócio adicionais (atualmente permitida)
+- **Leito Indisponível:** usado para manutenção, limpeza/desinfecção ou desativação. Requer **motivo** (`motivo_indisponivel`)
+- **Regras de transição de status:**
+  - `disponivel ↔ indisponivel` permitido (apenas Admin/Enfermeiro via UI)
+  - Leito **ocupado** NÃO pode ser marcado indisponível (exige alta antes)
+  - Leito **indisponível** NÃO recebe pacientes (apenas `disponivel` recebe)
+  - Medições só podem ser registradas em leitos **ocupados**
 
 ### 12.4 Usuários
 - O admin geral (`adminsistemageral@uti.com`) não pode ser excluído
@@ -1297,6 +1307,9 @@ O sistema gera alertas automáticos para parâmetros fora da faixa normal:
 |-------|-----------|-------------------|
 | Número | `Number.isInteger && numero > 0` | "Número do leito deve ser um inteiro positivo" |
 | Duplicidade | `findByNumero()` retorna null | "Leito X já existe" |
+| Status | Deve ser `disponivel`, `ocupado` ou `indisponivel` | "Status invalido" |
+| Indisponível | Leito não pode estar `ocupado` e motivo é obrigatório | "Leito ocupado nao pode ficar indisponivel..." / "Informe o motivo da indisponibilidade" |
+| Ocupação | Leito atual deve ser `disponivel` | "Apenas leitos disponiveis podem receber pacientes" |
 
 ### 13.2 Validações Frontend (HTML + JS)
 

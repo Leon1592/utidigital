@@ -72,6 +72,22 @@
   background: #e74c3c;
 }
 
+.btn-editar-usuario {
+  background: #0f3460;
+  color: var(--white);
+  border: 1px solid #00b4d8;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-editar-usuario:hover {
+  background: #00b4d8;
+}
+
 .no-users {
   font-size: 16px;
   color: var(--text-light);
@@ -240,4 +256,64 @@
 
 .btn-confirmar-excluir:hover {
   background: #e74c3c;
+}
+
+.edit-modal-field {
+  margin-bottom: 14px;
+}
+
+.edit-modal-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.edit-modal-field input,
+.edit-modal-field select {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--red-card);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--white);
+  font-size: 14px;
+}
+
+.edit-modal-field input:focus,
+.edit-modal-field select:focus {
+  outline: none;
+  border-color: #00b4d8;
+}
+
+.edit-modal-section {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  margin-top: 16px;
+  padding-top: 14px;
+}
+
+.btn-salvar-usuario {
+  background: var(--white);
+  color: #222;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-salvar-usuario:hover {
+  background: #ececec;
+}
+
+.user-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
 }

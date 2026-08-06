@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS leitos (
     motivo_admissao TEXT,
     data_nascimento_paciente DATE,
     cpf_paciente VARCHAR(14),
+    motivo_indisponivel TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -60,4 +61,17 @@ CREATE TABLE IF NOT EXISTS altas (
     leito_numero INTEGER,
     data_internacao TIMESTAMP,
     data_alta TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS internacoes (
+    id SERIAL PRIMARY KEY,
+    leito_id INTEGER NOT NULL,
+    leito_numero INTEGER,
+    paciente_id INTEGER,
+    paciente_nome VARCHAR(255),
+    medico_responsavel_nome VARCHAR(255),
+    motivo_admissao TEXT,
+    data_internacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_alta TIMESTAMP,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

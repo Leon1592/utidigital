@@ -21,8 +21,7 @@ async function create(medicao) {
 
 async function findByLeito(leitoId) {
     const result = await db.query(
-        `SELECT m.*, u.name as registrado_por_nome,
-                (m.created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/Sao_Paulo') as created_at
+        `SELECT m.*, u.name as registrado_por_nome
          FROM medicoes m
          LEFT JOIN users u ON m.registrado_por = u.id
          WHERE m.leito_id = $1
@@ -34,8 +33,7 @@ async function findByLeito(leitoId) {
 
 async function getLatest(leitoId) {
     const result = await db.query(
-        `SELECT leito_id, frequencia_cardiaca, pressao_sistolica, pressao_diastolica, spo2, temperatura,
-                (created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/Sao_Paulo') as created_at
+        `SELECT leito_id, frequencia_cardiaca, pressao_sistolica, pressao_diastolica, spo2, temperatura, created_at
          FROM medicoes WHERE leito_id = $1 ORDER BY created_at DESC LIMIT 1`,
         [leitoId]
     );
@@ -51,6 +49,7 @@ async function countCritical() {
         WITH latest_medicoes AS (
             SELECT m.*, ROW_NUMBER() OVER (PARTITION BY m.leito_id ORDER BY m.created_at DESC) as rn
             FROM medicoes m
+            INNER JOIN leitos l ON l.id = m.leito_id AND l.status = 'ocupado'
         )
         SELECT COUNT(*) as total FROM latest_medicoes lm
         WHERE lm.rn = 1 AND (
@@ -67,8 +66,7 @@ async function countCritical() {
 
 async function findByLeitoWithPeriod(leitoId, periodo) {
     let query = `
-        SELECT m.*, u.name as registrado_por_nome,
-               (m.created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/Sao_Paulo') as created_at
+        SELECT m.*, u.name as registrado_por_nome
         FROM medicoes m
         LEFT JOIN users u ON m.registrado_por = u.id
         WHERE m.leito_id = $1
@@ -85,8 +83,7 @@ async function findByLeitoWithPeriod(leitoId, periodo) {
 
 async function findByLeitoBetween(leitoId, from, to) {
     let query = `
-        SELECT m.*, u.name as registrado_por_nome,
-               (m.created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/Sao_Paulo') as created_at
+        SELECT m.*, u.name as registrado_por_nome
         FROM medicoes m
         LEFT JOIN users u ON m.registrado_por = u.id
         WHERE m.leito_id = $1

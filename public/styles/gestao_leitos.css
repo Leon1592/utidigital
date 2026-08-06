@@ -131,3 +131,47 @@
 .btn-internar:hover {
   background: #ececec;
 }
+
+.bed-motive {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffb74d;
+  background: rgba(255, 152, 0, 0.12);
+  border: 1px solid rgba(255, 152, 0, 0.4);
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: help;
+}
+
+.bed-toggle-btn {
+  align-self: flex-start;
+  margin-top: 10px;
+  background: #ff9800;
+  color: #0a2342;
+  font-family: "Nunito", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.bed-toggle-btn:hover {
+  background: #ffb74d;
+}
+
+.bed-toggle-btn.disponibilizar {
+  background: #4caf50;
+  color: #fff;
+}
+
+.bed-toggle-btn.disponibilizar:hover {
+  background: #66bb6a;
+}

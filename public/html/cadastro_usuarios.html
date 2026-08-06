@@ -34,6 +34,7 @@
         <a href="/gestao-leitos" class="nav-item">Gestão de Leitos</a>
         <a href="/cadastro-pacientes" class="nav-item">Cadastro de Pacientes</a>
         <a href="/historico-de-altas" class="nav-item">Histórico de Altas</a>
+        <a href="/historico-internacoes" class="nav-item">Histórico de Internações</a>
         <a href="/relatorios" class="nav-item">Relatórios</a>
         <a
           href="#"
@@ -237,9 +238,41 @@
       </div>
     </div>
 
+    <div class="delete-confirm-modal" id="editModal">
+      <div class="delete-confirm-content">
+        <div class="delete-confirm-header">Editar Usuário</div>
+        <div class="edit-modal-field">
+          <label for="editNome">Nome Completo</label>
+          <input type="text" id="editNome" maxlength="255" />
+        </div>
+        <div class="edit-modal-field">
+          <label for="editEmail">Email</label>
+          <input type="email" id="editEmail" />
+        </div>
+        <div class="edit-modal-field">
+          <label for="editPerfil">Perfil</label>
+          <select id="editPerfil">
+            <option value="Medico">Médico</option>
+            <option value="Enfermeiro">Enfermeiro</option>
+            <option value="Admin">Admin</option>
+          </select>
+        </div>
+        <div class="edit-modal-field edit-modal-section">
+          <label for="editNovaSenha">Nova Senha (opcional)</label>
+          <input type="password" id="editNovaSenha" />
+        </div>
+        <div class="delete-confirm-actions">
+          <button class="btn-cancelar" id="btnCancelarEditar">Cancelar</button>
+          <button class="btn-salvar-usuario" id="btnSalvarUsuario">Salvar</button>
+        </div>
+      </div>
+    </div>
+
     <script src="/js/auth.js"></script>
     <script>
+
       let usuarioAtual = null;
+      let usuarioEditando = null;
 
       async function initPage() {
         const user = await loadUser();
@@ -306,6 +339,11 @@
             deleteButton.addEventListener('click', () => showDeleteModal(user.id, userName));
           }
 
+          const editButton = document.createElement('button');
+          editButton.className = 'btn-editar-usuario';
+          editButton.textContent = 'Editar';
+          editButton.addEventListener('click', () => showEditModal(user));
+
           card.innerHTML = `
           <div class="user-card-header">
             <span class="user-name">${userName}</span>
@@ -314,10 +352,99 @@
           <span class="user-email">${userEmail}</span>
           <div class="user-actions"></div>
         `;
-          card.querySelector('.user-actions').appendChild(deleteButton);
+          const actionsDiv = card.querySelector('.user-actions');
+          actionsDiv.appendChild(editButton);
+          actionsDiv.appendChild(deleteButton);
           container.appendChild(card);
         });
       }
+
+      function showEditModal(user) {
+        usuarioEditando = user;
+        document.getElementById("editNome").value = user.name;
+        document.getElementById("editEmail").value = user.email;
+        document.getElementById("editPerfil").value = user.perfil;
+        document.getElementById("editNovaSenha").value = "";
+        document.getElementById("editModal").style.display = "flex";
+      }
+
+      document
+        .getElementById("btnCancelarEditar")
+        .addEventListener("click", function () {
+          document.getElementById("editModal").style.display = "none";
+          usuarioEditando = null;
+        });
+
+      document
+        .getElementById("editModal")
+        .addEventListener("click", function (e) {
+          if (e.target === this) {
+            this.style.display = "none";
+            usuarioEditando = null;
+          }
+        });
+
+      document
+        .getElementById("btnSalvarUsuario")
+        .addEventListener("click", async function () {
+          if (!usuarioEditando) return;
+          const btn = this;
+          const nome = document.getElementById("editNome").value.trim();
+          const email = document.getElementById("editEmail").value.trim();
+          const perfil = document.getElementById("editPerfil").value;
+          const novaSenha = document.getElementById("editNovaSenha").value;
+
+          if (!nome || nome.length < 3) {
+            alert("Nome deve ter no minimo 3 caracteres.");
+            return;
+          }
+          if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            alert("Email invalido.");
+            return;
+          }
+          if (novaSenha && novaSenha.length < 6) {
+            alert("A nova senha deve ter no minimo 6 caracteres.");
+            return;
+          }
+
+          btn.disabled = true;
+          try {
+            const response = await fetch(`/api/users/${usuarioEditando.id}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ name: nome, email: email, perfil: perfil }),
+            });
+            if (!response.ok) {
+              const error = await response.json();
+              throw new Error(error.error || "Erro ao atualizar usuario");
+            }
+
+            if (novaSenha) {
+              const resSenha = await fetch(
+                `/api/users/${usuarioEditando.id}/senha`,
+                {
+                  method: "PUT",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ novaSenha: novaSenha }),
+                },
+              );
+              if (!resSenha.ok) {
+                const error = await resSenha.json();
+                throw new Error(error.error || "Erro ao redefinir senha");
+              }
+            }
+
+            alert("Usuario atualizado com sucesso!");
+            document.getElementById("editModal").style.display = "none";
+            usuarioEditando = null;
+            loadUsers();
+          } catch (error) {
+            console.error("Erro ao atualizar:", error);
+            alert(error.message || "Erro ao atualizar usuario");
+          } finally {
+            btn.disabled = false;
+          }
+        });
 
       function showDeleteModal(userId, userName) {
         usuarioAtual = userId;
