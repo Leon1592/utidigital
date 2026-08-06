@@ -144,6 +144,7 @@ async function getRelatorioPaciente(req, res) {
         let leitoId = leito?.id;
         let dataInternacao = leito?.data_internacao || null;
         let medicoes = [];
+        let altaInfo = null;
 
         if (leitoId) {
             if (periodo) {
@@ -156,6 +157,7 @@ async function getRelatorioPaciente(req, res) {
         } else {
             // Paciente recebeu alta: usa o registro de alta para buscar os dados
             const alta = await altasModel.findLatestByPaciente(id);
+            altaInfo = alta || null;
             if (alta && alta.leito_id) {
                 leitoId = alta.leito_id;
                 dataInternacao = alta.data_internacao || null;
@@ -182,7 +184,8 @@ async function getRelatorioPaciente(req, res) {
         res.json({
             paciente: { ...(paciente || {}), data_internacao: dataInternacao },
             leito: leito || null,
-            medicoes
+            medicoes,
+            alta: altaInfo
         });
     } catch (error) {
         console.error('Erro ao gerar relatorio:', error);

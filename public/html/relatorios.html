@@ -143,6 +143,15 @@
           </div>
         </div>
 
+        <div class="preview-info-item" style="margin-top: 12px;">
+          <span class="preview-info-label">Data de Alta</span>
+          <span class="preview-info-value" id="previewAlta">-</span>
+        </div>
+
+        <div class="preview-alta-notice" id="previewAltaNotice" style="display: none;">
+          Este paciente já recebeu alta. Os dados abaixo são do período de internação.
+        </div>
+
         <div class="preview-section" id="sectionSinaisVitais">
           <div class="preview-section-title">SINAIS VITAIS</div>
           <table class="preview-table" id="tableSinaisVitais">
@@ -184,20 +193,24 @@
 
     async function loadPacientes() {
       try {
-        const [allResp, internadosResp] = await Promise.all([
+        const [allResp, internadosResp, altasResp] = await Promise.all([
           fetch('/api/pacientes', { credentials: 'include' }),
-          fetch('/api/relatorios/pacientes-internados', { credentials: 'include' })
+          fetch('/api/relatorios/pacientes-internados', { credentials: 'include' }),
+          fetch('/api/relatorios/altas', { credentials: 'include' })
         ]);
         if (!allResp.ok) return;
         const pacientes = await allResp.json();
         const internados = internadosResp.ok ? await internadosResp.json() : [];
+        const altas = altasResp.ok ? await altasResp.json() : [];
         const internadosIds = new Set(internados.map(p => p.id));
+        const altasIds = new Set(altas.map(a => a.paciente_id));
 
         const select = document.getElementById('selectPaciente');
         pacientes.forEach(p => {
           const option = document.createElement('option');
           option.value = p.id;
-          option.textContent = p.nome + (internadosIds.has(p.id) ? '' : ' (recebeu alta)');
+          const sufixo = internadosIds.has(p.id) ? '' : (altasIds.has(p.id) ? ' (recebeu alta)' : ' (sem internação registrada)');
+          option.textContent = p.nome + sufixo;
           select.appendChild(option);
         });
       } catch (error) {
@@ -243,6 +256,10 @@
         ? 'Período Completo'
         : `Últimos ${periodo} ${periodo == 1 ? 'dia' : 'dias'}`;
       document.getElementById('previewGeradoEm').textContent = formatarDataHora(new Date());
+
+      const dataAlta = data.alta ? formatarDataHora(data.alta.data_alta) : null;
+      document.getElementById('previewAlta').textContent = dataAlta || '-';
+      document.getElementById('previewAltaNotice').style.display = data.alta ? 'block' : 'none';
 
       const tbody = document.getElementById('tbodySinaisVitais');
       tbody.innerHTML = '';
@@ -340,10 +357,20 @@
       doc.setLineWidth(0.3);
       doc.line(15, 56, 195, 56);
 
+      let avisoAltaY = null;
+      if (reportData.alta) {
+        avisoAltaY = 61;
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(200, 40, 40);
+        doc.text('Paciente recebeu alta em: ' + formatarDataHora(reportData.alta.data_alta), 15, avisoAltaY);
+      }
+
+      const sinaisY = avisoAltaY ? avisoAltaY + 8 : 64;
       doc.setFontSize(11);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(0);
-      doc.text('SINAIS VITAIS', 15, 64);
+      doc.text('SINAIS VITAIS', 15, sinaisY);
 
       const tipo = document.querySelector('input[name="tipoRelatorio"]:checked').value;
       if (tipo === 'completo' || tipo === 'sinais_vitais') {
@@ -357,7 +384,7 @@
           ]);
 
           doc.autoTable({
-            startY: 66,
+            startY: sinaisY + 2,
             head: [['Data/Hora', 'FC (bpm)', 'PA (mmHg)', 'SpO2 (%)', 'Temp (°C)']],
             body: tableData,
             theme: 'grid',
@@ -370,7 +397,7 @@
           doc.setFontSize(10);
           doc.setFont('helvetica', 'normal');
           doc.setTextColor(80);
-          doc.text('Nenhuma medicao registrada no periodo.', 15, 72);
+          doc.text('Nenhuma medicao registrada no periodo.', 15, sinaisY + 6);
         }
       }
 
