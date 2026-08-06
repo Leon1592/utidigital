@@ -174,16 +174,16 @@ utidigital/
 │   │
 │   ├── routes/                         # Rotas da API (mapeamento thin)
 │   │   ├── authRoutes.js               #   POST /login, POST /logout, GET /user
-│   │   ├── userRoutes.js               #   CRUD de usuários
-│   │   ├── leitoRoutes.js              #   CRUD de leitos + darAlta
+│   │   ├── userRoutes.js               #   CRUD de usuários + edição + reset de senha
+│   │   ├── leitoRoutes.js              #   CRUD de leitos + darAlta + transferir
 │   │   ├── pacienteRoutes.js           #   CRUD de pacientes
 │   │   ├── medicaoRoutes.js            #   Medições (criar, listar, deletar)
-│   │   └── relatorioRoutes.js          #   Relatórios e estatísticas
+│   │   └── relatorioRoutes.js          #   Relatórios, estatísticas e internações
 │   │
 │   ├── controllers/                    # Lógica de negócio
 │   │   ├── authController.js           #   Login, logout, getUser
 │   │   ├── userController.js           #   CRUD com validação de campos
-│   │   ├── leitoController.js          #   CRUD + darAlta (coordena leito/medicoes/altas)
+│   │   ├── leitoController.js          #   CRUD + darAlta + transferir (coordena leito/medicoes/altas/internacoes)
 │   │   ├── pacienteController.js       #   CRUD com validação (CPF, data, etc.)
 │   │   ├── medicaoController.js        #   CRUD com validação de ranges vitais
 │   │   └── relatorioController.js      #   Alertas, estatísticas, relatórios
@@ -193,6 +193,7 @@ utidigital/
 │   │   ├── leitoModel.js               #   findAll, findById, update, resetPacienteData
 │   │   ├── pacienteModel.js            #   findAll, findById, findInternados, create
 │   │   ├── medicaoModel.js             #   create, getLatest, countCritical, findByLeitoWithPeriod
+│   │   ├── internacaoModel.js              #   createFromLeito, closeByLeito, moveBetweenLeitos, findAll
 │   │   └── altasModel.js               #   create, findById, findLatestByPaciente, removeByPaciente, removeById, findAllWithPaciente, countRecent24h
 │   │
 │   ├── middleware/
@@ -207,16 +208,17 @@ utidigital/
 ├── public/                             # Arquivos estáticos (frontend)
 │   │
 │   ├── js/
-│   │   └── auth.js                     # loadUser() + escapeHTML() compartilhados entre 7 páginas
+│   │   └── auth.js                     # loadUser() + escapeHTML() compartilhados entre 9 páginas
 │   │
 │   ├── html/                           # Páginas do sistema
 │   │   ├── index.html                  #   Tela de login
 │   │   ├── dashboard.html              #   Painel principal com estatísticas
 │   │   ├── gestao_leitos.html          #   Grid de leitos com CRUD
-│   │   ├── leito_detalhe.html          #   Detalhes do leito + medições + alta
+│   │   ├── leito_detalhe.html          #   Detalhes do leito + medições + alta + transferir
 │   │   ├── internar_paciente.html      #   Formulário de internação
 │   │   ├── cadastro_pacientes.html     #   Cadastro e busca de pacientes
 │   │   ├── historico_altas.html        #   Histórico de pacientes que receberam alta
+│   │   ├── historico_internacoes.html  #   Histórico completo de internações
 │   │   ├── cadastro_usuarios.html      #   CRUD de usuários (Admin apenas)
 │   │   └── relatorios.html             #   Relatórios e geração de PDF
 │   │
@@ -229,6 +231,7 @@ utidigital/
 │   │   ├── internar_paciente.css       #   Formulário de internação
 │   │   ├── leito_detalhe.css          #   Cards vitais e histórico
 │   │   ├── relatorios.css              #   Preview e controles de relatório
+│   │   ├── historico_internacoes.css     #   Histórico de internações
 │   │   └── historico_altas.css         #   Lista de pacientes que receberam alta
 │   │
 │   └── uploads/
@@ -333,6 +336,25 @@ CREATE TABLE IF NOT EXISTS altas (
     paciente_nome VARCHAR(255),
     data_alta TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- =====================
+-- Tabela: internacoes
+-- =====================
+-- Histórico completo de internações. Cada registro representa uma
+-- internação (com data de entrada e saída) e é atualizado quando o
+-- paciente é transferido entre leitos.
+CREATE TABLE IF NOT EXISTS internacoes (
+    id SERIAL PRIMARY KEY,
+    leito_id INTEGER NOT NULL,
+    leito_numero INTEGER,
+    paciente_id INTEGER,
+    paciente_nome VARCHAR(255),
+    medico_responsavel_nome VARCHAR(255),
+    motivo_admissao TEXT,
+    data_internacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_alta TIMESTAMP,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
 ### 6.2 Relacionamentos entre Tabelas
@@ -369,11 +391,13 @@ CREATE TABLE IF NOT EXISTS altas (
                   └──────────────────┘
 ```
 
+> **Observação:** a tabela `internacoes` registra o histórico completo de internações (leito, paciente, médico responsável, motivo, `data_internacao` e `data_alta`). Ela é preenchida automaticamente na internação, fechada na alta (`data_alta = NOW()`) e atualizada em transferências de leito. Não possui chave estrangeira — a integridade é garantida pelos controllers.
+
 ---
 
 ## 7. APIs RESTful
 
-Todas as rotas da API (`/users`, `/api/*`) e páginas protegidas utilizam o middleware `isAuthenticated`. Apenas as rotas de autenticação (`/auth/login`, `/auth/logout`, `/auth/user`) e a página inicial (`/`) são públicas.
+Todas as rotas da API (`/api/users`, `/api/*`) e páginas protegidas utilizam o middleware `isAuthenticated`. Apenas as rotas de autenticação (`/auth/login`, `/auth/logout`, `/auth/user`) e a página inicial (`/`) são públicas.
 
 ### 7.1 Autenticação (`/auth`)
 
@@ -433,20 +457,22 @@ GET /auth/user
 }
 ```
 
-### 7.2 Usuários (`/users`)
+### 7.2 Usuários (`/api/users`)
 
 | Método | Endpoint | Descrição |
 |--------|----------|-----------|
-| GET | `/users` | Lista todos os usuários |
-| GET | `/users?perfil=Medico` | Lista usuários por perfil |
-| POST | `/users` | Cria novo usuário |
-| DELETE | `/users/:id` | Exclui usuário |
+| GET | `/api/users` | Lista todos os usuários |
+| GET | `/api/users?perfil=Medico` | Lista usuários por perfil |
+| POST | `/api/users` | Cria novo usuário |
+| PUT | `/api/users/:id` | Edita nome, email e/ou perfil do usuário |
+| PUT | `/api/users/:id/senha` | Redefine a senha do usuário |
+| DELETE | `/api/users/:id` | Exclui usuário (apenas não-Admin) |
 
 **Exemplo de Criação:**
 
 ```javascript
 // Request
-POST /users
+POST /api/users
 {
   "name": "Dr. João",
   "email": "joao@uti.com",
@@ -464,11 +490,44 @@ POST /users
 }
 ```
 
+**Exemplo - Editar Usuário:**
+
+```javascript
+// Request
+PUT /api/users/4
+{
+  "name": "Dr. João Souza",
+  "perfil": "Enfermeiro"
+}
+
+// Response
+{
+  "id": 4,
+  "name": "Dr. João Souza",
+  "email": "joao@uti.com",
+  "perfil": "Enfermeiro"
+}
+```
+
+**Exemplo - Reset de Senha:**
+
+```javascript
+// Request
+PUT /api/users/4/senha
+{
+  "novaSenha": "novaSenha123"
+}
+
+// Response
+{ "success": true, "message": "Senha redefinida com sucesso" }
+```
+
 **Validações do Controller:**
 - Nome: mínimo 3 caracteres
-- Email: formato válido (`/^[^\s@]+@[^\s@]+\.[^\s@]+$/`)
+- Email: formato válido (`/^[^\s@]+@[^\s@]+\.[^\s@]+$/`) e não duplicado (em edição)
 - Senha: mínimo 6 caracteres
 - Perfil: deve ser `Medico`, `Enfermeiro` ou `Admin`
+- **Regras de proteção:** usuários com perfil `Admin` não podem ser excluídos; um Admin não pode remover o próprio perfil Admin (evita perda de acesso)
 
 ### 7.3 Leitos (`/api/leitos`)
 
@@ -480,6 +539,7 @@ POST /users
 | PUT | `/api/leitos/:id` | Atualiza dados do leito |
 | DELETE | `/api/leitos/:id` | Exclui leito (e medições associadas) |
 | POST | `/api/leitos/:id/alta` | Dar alta ao paciente do leito |
+| POST | `/api/leitos/:id/transferir` | Transfere o paciente para outro leito (Admin/Enfermeiro) |
 
 **Exemplo - Listar Leitos:**
 
@@ -528,6 +588,30 @@ POST /users
 
 // Response
 { "success": true }
+```
+
+**Exemplo - Transferir Paciente entre Leitos:**
+
+```javascript
+// Request
+POST /api/leitos/1/transferir
+{
+  "destino_leito_id": 4
+}
+
+// Processo interno (transação):
+// 1. Valida: origem ocupada e destino disponível
+// 2. Copia os dados do paciente (nome, CPF, médico, motivo, etc.) para o leito destino
+// 3. Reseta o leito de origem para 'disponivel'
+// 4. Atualiza a internação ativa (internacoes) para o novo leito
+
+// Response
+{
+  "success": true,
+  "origemNumero": 1,
+  "destinoNumero": 4,
+  "pacienteNome": "João Silva"
+}
 ```
 
 ### 7.4 Pacientes (`/api/pacientes`)
@@ -654,6 +738,7 @@ POST /api/medicoes
 | GET | `/api/relatorios/alertas` | Alertas de estados críticos |
 | GET | `/api/relatorios/altas` | Histórico de altas (pacientes que receberam alta) |
 | DELETE | `/api/relatorios/altas/:id` | Exclui paciente que recebeu alta (e seus registros de alta) |
+| GET | `/api/relatorios/internacoes` | Histórico completo de internações (entrada e saída por leito) |
 | GET | `/api/relatorios/pacientes-internados` | Lista de pacientes internados |
 | GET | `/api/relatorios/paciente/:id` | Relatório individual do paciente (internado ou com alta) |
 
@@ -736,7 +821,7 @@ POST /api/medicoes
 
 ## 8. Frontend - Páginas HTML
 
-O sistema possui 8 páginas HTML que compartilham um arquivo JavaScript comum (`public/js/auth.js`) com funções de autenticação e sanitização.
+O sistema possui 9 páginas HTML que compartilham um arquivo JavaScript comum (`public/js/auth.js`) com funções de autenticação e sanitização.
 
 ### 8.1 Script Compartilhado: `public/js/auth.js`
 
@@ -852,6 +937,7 @@ Página com informações completas de um leito ocupado.
 - `GET /api/medicoes/leito/:id` — Histórico de medições
 - `POST /api/medicoes` — Registrar medição
 - `POST /api/leitos/:id/alta` — Dar alta
+- `POST /api/leitos/:id/transferir` — Transferir paciente para outro leito
 - `DELETE /api/medicoes/leito/:id/delete` — Excluir histórico
 
 **Funcionalidades:**
@@ -860,6 +946,7 @@ Página com informações completas de um leito ocupado.
 - Histórico completo de medições
 - Formulário para registrar nova medição com validação client-side
 - Botão "Dar Alta ao Paciente" com confirmação
+- Botão "Transferir Paciente" (modal escolhe leito de destino disponível) — Admin/Enfermeiro
 - Botão "Excluir Histórico"
 
 #### 8.2.5 `internar_paciente.html` - Internar Paciente
@@ -919,16 +1006,20 @@ CRUD de usuários (apenas Admin).
 
 **Endpoints consumidos:**
 - `GET /auth/user` — Verifica se é Admin (redireciona se não for)
-- `GET /users` — Listar usuários
-- `POST /users` — Criar usuário
-- `DELETE /users/:id` — Excluir usuário
+- `GET /api/users` — Listar usuários
+- `POST /api/users` — Criar usuário
+- `PUT /api/users/:id` — Editar nome, email e perfil
+- `PUT /api/users/:id/senha` — Redefinir senha
+- `DELETE /api/users/:id` — Excluir usuário
 
 **Funcionalidades:**
 - 3 abas: Médicos, Enfermeiros, Administradores
 - Formulário de cadastro com nome, email e senha
 - Listagem de usuários com badge de perfil
+- **Edição de usuários** via modal (nome, email, perfil) com validação de duplicidade de email
+- **Reset de senha** via modal (nova senha com mínimo 6 caracteres)
 - Exclusão com modal de confirmação
-- Proteção: admin geral (`adminsistemageral@uti.com`) não pode ser excluído
+- Proteção: usuários com perfil Admin não podem ser excluídos; um Admin não pode remover o próprio perfil Admin
 
 #### 8.2.8 `relatorios.html` - Relatórios
 
@@ -946,6 +1037,19 @@ Visualização e geração de relatórios em PDF.
 - Botão de pré-visualização
 - Tabela de sinais vitais + seção de observações
 - Geração de PDF com jsPDF
+
+#### 8.2.9 `historico_internacoes.html` - Histórico de Internações
+
+Histórico completo de todas as internações (ativas e encerradas).
+
+**Endpoints consumidos:**
+- `GET /auth/user` — Identificação
+- `GET /api/relatorios/internacoes` — Lista de internações
+
+**Funcionalidades:**
+- Contador de internações registradas e em andamento
+- Cards com paciente, leito, médico responsável, motivo da admissão, CPF e período (entrada/saída)
+- Badge de status por internação: **"Em andamento"** (sem `data_alta`) ou **"Alta"**
 
 ---
 
@@ -1011,7 +1115,7 @@ router.delete('/:id', authorize('Admin'), leitoController.deleteLeito);
 
 | Perfil | Descrição | Permissões |
 |--------|-----------|------------|
-| **Admin** | Administrador do sistema | Acesso total: CRUD de leitos, CRUD de usuários, todas as páginas, botão "[Excluir]" nos leitos |
+| **Admin** | Administrador do sistema | Acesso total: CRUD de leitos, CRUD de usuários (criar, editar, reset de senha, excluir), transferir pacientes, todas as páginas, botão "[Excluir]" nos leitos |
 | **Médico** | Médico da UTI | Visualizar leitos, registrar medições, dar alta |
 | **Enfermeiro** | Enfermeiro da UTI | Visualizar leitos, registrar medições |
 
@@ -1044,7 +1148,8 @@ Além disso, na página **Gestão de Leitos**, o botão "+ Adicionar Leito" e os
 | `/relatorios` | Sim | |
 | `/leito/:id` | Sim | |
 | `/internar` | Sim | |
-| `/users` | Sim | API |
+| `/historico-internacoes` | Sim | |
+| `/api/users` | Sim | API |
 | `/api/*` | Sim | Todas as rotas de API |
 
 ---
@@ -1163,6 +1268,7 @@ Todos os endpoints que recebem dados do cliente validam os campos antes de persi
 - Alta do paciente (remove medições, registra alta, libera leito)
 - **Opção de dar alta e marcar o leito como indisponível** (aguardando limpeza), com motivo opcional
 - **Admin/Enfermeiro**: toggativa Indisponibilizar/Disponibilizar leito diretamente na página (para leitos não ocupados)
+- **Admin/Enfermeiro**: transferir o paciente para outro leito disponível, movendo a internação ativa para o destino
 
 ### 11.4 Internação
 - Busca de paciente já cadastrado
@@ -1221,7 +1327,24 @@ O sistema gera alertas automáticos para parâmetros fora da faixa normal:
 | Frequência Cardíaca | 50-100 bpm | ALTO | > 100 bpm |
 | Frequência Cardíaca | 50-100 bpm | BAIXO | < 50 bpm |
 
-### 11.6 Relatórios
+### 11.9 Histórico de Internações
+
+Página `/historico-internacoes` que lista o histórico completo de internações:
+
+- Contador de internações registradas e em andamento
+- Cards com paciente, leito, médico responsável, motivo da admissão, CPF e período (entrada/saída)
+- Badge de status: **"Em andamento"** (internação ativa) ou **"Alta"**
+- Consumo do endpoint `GET /api/relatorios/internacoes`
+
+### 11.10 Edição de Usuários e Reset de Senha
+
+Na página Cadastro de Usuários (Admin apenas):
+
+- **Editar usuário**: modal para alterar nome, email e perfil, com validação de duplicidade de email
+- **Redefinir senha**: modal para definir nova senha (mínimo 6 caracteres), sem exigir senha antiga
+- Proteções: usuários Admin não podem ser excluídos; Admin não pode rebaixar o próprio perfil
+
+### 11.11 Relatórios
 - Relatório individual por paciente
 - Período selecionável (24h, 7, 15, 30 dias ou Período Completo)
 - Três tipos: Completo, Sinais Vitais, Internação
@@ -1242,7 +1365,8 @@ O sistema gera alertas automáticos para parâmetros fora da faixa normal:
 - Ao dar alta:
   1. Um registro é criado na tabela `altas` (histórico de altas) com nome, leito e data de internação
   2. O paciente **permanece** cadastrado na tabela `pacientes` (não é excluído)
-  3. O leito volta ao status 'disponivel' com todos os campos resetados
+  3. A internação ativa é encerrada na tabela `internacoes` (`data_alta = NOW()`)
+  4. O leito volta ao status 'disponivel' com todos os campos resetados
 - O histórico de altas é exibido na página **Histórico de Altas** (`/historico-de-altas`), listando todos os pacientes que receberam alta com nome, CPF, dados e data da alta
 - Pacientes que receberam alta **continuam podendo gerar relatórios** na página Relatórios (marcados com "(recebeu alta)"), com as medições do período de internação
 - Na página Histórico de Altas é possível **excluir** um paciente que recebeu alta (remove paciente e registros de alta); não é permitido excluir paciente que esteja internado
@@ -1259,16 +1383,28 @@ O sistema gera alertas automáticos para parâmetros fora da faixa normal:
   - Leito **ocupado** NÃO pode ser marcado indisponível (exige alta antes)
   - Leito **indisponível** NÃO recebe pacientes (apenas `disponivel` recebe)
   - Medições só podem ser registradas em leitos **ocupados**
+- **Transferência entre leitos** (`POST /api/leitos/:id/transferir`):
+  - Leito de **origem** deve estar `ocupado`; leito de **destino** deve estar `disponivel`
+  - Os dados do paciente (nome, CPF, médico responsável, motivo de admissão, data de internação) são copiados para o destino
+  - A origem volta a `disponivel`; a internação ativa é atualizada para o novo leito
+  - Todo o processo é executado em uma **transação** (rollback em caso de erro)
 
 ### 12.4 Usuários
-- O admin geral (`adminsistemageral@uti.com`) não pode ser excluído
-- Usuários com perfil 'Admin' podem acessar a página de cadastro de usuários
-- Médicos e enfermeiros não podem criar/excluir usuários
+- Usuários com perfil 'Admin' **não podem ser excluídos** (apenas não-Admin)
+- Um Admin não pode remover o **próprio** perfil Admin (evita bloquear o acesso de todos)
+- Usuários com perfil 'Admin' podem acessar a página de cadastro de usuários, **editar** usuários (nome, email, perfil) e **redefinir senhas**
+- Médicos e enfermeiros não podem criar/editar/excluir usuários
 
 ### 12.5 Medições
 - Uma medição só pode ser registrada para leitos ocupados (embora não haja validação explícita no backend, o fluxo natural impede)
 - Cada medição registra opcionalmente qual usuário a realizou
 - O histórico de medições pode ser excluído em massa
+
+### 12.6 Internações
+- Toda internação gera um registro na tabela `internacoes` (leito, paciente, médico responsável, motivo e `data_internacao`)
+- A internação fica **aberta** enquanto o paciente está internado e é **encerrada** na alta (`data_alta`)
+- Em transferências, a internação ativa é **movida** para o novo leito, mantendo o mesmo período
+- O histórico permite consultar as internações de cada paciente, inclusive múltiplas internações ao longo do tempo
 
 ---
 
@@ -1283,6 +1419,9 @@ O sistema gera alertas automáticos para parâmetros fora da faixa normal:
 | Email | Regex `/^[^\s@]+@[^\s@]+\.[^\s@]+$/` | "Email inválido" |
 | Senha | `length >= 6` | "Senha deve ter no mínimo 6 caracteres" |
 | Perfil | `['Medico', 'Enfermeiro', 'Admin']` | "Perfil inválido" |
+| Email (edição) | Não duplicado entre outros usuários | "Email ja cadastrado" |
+| Perfil (edição) | Admin não pode rebaixar o próprio perfil | "Voce nao pode remover seu proprio perfil Admin" |
+| Nova senha (reset) | `length >= 6` | "Senha deve ter no mínimo 6 caracteres" |
 
 **PacienteController:**
 | Campo | Validação | Mensagem de Erro |
@@ -1430,6 +1569,7 @@ Além dos usuários, o seed cria:
    ├── Visualizar histórico de medições
    ├── Registrar nova medição
    ├── Excluir histórico
+   ├── Transferir paciente para outro leito (Admin/Enfermeiro)
    └── Dar alta ao paciente
        │
 6. Internar Paciente
@@ -1448,16 +1588,22 @@ Além dos usuários, o seed cria:
 8. Cadastro de Usuários (Admin apenas)
    ├── Abas: Médicos, Enfermeiros, Administradores
    ├── Cadastrar novo usuário
+   ├── Editar usuário (nome, email, perfil)
+   ├── Redefinir senha
    └── Excluir usuário
        │
-9. Relatórios
+9. Histórico de Internações
+   ├── Visualizar todas as internações (ativas e encerradas)
+   └── Consultar leito, período e médico de cada internação
+       │
+10. Relatórios
    ├── Selecionar paciente internado
    ├── Selecionar período
    ├── Selecionar tipo de relatório
    ├── Visualizar prévia
    └── Gerar PDF
        │
-10. Sair (logout)
+11. Sair (logout)
 ```
 
 ### 16.2 Fluxo de Internação Detalhado
@@ -1503,9 +1649,24 @@ Além dos usuários, o seed cria:
 5. Sistema executa:
    a. Cria registro na tabela altas (histórico)
    b. Paciente permanece cadastrado na tabela pacientes
-   c. Reseta leito para 'disponivel'
+   c. Encerra a internação ativa na tabela internacoes
+   d. Reseta leito para 'disponivel'
 6. Redirecionamento automático para Gestão de Leitos
 7. O paciente passa a constar na página "Histórico de Altas"
+```
+
+### 16.5 Fluxo de Transferência entre Leitos
+
+```
+1. Navegar para "Gestão de Leitos"
+2. Clicar em leito ocupado
+3. Clicar em "Transferir Paciente" (Admin/Enfermeiro)
+4. Selecionar o leito de destino (apenas leitos 'disponivel')
+5. Sistema executa (em transação):
+   a. Copia os dados do paciente para o leito destino
+   b. Reseta o leito de origem para 'disponivel'
+   c. Move a internação ativa para o novo leito
+6. Mensagem de sucesso com origem e destino
 ```
 
 ---
@@ -1643,7 +1804,6 @@ O UTI Digital é um sistema completo que demonstra:
 - Módulo de notificações push para alertas críticos
 - Integração com equipamentos médicos (monitores cardíacos)
 - Aplicativo móvel para enfermeiros (registro de medições in loco)
-- Histórico completo de internações por paciente (múltiplas internações)
 - Dashboard com gráficos de tendência dos sinais vitais
 - Sistema de auditoria (logs de todas as operações)
 - Suporte a multilíngue (português/inglês/espanhol)
