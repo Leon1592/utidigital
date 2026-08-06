@@ -1,0 +1,101 @@
+.page-title {
+    font-family: "Playfair Display", serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 16px;
+}
+
+.altas-count {
+    color: var(--text-light);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.altas-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 800px;
+}
+
+.no-altas {
+    color: var(--text-light);
+    padding: 20px 0;
+}
+
+.alta-card {
+    background: var(--red-card);
+    border-radius: 16px;
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.alta-card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.alta-patient-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 6px;
+}
+
+.alta-detail {
+    font-size: 13px;
+    color: var(--text-light);
+}
+
+.alta-card-date {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.alta-card-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.btn-excluir-alta {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ff6b6b;
+    font-family: "Nunito", sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    border: 1px solid rgba(255, 107, 107, 0.4);
+    border-radius: 8px;
+    padding: 8px 18px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-excluir-alta:hover {
+    background: rgba(255, 107, 107, 0.15);
+}
+
+.alta-date-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.alta-date-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--white);
+}

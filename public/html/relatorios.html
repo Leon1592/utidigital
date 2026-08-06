@@ -29,6 +29,7 @@
       <a href="/dashboard" class="nav-item">Dashboard</a>
       <a href="/gestao-leitos" class="nav-item">Gestão de Leitos</a>
       <a href="/cadastro-pacientes" class="nav-item">Cadastro de Pacientes</a>
+      <a href="/historico-de-altas" class="nav-item">Histórico de Altas</a>
       <a href="/relatorios" class="nav-item active">Relatórios</a>
       <a href="#" class="nav-item" id="navCadastroUsuarios" style="display: none;">Cadastro de Usuários</a>
       <form action="/auth/logout" method="POST" style="display:inline">
@@ -51,9 +52,10 @@
             <label class="field-label">Período</label>
             <select class="field-input" id="selectPeriodo">
               <option value="1">Últimas 24 horas</option>
-              <option value="2">Últimos 2 dias</option>
-              <option value="5">Últimos 5 dias</option>
               <option value="7" selected>Últimos 7 dias</option>
+              <option value="15">Últimos 15 dias</option>
+              <option value="30">Últimos 30 dias</option>
+              <option value="completo">Período Completo</option>
             </select>
           </div>
         </div>
@@ -182,14 +184,20 @@
 
     async function loadPacientes() {
       try {
-        const response = await fetch('/api/relatorios/pacientes-internados', { credentials: 'include' });
-        if (!response.ok) return;
-        const pacientes = await response.json();
+        const [allResp, internadosResp] = await Promise.all([
+          fetch('/api/pacientes', { credentials: 'include' }),
+          fetch('/api/relatorios/pacientes-internados', { credentials: 'include' })
+        ]);
+        if (!allResp.ok) return;
+        const pacientes = await allResp.json();
+        const internados = internadosResp.ok ? await internadosResp.json() : [];
+        const internadosIds = new Set(internados.map(p => p.id));
+
         const select = document.getElementById('selectPaciente');
         pacientes.forEach(p => {
           const option = document.createElement('option');
           option.value = p.id;
-          option.textContent = p.nome;
+          option.textContent = p.nome + (internadosIds.has(p.id) ? '' : ' (recebeu alta)');
           select.appendChild(option);
         });
       } catch (error) {
@@ -231,7 +239,9 @@
       document.getElementById('previewLeito').textContent = 'Leito ' + (data.leito?.numero || '-');
       const rawInternacao = data.paciente?.data_internacao || data.leito?.data_internacao;
       document.getElementById('previewInternacao').textContent = rawInternacao ? formatarDataHora(rawInternacao).split(' ')[0] : '-';
-      document.getElementById('previewPeriodo').textContent = `Últimos ${periodo} ${periodo == 1 ? 'dia' : 'dias'}`;
+      document.getElementById('previewPeriodo').textContent = periodo === 'completo'
+        ? 'Período Completo'
+        : `Últimos ${periodo} ${periodo == 1 ? 'dia' : 'dias'}`;
       document.getElementById('previewGeradoEm').textContent = formatarDataHora(new Date());
 
       const tbody = document.getElementById('tbodySinaisVitais');

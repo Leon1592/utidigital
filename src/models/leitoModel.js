@@ -59,7 +59,7 @@ async function remove(id) {
 }
 
 async function findAltaInfo(id) {
-    const result = await db.query('SELECT paciente_id, paciente_nome FROM leitos WHERE id = $1', [id]);
+    const result = await db.query('SELECT id, numero, paciente_id, paciente_nome, data_internacao FROM leitos WHERE id = $1', [id]);
     return result.rows[0];
 }
 

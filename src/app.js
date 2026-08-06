@@ -70,6 +70,10 @@ app.get('/relatorios', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../public/html/relatorios.html'));
 });
 
+app.get('/historico-de-altas', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/html/historico_altas.html'));
+});
+
 app.use('/auth', authRoutes);
 app.use('/api/users', isAuthenticated, userRoutes);
 app.use('/api/leitos', isAuthenticated, leitoRoutes);

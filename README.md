@@ -193,7 +193,7 @@ utidigital/
 │   │   ├── leitoModel.js               #   findAll, findById, update, resetPacienteData
 │   │   ├── pacienteModel.js            #   findAll, findById, findInternados, create
 │   │   ├── medicaoModel.js             #   create, getLatest, countCritical, findByLeitoWithPeriod
-│   │   └── altasModel.js               #   create, countRecent24h
+│   │   └── altasModel.js               #   create, findById, findLatestByPaciente, removeByPaciente, removeById, findAllWithPaciente, countRecent24h
 │   │
 │   ├── middleware/
 │   │   └── authMiddleware.js           # isAuthenticated (redireciona para / se não logado)
@@ -216,6 +216,7 @@ utidigital/
 │   │   ├── leito_detalhe.html          #   Detalhes do leito + medições + alta
 │   │   ├── internar_paciente.html      #   Formulário de internação
 │   │   ├── cadastro_pacientes.html     #   Cadastro e busca de pacientes
+│   │   ├── historico_altas.html        #   Histórico de pacientes que receberam alta
 │   │   ├── cadastro_usuarios.html      #   CRUD de usuários (Admin apenas)
 │   │   └── relatorios.html             #   Relatórios e geração de PDF
 │   │
@@ -226,8 +227,9 @@ utidigital/
 │   │   ├── cadastro_pacientes.css      #   Formulário e listagem de pacientes
 │   │   ├── cadastro_usuarios.css       #   Tabs e cards de usuários
 │   │   ├── internar_paciente.css       #   Formulário de internação
-│   │   ├── leito_detalhe.css           #   Cards vitais e histórico
-│   │   └── relatorios.css              #   Preview e controles de relatório
+│   │   ├── leito_detalhe.css          #   Cards vitais e histórico
+│   │   ├── relatorios.css              #   Preview e controles de relatório
+│   │   └── historico_altas.css         #   Lista de pacientes que receberam alta
 │   │
 │   └── uploads/
 │       └── images/
@@ -519,10 +521,9 @@ POST /users
 
 // Processo interno:
 // 1. Busca dados do leito (paciente_id, paciente_nome)
-// 2. Exclui todas as medições do leito
-// 3. Cria registro na tabela altas
-// 4. Remove paciente da tabela pacientes
-// 5. Reseta dados do leito para disponível
+// 2. Cria registro na tabela altas (histórico de altas)
+// 3. Paciente permanece cadastrado na tabela pacientes
+// 4. Reseta dados do leito para disponível
 
 // Response
 { "success": true }
@@ -650,8 +651,10 @@ POST /api/medicoes
 |--------|----------|-----------|
 | GET | `/api/relatorios/estatisticas` | Estatísticas do dashboard |
 | GET | `/api/relatorios/alertas` | Alertas de estados críticos |
+| GET | `/api/relatorios/altas` | Histórico de altas (pacientes que receberam alta) |
+| DELETE | `/api/relatorios/altas/:id` | Exclui paciente que recebeu alta (e seus registros de alta) |
 | GET | `/api/relatorios/pacientes-internados` | Lista de pacientes internados |
-| GET | `/api/relatorios/paciente/:id` | Relatório individual do paciente |
+| GET | `/api/relatorios/paciente/:id` | Relatório individual do paciente (internado ou com alta) |
 
 **Exemplo - Estatísticas:**
 
@@ -1216,7 +1219,7 @@ O sistema gera alertas automáticos para parâmetros fora da faixa normal:
 
 ### 11.6 Relatórios
 - Relatório individual por paciente
-- Período selecionável (1, 2, 5 ou 7 dias)
+- Período selecionável (24h, 7, 15, 30 dias ou Período Completo)
 - Três tipos: Completo, Sinais Vitais, Internação
 - Pré-visualização na tela
 - Exportação em PDF com jsPDF
@@ -1233,10 +1236,12 @@ O sistema gera alertas automáticos para parâmetros fora da faixa normal:
 
 ### 12.2 Alta
 - Ao dar alta:
-  1. Todas as medições do leito são excluídas
-  2. Um registro é criado na tabela `altas` (histórico)
-  3. O paciente é removido da tabela `pacientes`
-  4. O leito volta ao status 'disponivel' com todos os campos resetados
+  1. Um registro é criado na tabela `altas` (histórico de altas) com nome, leito e data de internação
+  2. O paciente **permanece** cadastrado na tabela `pacientes` (não é excluído)
+  3. O leito volta ao status 'disponivel' com todos os campos resetados
+- O histórico de altas é exibido na página **Histórico de Altas** (`/historico-de-altas`), listando todos os pacientes que receberam alta com nome, CPF, dados e data da alta
+- Pacientes que receberam alta **continuam podendo gerar relatórios** na página Relatórios (marcados com "(recebeu alta)"), com as medições do período de internação
+- Na página Histórico de Altas é possível **excluir** um paciente que recebeu alta (remove paciente e registros de alta); não é permitido excluir paciente que esteja internado
 - A operação é irreversível
 
 ### 12.3 Leitos
@@ -1483,11 +1488,11 @@ Além dos usuários, o seed cria:
 3. Clicar em "Dar Alta ao Paciente"
 4. Confirmar na caixa de diálogo
 5. Sistema executa:
-   a. Exclui todas as medições do leito
-   b. Cria registro na tabela altas
-   c. Remove paciente da tabela pacientes
-   d. Reseta leito para 'disponivel'
+   a. Cria registro na tabela altas (histórico)
+   b. Paciente permanece cadastrado na tabela pacientes
+   c. Reseta leito para 'disponivel'
 6. Redirecionamento automático para Gestão de Leitos
+7. O paciente passa a constar na página "Histórico de Altas"
 ```
 
 ---
@@ -1563,7 +1568,7 @@ GET /api/relatorios/paciente/:id?periodo=7&tipo=completo
 
 | Parâmetro | Valores | Descrição |
 |-----------|---------|-----------|
-| `periodo` | 1, 2, 5, 7 | Número de dias para buscar histórico |
+| `periodo` | 1, 7, 15, 30, `completo` | Número de dias para buscar histórico (ou `completo` para todo o histórico) |
 | `tipo` | `completo`, `sinais_vitais`, `internacao` | Tipo de relatório |
 
 ### 18.5 Estrutura do PDF

@@ -66,15 +66,42 @@ async function countCritical() {
 }
 
 async function findByLeitoWithPeriod(leitoId, periodo) {
-    const result = await db.query(`
+    let query = `
         SELECT m.*, u.name as registrado_por_nome,
                (m.created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/Sao_Paulo') as created_at
         FROM medicoes m
         LEFT JOIN users u ON m.registrado_por = u.id
         WHERE m.leito_id = $1
-        AND m.created_at >= NOW() - INTERVAL '1 day' * $2
-        ORDER BY m.created_at DESC
-    `, [leitoId, periodo]);
+    `;
+    const params = [leitoId];
+    if (periodo !== null && periodo !== undefined) {
+        query += ` AND m.created_at >= NOW() - INTERVAL '1 day' * $2`;
+        params.push(periodo);
+    }
+    query += ` ORDER BY m.created_at DESC`;
+    const result = await db.query(query, params);
+    return result.rows;
+}
+
+async function findByLeitoBetween(leitoId, from, to) {
+    let query = `
+        SELECT m.*, u.name as registrado_por_nome,
+               (m.created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/Sao_Paulo') as created_at
+        FROM medicoes m
+        LEFT JOIN users u ON m.registrado_por = u.id
+        WHERE m.leito_id = $1
+    `;
+    const params = [leitoId];
+    if (from) {
+        params.push(from);
+        query += ` AND m.created_at >= $${params.length}`;
+    }
+    if (to) {
+        params.push(to);
+        query += ` AND m.created_at <= $${params.length}`;
+    }
+    query += ` ORDER BY m.created_at DESC`;
+    const result = await db.query(query, params);
     return result.rows;
 }
 
@@ -84,5 +111,6 @@ module.exports = {
     getLatest,
     deleteAllByLeito,
     countCritical,
-    findByLeitoWithPeriod
+    findByLeitoWithPeriod,
+    findByLeitoBetween
 };

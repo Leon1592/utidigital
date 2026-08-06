@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Histórico de Altas - UTI Digital</title>
+  <link rel="shortcut icon" href="/uploads/images/ui.png" type="image/x-icon" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles/global.css">
+  <link rel="stylesheet" href="/styles/historico_altas.css">
+</head>
+
+<body>
+  <div class="app">
+
+    <header>
+      <div class="logo">
+        <img src="/uploads/images/ui.png" alt="UTI Digital" height="50px">
+      </div>
+      <div class="badge-medico" id="roleBadge">...</div>
+      <div class="doctor-name" id="doctorName">Carregando...</div>
+    </header>
+
+    <aside>
+      <div class="menu-label">Menu Principal</div>
+
+      <a href="/dashboard" class="nav-item">Dashboard</a>
+      <a href="/gestao-leitos" class="nav-item">Gestão de Leitos</a>
+      <a href="/cadastro-pacientes" class="nav-item">Cadastro de Pacientes</a>
+      <a href="/historico-de-altas" class="nav-item active">Histórico de Altas</a>
+      <a href="/relatorios" class="nav-item">Relatórios</a>
+      <a href="#" class="nav-item" id="navCadastroUsuarios" style="display: none;">Cadastro de Usuários</a>
+      <form action="/auth/logout" method="POST" style="display:inline">
+        <button type="submit" class="nav-item logout-btn" style="background:none;border:none;color:inherit;font:inherit;cursor:pointer;width:100%;text-align:left;padding:12px 16px;">Sair</button>
+      </form>
+    </aside>
+
+    <main>
+      <h1 class="page-title">Histórico de Altas</h1>
+
+      <div id="altasCount" class="altas-count"></div>
+
+      <div class="altas-list" id="altasList">
+        <p class="no-altas">Carregando histórico de altas...</p>
+      </div>
+    </main>
+
+  </div>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    function formatarDataHora(data) {
+      if (!data) return '-';
+      const d = new Date(data);
+      return d.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' });
+    }
+
+    function formatarData(data) {
+      if (!data) return '-';
+      const d = new Date(data);
+      return d.toLocaleDateString('pt-BR');
+    }
+
+    async function loadAltas() {
+      try {
+        const response = await fetch('/api/relatorios/altas');
+        if (!response.ok) throw new Error('Erro ao carregar altas');
+        const altas = await response.json();
+
+        const list = document.getElementById('altasList');
+        list.innerHTML = '';
+
+        if (!altas || altas.length === 0) {
+          document.getElementById('altasCount').textContent = '';
+          list.innerHTML = '<p class="no-altas">Nenhum paciente recebeu alta até o momento.</p>';
+          return;
+        }
+
+        document.getElementById('altasCount').textContent =
+          altas.length + (altas.length === 1 ? ' paciente recebeu alta' : ' pacientes receberam alta');
+
+        altas.forEach(alta => {
+          const card = document.createElement('div');
+          card.className = 'alta-card';
+          card.innerHTML = `
+            <div class="alta-card-info">
+              <span class="alta-patient-name">${escapeHTML(alta.paciente_nome) || '-'}</span>
+              <span class="alta-detail">CPF: ${escapeHTML(alta.cpf) || 'Não informado'}</span>
+              <span class="alta-detail">Nascimento: ${escapeHTML(formatarData(alta.data_nascimento))}</span>
+              <span class="alta-detail">Sexo: ${escapeHTML(alta.sexo) || '-'}</span>
+              <span class="alta-detail">Contato: ${escapeHTML(alta.contato_paciente) || 'Não informado'}</span>
+              ${alta.motivo_admissao ? '<span class="alta-detail">Motivo: ' + escapeHTML(alta.motivo_admissao) + '</span>' : ''}
+            </div>
+            <div class="alta-card-right">
+              <div class="alta-card-date">
+                <span class="alta-date-label">Data da Alta</span>
+                <span class="alta-date-value">${escapeHTML(formatarDataHora(alta.data_alta))}</span>
+              </div>
+              <button class="btn-excluir-alta" data-id="${alta.id}" data-nome="${escapeHTML(alta.paciente_nome)}">Excluir</button>
+            </div>
+          `;
+          list.appendChild(card);
+        });
+
+        document.querySelectorAll('.btn-excluir-alta').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const altaId = btn.dataset.id;
+            const nome = btn.dataset.nome || 'este paciente';
+            if (!confirm(`Tem certeza que deseja excluir "${nome}"? O paciente e o histórico de alta serão removidos permanentemente.`)) return;
+            try {
+              const res = await fetch('/api/relatorios/altas/' + altaId, { method: 'DELETE' });
+              if (res.ok) {
+                alert('Paciente excluído com sucesso!');
+                loadAltas();
+              } else {
+                const err = await res.json();
+                alert(err.error || 'Erro ao excluir paciente');
+              }
+            } catch (error) {
+              console.error('Erro ao excluir:', error);
+              alert('Erro ao excluir paciente');
+            }
+          });
+        });
+      } catch (error) {
+        console.error('Erro ao carregar altas:', error);
+        document.getElementById('altasList').innerHTML = '<p class="no-altas" style="color: red;">Erro ao carregar histórico de altas.</p>';
+      }
+    }
+
+    loadUser();
+    loadAltas();
+  </script>
+</body>
+
+</html>

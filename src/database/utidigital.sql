@@ -56,5 +56,8 @@ CREATE TABLE IF NOT EXISTS altas (
     id SERIAL PRIMARY KEY,
     paciente_id INTEGER,
     paciente_nome VARCHAR(255),
+    leito_id INTEGER,
+    leito_numero INTEGER,
+    data_internacao TIMESTAMP,
     data_alta TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

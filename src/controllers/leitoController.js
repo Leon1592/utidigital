@@ -1,7 +1,6 @@
 const leitoModel = require('../models/leitoModel');
 const medicaoModel = require('../models/medicaoModel');
 const altasModel = require('../models/altasModel');
-const pacienteModel = require('../models/pacienteModel');
 
 async function listLeitos(req, res) {
     try {
@@ -90,11 +89,16 @@ async function darAlta(req, res) {
             return res.status(404).json({ error: 'Leito nao encontrado' });
         }
 
-        const { paciente_id, paciente_nome } = leito;
+        const { id: leitoId, numero, paciente_id, paciente_nome, data_internacao } = leito;
 
         if (paciente_id) {
-            await altasModel.create(paciente_id, paciente_nome);
-            await pacienteModel.remove(paciente_id);
+            await altasModel.create({
+                pacienteId: paciente_id,
+                pacienteNome: paciente_nome,
+                leitoId: leitoId,
+                leitoNumero: numero,
+                dataInternacao: data_internacao
+            });
         }
 
         await leitoModel.resetPacienteData(id);

@@ -28,6 +28,7 @@
       <a href="/dashboard" class="nav-item">Dashboard</a>
       <a href="/gestao-leitos" class="nav-item active">Gestão de Leitos</a>
       <a href="/cadastro-pacientes" class="nav-item">Cadastro de Pacientes</a>
+      <a href="/historico-de-altas" class="nav-item">Histórico de Altas</a>
       <a href="/relatorios" class="nav-item">Relatórios</a>
       <a href="#" class="nav-item" id="navCadastroUsuarios" style="display: none;">Cadastro de Usuários</a>
       <form action="/auth/logout" method="POST" style="display:inline">
@@ -132,6 +133,7 @@
   <script src="/js/auth.js"></script>
   <script>
     let leitoId = null;
+    let dataInternacao = null;
 
     function calcularIdade(dataNascimento) {
       if (!dataNascimento) return '-';
@@ -189,6 +191,8 @@
         document.getElementById('medicoResponsavel').textContent = leito.medico_responsavel_nome || '-';
         document.getElementById('dataInternacao').textContent = formatarData(leito.data_internacao);
 
+        dataInternacao = leito.data_internacao;
+
         await loadMedicoes();
       } catch (error) {
         console.error('Erro ao carregar leito:', error);
@@ -199,7 +203,12 @@
     async function loadMedicoes() {
       try {
         const response = await fetch('/api/medicoes/leito/' + leitoId);
-        const medicoes = await response.json();
+        let medicoes = await response.json();
+
+        if (dataInternacao) {
+          const dataInt = new Date(dataInternacao).getTime();
+          medicoes = medicoes.filter(m => new Date(m.created_at).getTime() >= dataInt);
+        }
 
         renderVitals(medicoes);
         renderMeasurements(medicoes);
@@ -377,7 +386,7 @@ document.getElementById('btnRegistrar').addEventListener('click', async function
     });
 
     document.getElementById('btnDarAlta').addEventListener('click', async function() {
-      if (!confirm('Tem certeza que deseja dar alta ao paciente? Todos os dados serão removidos.')) return;
+      if (!confirm('Tem certeza que deseja dar alta ao paciente? O leito será liberado e o paciente irá para o histórico de altas. As medições registradas serão mantidas.')) return;
       this.disabled = true;
       this.textContent = 'Dando alta...';
 

@@ -91,20 +91,93 @@ async function getPacientesInternados(req, res) {
     }
 }
 
+async function getAltas(req, res) {
+    try {
+        const altas = await altasModel.findAllWithPaciente();
+        res.json(altas);
+    } catch (error) {
+        console.error('Erro ao buscar altas:', error);
+        res.status(500).json({ error: 'Erro ao buscar altas' });
+    }
+}
+
+async function deleteAlta(req, res) {
+    try {
+        const { id } = req.params;
+        const alta = await altasModel.findById(id);
+        if (!alta) {
+            return res.status(404).json({ error: 'Alta nao encontrada' });
+        }
+
+        if (alta.paciente_id) {
+            const leito = await leitoModel.findByPacienteId(alta.paciente_id);
+            if (leito) {
+                return res.status(400).json({ error: 'Paciente esta internado e nao pode ser excluido' });
+            }
+            await pacienteModel.remove(alta.paciente_id);
+            await altasModel.removeByPaciente(alta.paciente_id);
+        } else {
+            await altasModel.removeById(id);
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Erro ao excluir alta:', error);
+        res.status(500).json({ error: 'Erro ao excluir alta' });
+    }
+}
+
 async function getRelatorioPaciente(req, res) {
     try {
         const { id } = req.params;
-        const periodo = parseInt(req.query.periodo) || 7;
+        const periodoRaw = req.query.periodo;
+        let periodo = null;
+        if (periodoRaw && periodoRaw !== 'completo') {
+            const p = parseInt(periodoRaw, 10);
+            if (!isNaN(p) && p > 0) periodo = p;
+        }
 
-        const leito = await leitoModel.findByPacienteId(id);
         const paciente = await pacienteModel.findById(id);
 
-        const leitoId = leito?.id;
-        const dataInternacao = leito?.data_internacao;
+        // Paciente internado: relatório usa os dados atuais do leito
+        let leito = await leitoModel.findByPacienteId(id);
+        let leitoId = leito?.id;
+        let dataInternacao = leito?.data_internacao || null;
+        let medicoes = [];
 
-        const medicoes = leitoId
-            ? await medicaoModel.findByLeitoWithPeriod(leitoId, periodo)
-            : [];
+        if (leitoId) {
+            if (periodo) {
+                medicoes = await medicaoModel.findByLeitoWithPeriod(leitoId, periodo);
+            } else if (dataInternacao) {
+                medicoes = await medicaoModel.findByLeitoBetween(leitoId, dataInternacao, null);
+            } else {
+                medicoes = await medicaoModel.findByLeito(leitoId);
+            }
+        } else {
+            // Paciente recebeu alta: usa o registro de alta para buscar os dados
+            const alta = await altasModel.findLatestByPaciente(id);
+            if (alta && alta.leito_id) {
+                leitoId = alta.leito_id;
+                dataInternacao = alta.data_internacao || null;
+                let from = dataInternacao;
+                let to = alta.data_alta || null;
+
+                if (periodo && to) {
+                    const fromPeriodo = new Date(new Date(to).getTime() - periodo * 24 * 60 * 60 * 1000);
+                    if (!from || fromPeriodo > new Date(from)) {
+                        from = fromPeriodo.toISOString();
+                    }
+                }
+
+                medicoes = await medicaoModel.findByLeitoBetween(leitoId, from, to);
+                leito = {
+                    id: alta.leito_id,
+                    numero: alta.leito_numero || null,
+                    medico_responsavel_nome: null,
+                    data_internacao: dataInternacao
+                };
+            }
+        }
 
         res.json({
             paciente: { ...(paciente || {}), data_internacao: dataInternacao },
@@ -121,5 +194,7 @@ module.exports = {
     getAlertas,
     getEstatisticas,
     getPacientesInternados,
+    getAltas,
+    deleteAlta,
     getRelatorioPaciente
 };
