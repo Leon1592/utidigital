@@ -26,10 +26,10 @@
       <div class="menu-label">Menu Principal</div>
 
       <a href="/dashboard" class="nav-item">Dashboard</a>
-      <a href="/gestao-leitos" class="nav-item active">Gestao de Leitos</a>
+      <a href="/gestao-leitos" class="nav-item active">Gestão de Leitos</a>
       <a href="/cadastro-pacientes" class="nav-item">Cadastro de Pacientes</a>
-      <a href="/relatorios" class="nav-item">Relatorios</a>
-      <a href="#" class="nav-item" id="navCadastroUsuarios" style="display: none;">Cadastro de Usuarios</a>
+      <a href="/relatorios" class="nav-item">Relatórios</a>
+      <a href="#" class="nav-item" id="navCadastroUsuarios" style="display: none;">Cadastro de Usuários</a>
       <form action="/auth/logout" method="POST" style="display:inline">
         <button type="submit" class="nav-item logout-btn" style="background:none;border:none;color:inherit;font:inherit;cursor:pointer;width:100%;text-align:left;padding:12px 16px;">Sair</button>
       </form>
@@ -39,8 +39,8 @@
       <div class="leito-page-title" id="leitoPageTitle"></div>
 
       <div id="leitoIndiponivelMsg" class="leito-indisponivel" style="display: none;">
-        <h2>Leito Disponivel</h2>
-        <p>Este leito ainda nao possui paciente cadastrado.</p>
+        <h2>Leito Disponível</h2>
+        <p>Este leito ainda não possui paciente cadastrado.</p>
       </div>
 
       <div id="leitoContent">
@@ -59,11 +59,11 @@
               <span class="patient-info-value" id="pacienteMotivo">-</span>
             </div>
             <div class="patient-info-item">
-              <span class="patient-info-label">Medico Responsavel</span>
+              <span class="patient-info-label">Médico Responsavel</span>
               <span class="patient-info-value" id="medicoResponsavel">-</span>
             </div>
             <div class="patient-info-item">
-              <span class="patient-info-label">Data de Internacao</span>
+              <span class="patient-info-label">Data de Internação</span>
               <span class="patient-info-value" id="dataInternacao">-</span>
             </div>
           </div>
@@ -98,11 +98,11 @@
                   <input class="field-input" type="number" id="fc" placeholder="72" required min="0" max="300" step="1">
                 </div>
                 <div class="field-group">
-                  <label class="field-label">PA Sistolica (mmHg)</label>
+                  <label class="field-label">PA Sistólica (mmHg)</label>
                   <input class="field-input" type="number" id="paSistolica" placeholder="120" required min="0" max="300" step="1">
                 </div>
                 <div class="field-group">
-                  <label class="field-label">PA Diastolica (mmHg)</label>
+                  <label class="field-label">PA Diastólica (mmHg)</label>
                   <input class="field-input" type="number" id="paDiastolica" placeholder="80" required min="0" max="300" step="1">
                 </div>
               </div>
@@ -117,7 +117,7 @@
                 </div>
               </div>
               <div class="field-group">
-                <label class="field-label">Observacoes</label>
+                <label class="field-label">Observações</label>
                 <input class="field-input" type="text" id="obs" placeholder="Observacoes adicionais...">
               </div>
               <button class="btn-registrar" id="btnRegistrar">Registrar Medição</button>
