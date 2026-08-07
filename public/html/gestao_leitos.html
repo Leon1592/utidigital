@@ -103,11 +103,13 @@
 <script src="/js/auth.js"></script>
 <script>
 let isUserAdmin = false;
+    let canManageStatus = false;
     
     async function initGestaoLeitos() {
       const user = await loadUser();
       if (!user) return;
       isUserAdmin = user.perfil === 'Admin';
+      canManageStatus = (user.perfil === 'Admin' || user.perfil === 'Enfermeiro');
       
       if (isUserAdmin) {
         document.getElementById('btnAddLeito').style.display = 'inline-block';
@@ -191,14 +193,71 @@ let isUserAdmin = false;
           
           const deleteBtn = isUserAdmin ? `<span class="bed-delete" data-id="${leito.id}" style="color: #ff4444; cursor: pointer; font-size: 12px; margin-left: 10px;">[Excluir]</span>` : '';
           
+          const motivoIndisponivel = (leito.status === 'indisponivel' && leito.motivo_indisponivel)
+            ? `<span class="bed-motive" title="${escapeHTML(leito.motivo_indisponivel)}">Motivo: ${escapeHTML(leito.motivo_indisponivel)}</span>`
+            : '';
+          
+          let toggleBtn = '';
+          if (canManageStatus && leito.status !== 'ocupado') {
+            const isIndisponivel = leito.status === 'indisponivel';
+            toggleBtn = `<button class="bed-toggle-btn ${isIndisponivel ? 'disponibilizar' : ''}" data-id="${leito.id}" data-status="${isIndisponivel ? 'disponivel' : 'indisponivel'}">${isIndisponivel ? 'Disponibilizar Leito' : 'Indisponibilizar Leito'}</button>`;
+          }
+          
           bedCard.innerHTML = `
             <span class="bed-title ${statusClass}">Leito ${leito.numero}${deleteBtn}</span>
             <span class="bed-info">Nome: ${escapeHTML(pacienteNome)}</span>
             <span class="bed-info">Situacao: ${escapeHTML(statusDisplay)}</span>
             <span class="bed-info">Data de Internacao: ${escapeHTML(dataInternacao)}</span>
+            ${motivoIndisponivel}
+            ${toggleBtn}
             ${isClickable ? '<span class="bed-info" style="color: #4caf50; font-size: 12px;">Clique para ver detalhes</span>' : ''}
           `;
           grid.appendChild(bedCard);
+        });
+        
+        document.querySelectorAll('.bed-toggle-btn').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const leitoId = btn.dataset.id;
+            const novoStatus = btn.dataset.status;
+            btn.disabled = true;
+            try {
+              const body = { status: novoStatus };
+              if (novoStatus === 'indisponivel') {
+                const motivo = prompt('Informe o motivo da indisponibilidade:', '');
+                if (motivo === null) {
+                  btn.disabled = false;
+                  return;
+                }
+                if (!motivo.trim()) {
+                  alert('Informe o motivo da indisponibilidade.');
+                  btn.disabled = false;
+                  return;
+                }
+                body.motivo_indisponivel = motivo.trim();
+              } else {
+                if (!confirm('Deseja tornar este leito disponível novamente?')) {
+                  btn.disabled = false;
+                  return;
+                }
+              }
+              const res = await fetch('/api/leitos/' + leitoId, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+              });
+              if (res.ok) {
+                loadBeds();
+              } else {
+                const err = await res.json();
+                alert('Erro: ' + (err.error || 'Não foi possível alterar o status do leito'));
+              }
+            } catch (err) {
+              alert('Erro ao alterar o status do leito');
+            } finally {
+              btn.disabled = false;
+            }
+          });
         });
         
         if (isUserAdmin) {
