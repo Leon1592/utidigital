@@ -15,6 +15,7 @@
     />
     <link rel="stylesheet" href="../styles/global.css" />
     <link rel="stylesheet" href="../styles/cadastro_usuarios.css" />
+    <link rel="stylesheet" href="/styles/popups.css" />
   </head>
 
   <body>
@@ -268,6 +269,7 @@
       </div>
     </div>
 
+    <script src="/js/popups.js"></script>
     <script src="/js/auth.js"></script>
     <script>
 
@@ -395,15 +397,15 @@
           const novaSenha = document.getElementById("editNovaSenha").value;
 
           if (!nome || nome.length < 3) {
-            alert("Nome deve ter no minimo 3 caracteres.");
+            uiAlert("Nome deve ter no mínimo 3 caracteres.", { title: "Validação", type: "error" });
             return;
           }
           if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            alert("Email invalido.");
+            uiAlert("Email inválido.", { title: "Validação", type: "error" });
             return;
           }
           if (novaSenha && novaSenha.length < 6) {
-            alert("A nova senha deve ter no minimo 6 caracteres.");
+            uiAlert("A nova senha deve ter no mínimo 6 caracteres.", { title: "Validação", type: "error" });
             return;
           }
 
@@ -434,13 +436,13 @@
               }
             }
 
-            alert("Usuario atualizado com sucesso!");
+            uiAlert("Usuário atualizado com sucesso!", { title: "Usuário Atualizado", type: "success" });
             document.getElementById("editModal").style.display = "none";
             usuarioEditando = null;
             loadUsers();
           } catch (error) {
             console.error("Erro ao atualizar:", error);
-            alert(error.message || "Erro ao atualizar usuario");
+            uiAlert(error.message || "Erro ao atualizar usuário", { title: "Erro", type: "error" });
           } finally {
             btn.disabled = false;
           }
@@ -475,12 +477,12 @@
               throw new Error(error.error || "Erro ao excluir usuario");
             }
 
-            alert("Usuario excluido com sucesso!");
+            uiAlert("Usuário excluído com sucesso!", { title: "Usuário Excluído", type: "success" });
             document.getElementById("deleteModal").style.display = "none";
             loadUsers();
           } catch (error) {
             console.error("Erro ao excluir:", error);
-            alert(error.message || "Erro ao excluir usuario");
+            uiAlert(error.message || "Erro ao excluir usuário", { title: "Erro", type: "error" });
           }
         });
 
@@ -507,15 +509,15 @@
           ).value;
 
           if (!nome || nome.length < 3) {
-            alert("Por favor, informe o nome completo (minimo 3 caracteres).");
+            uiAlert("Por favor, informe o nome completo (mínimo 3 caracteres).", { title: "Validação", type: "error" });
             return;
           }
           if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            alert("Por favor, informe um email valido.");
+            uiAlert("Por favor, informe um email válido.", { title: "Validação", type: "error" });
             return;
           }
           if (!senha || senha.length < 6) {
-            alert("A senha deve ter no minimo 6 caracteres.");
+            uiAlert("A senha deve ter no mínimo 6 caracteres.", { title: "Validação", type: "error" });
             return;
           }
 
@@ -536,7 +538,7 @@ const response = await fetch("/api/users", {
               throw new Error(error.error || "Erro ao cadastrar usuario");
             }
 
-            alert(`${perfil} cadastrado com sucesso!`);
+            uiAlert(`${perfil} cadastrado com sucesso!`, { title: "Usuário Cadastrado", type: "success" });
 
             document.getElementById(`nome-${perfil.toLowerCase()}`).value = "";
             document.getElementById(`email-${perfil.toLowerCase()}`).value = "";
@@ -545,7 +547,7 @@ const response = await fetch("/api/users", {
             loadUsers();
           } catch (error) {
             console.error("Erro ao cadastrar:", error);
-            alert(error.message || "Erro ao cadastrar usuario");
+            uiAlert(error.message || "Erro ao cadastrar usuário", { title: "Erro", type: "error" });
           }
         });
       });

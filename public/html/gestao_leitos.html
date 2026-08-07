@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles/global.css">
   <link rel="stylesheet" href="/styles/gestao_leitos.css">
+  <link rel="stylesheet" href="/styles/popups.css">
 </head>
 
 <body>
@@ -100,6 +101,7 @@
     </div>
   </div>
 
+<script src="/js/popups.js"></script>
 <script src="/js/auth.js"></script>
 <script>
 let isUserAdmin = false;
@@ -133,7 +135,7 @@ let isUserAdmin = false;
         document.getElementById('btnConfirmAdd').addEventListener('click', async () => {
           const numero = parseInt(document.getElementById('novoLeitoNumero').value);
           if (!numero || numero <= 0) {
-            alert('Por favor, insira um número válido para o leito.');
+            uiAlert('Por favor, insira um número válido para o leito.', { title: 'Número Inválido', type: 'error' });
             return;
           }
           try {
@@ -143,15 +145,15 @@ let isUserAdmin = false;
               body: JSON.stringify({ numero: numero, status: 'disponivel' })
             });
             if (res.ok) {
-              alert('Leito adicionado com sucesso!');
+              uiAlert('Leito ' + numero + ' adicionado com sucesso!', { title: 'Leito Adicionado', type: 'success' });
               document.getElementById('addLeitoModal').style.display = 'none';
               loadBeds();
             } else {
               const err = await res.json();
-              alert('Erro ao adicionar leito: ' + (err.error || 'Erro desconhecido'));
+              uiAlert('Erro ao adicionar leito: ' + (err.error || 'Erro desconhecido'), { title: 'Erro', type: 'error' });
             }
           } catch (err) {
-            alert('Erro ao adicionar leito');
+            uiAlert('Erro ao adicionar leito.', { title: 'Erro', type: 'error' });
           }
         });
       }
@@ -224,19 +226,23 @@ let isUserAdmin = false;
             try {
               const body = { status: novoStatus };
               if (novoStatus === 'indisponivel') {
-                const motivo = prompt('Informe o motivo da indisponibilidade:', '');
+                const motivo = await uiPrompt({
+                  title: 'Indisponibilizar Leito',
+                  message: 'Informe o motivo da indisponibilidade:',
+                  placeholder: 'Ex: manutenção, aguardando limpeza',
+                  required: true
+                });
                 if (motivo === null) {
-                  btn.disabled = false;
-                  return;
-                }
-                if (!motivo.trim()) {
-                  alert('Informe o motivo da indisponibilidade.');
                   btn.disabled = false;
                   return;
                 }
                 body.motivo_indisponivel = motivo.trim();
               } else {
-                if (!confirm('Deseja tornar este leito disponível novamente?')) {
+                const confirmou = await uiConfirm('Deseja tornar este leito disponível novamente?', {
+                  title: 'Disponibilizar Leito',
+                  confirmText: 'Disponibilizar'
+                });
+                if (!confirmou) {
                   btn.disabled = false;
                   return;
                 }
@@ -250,10 +256,10 @@ let isUserAdmin = false;
                 loadBeds();
               } else {
                 const err = await res.json();
-                alert('Erro: ' + (err.error || 'Não foi possível alterar o status do leito'));
+                uiAlert('Erro: ' + (err.error || 'Não foi possível alterar o status do leito'), { title: 'Erro', type: 'error' });
               }
             } catch (err) {
-              alert('Erro ao alterar o status do leito');
+              uiAlert('Erro ao alterar o status do leito.', { title: 'Erro', type: 'error' });
             } finally {
               btn.disabled = false;
             }
@@ -265,17 +271,22 @@ let isUserAdmin = false;
             btn.addEventListener('click', async (e) => {
               e.stopPropagation();
               const leitoId = btn.dataset.id;
-              if (confirm('Tem certeza que deseja excluir este leito?')) {
+              const confirmou = await uiConfirm('Tem certeza que deseja excluir este leito? Todas as medições associadas também serão excluídas.', {
+                title: 'Excluir Leito',
+                confirmText: 'Excluir',
+                danger: true
+              });
+              if (confirmou) {
                 try {
                   const res = await fetch('/api/leitos/' + leitoId, { method: 'DELETE' });
                   if (res.ok) {
-                    alert('Leito excluído com sucesso!');
+                    uiAlert('Leito excluído com sucesso!', { title: 'Leito Excluído', type: 'success' });
                     loadBeds();
                   } else {
-                    alert('Erro ao excluir leito');
+                    uiAlert('Erro ao excluir leito.', { title: 'Erro', type: 'error' });
                   }
                 } catch (err) {
-                  alert('Erro ao excluir leito');
+                  uiAlert('Erro ao excluir leito.', { title: 'Erro', type: 'error' });
                 }
               }
             });

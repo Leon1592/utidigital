@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles/global.css">
   <link rel="stylesheet" href="/styles/historico_altas.css">
+  <link rel="stylesheet" href="/styles/popups.css">
 </head>
 
 <body>
@@ -49,6 +50,7 @@
 
   </div>
 
+  <script src="/js/popups.js"></script>
   <script src="/js/auth.js"></script>
   <script>
     function formatarDataHora(data) {
@@ -109,19 +111,24 @@
             e.stopPropagation();
             const altaId = btn.dataset.id;
             const nome = btn.dataset.nome || 'este paciente';
-            if (!confirm(`Tem certeza que deseja excluir "${nome}"? O paciente e o histórico de alta serão removidos permanentemente.`)) return;
+            const confirmou = await uiConfirm(`Tem certeza que deseja excluir "${nome}"? O paciente e o histórico de alta serão removidos permanentemente.`, {
+              title: 'Excluir Paciente',
+              confirmText: 'Excluir',
+              danger: true
+            });
+            if (!confirmou) return;
             try {
               const res = await fetch('/api/relatorios/altas/' + altaId, { method: 'DELETE' });
               if (res.ok) {
-                alert('Paciente excluído com sucesso!');
+                uiAlert('Paciente excluído com sucesso!', { title: 'Paciente Excluído', type: 'success' });
                 loadAltas();
               } else {
                 const err = await res.json();
-                alert(err.error || 'Erro ao excluir paciente');
+                uiAlert(err.error || 'Erro ao excluir paciente', { title: 'Erro', type: 'error' });
               }
             } catch (error) {
               console.error('Erro ao excluir:', error);
-              alert('Erro ao excluir paciente');
+              uiAlert('Erro ao excluir paciente.', { title: 'Erro', type: 'error' });
             }
           });
         });

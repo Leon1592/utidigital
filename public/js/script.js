@@ -19,10 +19,10 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         if (data.success) {
             window.location.href = data.redirect;
         } else {
-            alert(data.error || 'Erro ao fazer login');
+            uiAlert(data.error || 'Erro ao fazer login', { title: 'Erro no Login', type: 'error' });
         }
     } catch (error) {
         console.error('Erro:', error);
-        alert('Erro ao conectar com o servidor');
+        uiAlert('Erro ao conectar com o servidor. Verifique sua conexão e tente novamente.', { title: 'Erro no Login', type: 'error' });
     }
 });
