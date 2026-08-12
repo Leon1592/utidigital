@@ -118,6 +118,22 @@ async function getInternacoes(req, res) {
     }
 }
 
+async function deleteInternacao(req, res) {
+    try {
+        const { id } = req.params;
+        const internacao = await internacaoModel.findById(id);
+        if (!internacao) {
+            return res.status(404).json({ error: 'Internacao nao encontrada' });
+        }
+
+        await internacaoModel.removeById(id);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Erro ao excluir internacao:', error);
+        res.status(500).json({ error: 'Erro ao excluir internacao' });
+    }
+}
+
 async function deleteAlta(req, res) {
     try {
         const { id } = req.params;
@@ -218,5 +234,6 @@ module.exports = {
     getAltas,
     getInternacoes,
     deleteAlta,
+    deleteInternacao,
     getRelatorioPaciente
 };

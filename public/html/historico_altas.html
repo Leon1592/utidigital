@@ -53,6 +53,8 @@
   <script src="/js/popups.js"></script>
   <script src="/js/auth.js"></script>
   <script>
+    let currentUser = null;
+
     function formatarDataHora(data) {
       if (!data) return '-';
       const d = new Date(data);
@@ -100,7 +102,7 @@
                 <span class="alta-date-label">Data da Alta</span>
                 <span class="alta-date-value">${escapeHTML(formatarDataHora(alta.data_alta))}</span>
               </div>
-              <button class="btn-excluir-alta" data-id="${alta.id}" data-nome="${escapeHTML(alta.paciente_nome)}">Excluir</button>
+              <button class="btn-excluir-alta" data-id="${alta.id}" data-nome="${escapeHTML(alta.paciente_nome)}" style="${currentUser && currentUser.perfil === 'Enfermeiro' ? '' : 'display:none'}">Excluir</button>
             </div>
           `;
           list.appendChild(card);
@@ -138,8 +140,12 @@
       }
     }
 
-    loadUser();
-    loadAltas();
+    async function init() {
+      currentUser = await loadUser();
+      if (currentUser) loadAltas();
+    }
+
+    init();
   </script>
 </body>
 
