@@ -17,6 +17,25 @@ const { isAuthenticated } = require('./middleware/authMiddleware');
 const app = express();
 app.set('trust proxy', 1);
 
+async function ensureSessionTable() {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS "session" (
+                "sid" varchar NOT NULL COLLATE "default",
+                "sess" json NOT NULL,
+                "expire" timestamp(6) NOT NULL,
+                CONSTRAINT "session_pkey" PRIMARY KEY ("sid")
+            )
+        `);
+        await pool.query('CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON "session" ("expire")');
+        console.log('Tabela session criada/verificada');
+    } catch (err) {
+        console.error('Erro ao criar tabela session:', err.message);
+    }
+}
+
+const sessionReady = ensureSessionTable();
+
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -31,20 +50,17 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(publicPath, 'index.html'));
 });
 
-let sessionStore;
-try {
-    sessionStore = new pgSession({
+const sessionMaxAge = parseInt(process.env.SESSION_MAX_AGE, 10);
+app.use(async (req, res, next) => {
+    try { await sessionReady; } catch (e) {}
+    next();
+});
+app.use(session({
+    store: new pgSession({
         pool: pool,
         tableName: 'session',
         createTableIfMissing: true
-    });
-} catch (err) {
-    console.error('Erro ao criar session store:', err.message);
-    sessionStore = undefined;
-}
-
-const sessionMaxAge = parseInt(process.env.SESSION_MAX_AGE, 10);
-const sessionConfig = {
+    }),
     secret: process.env.SESSION_SECRET || 'utidigital_secret_key',
     resave: false,
     saveUninitialized: false,
@@ -54,11 +70,7 @@ const sessionConfig = {
         sameSite: 'lax',
         secure: process.env.NODE_ENV === 'production'
     }
-};
-if (sessionStore) {
-    sessionConfig.store = sessionStore;
-}
-app.use(session(sessionConfig));
+}));
 
 app.use(flash());
 
@@ -104,12 +116,29 @@ app.use('/api/pacientes', isAuthenticated, pacienteRoutes);
 app.use('/api/medicoes', isAuthenticated, medicaoRoutes);
 app.use('/api/relatorios', isAuthenticated, relatorioRoutes);
 
+app.get('/api/health', async (req, res) => {
+    try {
+        await pool.query('SELECT 1');
+        const sessCount = await pool.query('SELECT COUNT(*) FROM "session"').catch(() => ({ rows: [{ count: '?' }] }));
+        res.json({ ok: true, sessions: sessCount.rows[0].count, nodeEnv: process.env.NODE_ENV || 'not set' });
+    } catch (err) {
+        res.status(500).json({ ok: false, error: err.message });
+    }
+});
+
 app.get('/leito/:id', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../public/html/leito_detalhe.html'));
 });
 
 app.get('/internar', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../public/html/internar_paciente.html'));
+});
+
+app.use((err, req, res, next) => {
+    console.error('Express error:', err);
+    if (!res.headersSent) {
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
 });
 
 module.exports = app;
