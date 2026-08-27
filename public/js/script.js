@@ -29,7 +29,14 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
             body: JSON.stringify(formData)
         });
 
-        const data = await response.json();
+        const text = await response.text();
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            uiAlert('Resposta invalida do servidor (HTTP ' + response.status + '). Tente novamente em alguns segundos.', { title: 'Erro no Login', type: 'error' });
+            return;
+        }
 
         if (data.success) {
             window.location.href = data.redirect;
@@ -38,6 +45,6 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         }
     } catch (error) {
         console.error('Erro:', error);
-        uiAlert('Erro ao conectar com o servidor. Verifique sua conexão e tente novamente.', { title: 'Erro no Login', type: 'error' });
+        uiAlert('Erro ao conectar com o servidor: ' + error.message, { title: 'Erro no Login', type: 'error' });
     }
 });

@@ -31,13 +31,20 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(publicPath, 'index.html'));
 });
 
-const sessionMaxAge = parseInt(process.env.SESSION_MAX_AGE, 10);
-app.use(session({
-    store: new pgSession({
+let sessionStore;
+try {
+    sessionStore = new pgSession({
         pool: pool,
         tableName: 'session',
         createTableIfMissing: true
-    }),
+    });
+} catch (err) {
+    console.error('Erro ao criar session store:', err.message);
+    sessionStore = undefined;
+}
+
+const sessionMaxAge = parseInt(process.env.SESSION_MAX_AGE, 10);
+const sessionConfig = {
     secret: process.env.SESSION_SECRET || 'utidigital_secret_key',
     resave: false,
     saveUninitialized: false,
@@ -47,7 +54,11 @@ app.use(session({
         sameSite: 'lax',
         secure: process.env.NODE_ENV === 'production'
     }
-}));
+};
+if (sessionStore) {
+    sessionConfig.store = sessionStore;
+}
+app.use(session(sessionConfig));
 
 app.use(flash());
 
