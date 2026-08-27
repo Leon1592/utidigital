@@ -118,11 +118,12 @@ app.use('/api/relatorios', isAuthenticated, relatorioRoutes);
 
 app.get('/api/health', async (req, res) => {
     try {
+        const hasUrl = !!process.env.DATABASE_URL;
+        if (!hasUrl) return res.json({ ok: false, error: 'DATABASE_URL nao configurada' });
         await pool.query('SELECT 1');
-        const sessCount = await pool.query('SELECT COUNT(*) FROM "session"').catch(() => ({ rows: [{ count: '?' }] }));
-        res.json({ ok: true, sessions: sessCount.rows[0].count, nodeEnv: process.env.NODE_ENV || 'not set' });
+        res.json({ ok: true, db: 'connected', env: process.env.NODE_ENV || 'not set' });
     } catch (err) {
-        res.status(500).json({ ok: false, error: err.message });
+        res.json({ ok: false, error: err.message, code: err.code });
     }
 });
 
