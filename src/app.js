@@ -2,8 +2,10 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const express = require('express');
 const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
 const flash = require('connect-flash');
 const helmet = require('helmet');
+const pool = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/authRoutes');
 const leitoRoutes = require('./routes/leitoRoutes');
@@ -30,6 +32,11 @@ app.get('/', (req, res) => {
 
 const sessionMaxAge = parseInt(process.env.SESSION_MAX_AGE, 10);
 app.use(session({
+    store: new pgSession({
+        pool: pool,
+        tableName: 'session',
+        createTableIfMissing: true
+    }),
     secret: process.env.SESSION_SECRET || 'utidigital_secret_key',
     resave: false,
     saveUninitialized: false,
@@ -37,7 +44,7 @@ app.use(session({
         maxAge: (Number.isFinite(sessionMaxAge) && sessionMaxAge > 0) ? sessionMaxAge : 3600000,
         httpOnly: true,
         sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production'
+        secure: true
     }
 }));
 
