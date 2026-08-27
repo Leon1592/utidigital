@@ -8,8 +8,8 @@
   <link rel="shortcut icon" href="/uploads/images/ui.png" type="image/x-icon" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles/global.css">
-  <link rel="stylesheet" href="/styles/popup.css">
   <link rel="stylesheet" href="/styles/leito_detalhe.css">
+  <link rel="stylesheet" href="/styles/popups.css">
 </head>
 
 <body>
@@ -155,7 +155,7 @@
     </div>
   </div>
 
-  <script src="/js/popup.js"></script>
+  <script src="/js/popups.js"></script>
   <script src="/js/auth.js"></script>
   <script>
 
@@ -207,7 +207,7 @@
         const response = await fetch('/api/leitos/' + leitoId);
 
         if (!response.ok) {
-          showPopup('Erro ao carregar leito', 'error');
+          uiAlert('Erro ao carregar os dados do leito.', { title: 'Erro', type: 'error' });
           return;
         }
 
@@ -233,7 +233,11 @@
             btn.textContent = isIndisponivel ? 'Disponibilizar Leito' : 'Indisponibilizar Leito';
             btn.onclick = async () => {
               if (isIndisponivel) {
-                if (!await showConfirm('Deseja tornar este leito disponivel novamente?')) return;
+                const confirmou = await uiConfirm('Deseja tornar este leito disponível novamente?', {
+                  title: 'Disponibilizar Leito',
+                  confirmText: 'Disponibilizar'
+                });
+                if (!confirmou) return;
                 btn.disabled = true;
                 try {
                   const r = await fetch('/api/leitos/' + leitoId, {
@@ -245,20 +249,21 @@
                     window.location.reload();
                   } else {
                     const err = await r.json();
-                    showPopup('Erro: ' + (err.error || 'Nao foi possivel disponibilizar'), 'error');
+                    uiAlert('Erro: ' + (err.error || 'Não foi possível disponibilizar'), { title: 'Erro', type: 'error' });
                   }
                 } catch (err) {
-                  showPopup('Erro ao disponibilizar leito', 'error');
+                  uiAlert('Erro ao disponibilizar leito.', { title: 'Erro', type: 'error' });
                 } finally {
                   btn.disabled = false;
                 }
               } else {
-                const motivo = await showPrompt('Informe o motivo da indisponibilidade:');
+                const motivo = await uiPrompt({
+                  title: 'Indisponibilizar Leito',
+                  message: 'Informe o motivo da indisponibilidade:',
+                  placeholder: 'Ex: manutenção, aguardando limpeza',
+                  required: true
+                });
                 if (motivo === null) return;
-                if (!motivo) {
-                  showPopup('Informe o motivo da indisponibilidade.', 'warning');
-                  return;
-                }
                 btn.disabled = true;
                 try {
                   const r = await fetch('/api/leitos/' + leitoId, {
@@ -270,10 +275,10 @@
                     window.location.reload();
                   } else {
                     const err = await r.json();
-                    showPopup('Erro: ' + (err.error || 'Nao foi possivel indisponibilizar'), 'error');
+                    uiAlert('Erro: ' + (err.error || 'Não foi possível indisponibilizar'), { title: 'Erro', type: 'error' });
                   }
                 } catch (err) {
-                  showPopup('Erro ao indisponibilizar leito', 'error');
+                  uiAlert('Erro ao indisponibilizar leito.', { title: 'Erro', type: 'error' });
                 } finally {
                   btn.disabled = false;
                 }
@@ -297,7 +302,7 @@
         await loadMedicoes();
       } catch (error) {
         console.error('Erro ao carregar leito:', error);
-        showPopup('Erro: ' + error.message, 'error');
+        uiAlert('Erro ao carregar os dados do leito: ' + error.message, { title: 'Erro', type: 'error' });
       }
     }
 
@@ -401,23 +406,23 @@
       const obs = document.getElementById('obs').value.trim();
 
       if (!fc || isNaN(fc) || fc < 0 || fc > 300) {
-        showPopup('Frequencia cardiaca invalida (0-300 bpm).', 'warning');
+        uiAlert('Frequência cardíaca inválida (0-300 bpm).', { title: 'Valor Inválido', type: 'error' });
         return;
       }
       if (!paSistolica || isNaN(paSistolica) || paSistolica < 0 || paSistolica > 300) {
-        showPopup('Pressao sistolica invalida (0-300 mmHg).', 'warning');
+        uiAlert('Pressão sistólica inválida (0-300 mmHg).', { title: 'Valor Inválido', type: 'error' });
         return;
       }
       if (!paDiastolica || isNaN(paDiastolica) || paDiastolica < 0 || paDiastolica > 300) {
-        showPopup('Pressao diastolica invalida (0-300 mmHg).', 'warning');
+        uiAlert('Pressão diastólica inválida (0-300 mmHg).', { title: 'Valor Inválido', type: 'error' });
         return;
       }
       if (!spo2 || isNaN(spo2) || spo2 < 0 || spo2 > 100) {
-        showPopup('SpO2 invalido (0-100%).', 'warning');
+        uiAlert('SpO2 inválido (0-100%).', { title: 'Valor Inválido', type: 'error' });
         return;
       }
       if (!temp || isNaN(temp) || temp < 30 || temp > 45) {
-        showPopup('Temperatura invalida (30-45 C).', 'warning');
+        uiAlert('Temperatura inválida (30-45 °C).', { title: 'Valor Inválido', type: 'error' });
         return;
       }
 
@@ -458,7 +463,7 @@
         await loadMedicoes();
       } catch (error) {
         console.error('Erro ao registrar:', error);
-        showPopup(error.message || 'Erro ao registrar medicao', 'error');
+        uiAlert(error.message || 'Erro ao registrar medição.', { title: 'Erro', type: 'error' });
       } finally {
         btn.disabled = false;
         btn.textContent = 'Registrar Medição';
@@ -469,7 +474,12 @@
     loadLeito();
 
     document.getElementById('btnDeleteAll').addEventListener('click', async function() {
-      if (!await showConfirm('Tem certeza que deseja excluir todo o historico de medicoes?')) return;
+      const confirmou = await uiConfirm('Tem certeza que deseja excluir todo o histórico de medições? Essa ação não pode ser desfeita.', {
+        title: 'Excluir Histórico',
+        confirmText: 'Excluir',
+        danger: true
+      });
+      if (!confirmou) return;
       this.disabled = true;
 
       try {
@@ -479,8 +489,9 @@
 
         document.getElementById('measurementsList').innerHTML = '<p style="color: var(--text-light); padding: 20px;">Nenhuma medição registrada.</p>';
         document.getElementById('vitalsGrid').innerHTML = '<p style="color: var(--text-light); padding: 20px; grid-column: 1/-1;">Nenhuma medição registrada.</p>';
+        uiAlert('Histórico de medições excluído com sucesso!', { title: 'Histórico Excluído', type: 'success' });
       } catch (error) {
-        showPopup('Erro ao excluir historico: ' + error.message, 'error');
+        uiAlert('Erro ao excluir histórico: ' + error.message, { title: 'Erro', type: 'error' });
       } finally {
         this.disabled = false;
       }
@@ -488,11 +499,15 @@
 
     document.getElementById('btnDarAlta').addEventListener('click', async function() {
       const marcarIndisponivel = document.getElementById('checkMarcarIndisponivel').checked;
-      let mensagem = 'Tem certeza que deseja dar alta ao paciente? O leito sera liberado e o paciente ira para o historico de altas. As medicoes registradas serao mantidas.';
+      let mensagem = 'Tem certeza que deseja dar alta ao paciente? O leito será liberado e o paciente irá para o histórico de altas. As medições registradas serão mantidas.';
       if (marcarIndisponivel) {
-        mensagem = 'Dar alta ao paciente e marcar o leito como indisponivel? O paciente ira para o historico de altas.';
+        mensagem = 'Dar alta ao paciente e marcar o leito como indisponível? O paciente irá para o histórico de altas.';
       }
-      if (!await showConfirm(mensagem)) return;
+      const confirmou = await uiConfirm(mensagem, {
+        title: 'Dar Alta',
+        confirmText: 'Dar Alta'
+      });
+      if (!confirmou) return;
       this.disabled = true;
       this.textContent = 'Dando alta...';
 
@@ -513,13 +528,13 @@
             body: JSON.stringify({ status: 'indisponivel', motivo_indisponivel: motivo })
           });
           if (!resStatus.ok) {
-            showPopup('Alta realizada, mas nao foi possivel marcar o leito como indisponivel. Ele ficou disponivel.', 'warning');
+            await uiAlert('Alta realizada, mas não foi possível marcar o leito como indisponível. Ele ficou disponível.', { title: 'Atenção', type: 'warning' });
           }
         }
 
         window.location.href = '/gestao-leitos';
       } catch (error) {
-        showPopup('Erro ao dar alta: ' + error.message, 'error');
+        uiAlert('Erro ao dar alta: ' + error.message, { title: 'Erro', type: 'error' });
         this.disabled = false;
         this.textContent = 'Dar Alta';
       }
@@ -584,10 +599,10 @@
           const err = await r.json();
           throw new Error(err.error || 'Erro ao transferir paciente');
         }
-        showPopup('Paciente transferido com sucesso!', 'success');
+        await uiAlert('Paciente transferido com sucesso!', { title: 'Transferência Realizada', type: 'success' });
         window.location.href = '/gestao-leitos';
       } catch (error) {
-        showPopup('Erro ao transferir: ' + error.message, 'error');
+        uiAlert('Erro ao transferir: ' + error.message, { title: 'Erro', type: 'error' });
         this.disabled = false;
         this.textContent = 'Confirmar Transferência';
       }

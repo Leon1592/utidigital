@@ -94,3 +94,20 @@
     color: #aaa;
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
+
+.btn-excluir-internacao {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ff6b6b;
+    font-family: "Nunito", sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    border: 1px solid rgba(255, 107, 107, 0.4);
+    border-radius: 8px;
+    padding: 8px 18px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-excluir-internacao:hover {
+    background: rgba(255, 107, 107, 0.15);
+}

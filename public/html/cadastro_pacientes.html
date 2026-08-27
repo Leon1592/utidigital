@@ -10,8 +10,8 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/styles/global.css">
-    <link rel="stylesheet" href="/styles/popup.css">
     <link rel="stylesheet" href="/styles/cadastro_pacientes.css" />
+    <link rel="stylesheet" href="/styles/popups.css">
   </head>
   <body>
     <div class="app">
@@ -148,7 +148,7 @@
       </div>
     </div>
 
-    <script src="/js/popup.js"></script>
+    <script src="/js/popups.js"></script>
     <script src="/js/auth.js"></script>
     <script>
       async function buscarCEP() {
@@ -163,7 +163,7 @@
           const data = await response.json();
 
           if (data.erro) {
-            showPopup('CEP nao encontrado. Preencha manualmente.', 'warning');
+            uiAlert('CEP não encontrado. Preencha manualmente.', { title: 'CEP Não Encontrado', type: 'warning' });
             return;
           }
 
@@ -172,7 +172,7 @@
           document.getElementById('estado').value = data.uf;
         } catch (error) {
           console.error('Erro ao buscar CEP:', error);
-          showPopup('Erro ao buscar CEP. Preencha manualmente.', 'error');
+          uiAlert('Erro ao buscar CEP. Preencha manualmente.', { title: 'Erro', type: 'error' });
         }
       }
 
@@ -193,32 +193,32 @@
         };
 
         if (!paciente.nome || paciente.nome.length < 3) {
-          showPopup('Por favor, informe o nome completo (minimo 3 caracteres).', 'warning');
+          uiAlert('Por favor, informe o nome completo (mínimo 3 caracteres).', { title: 'Validação', type: 'error' });
           return;
         }
         if (!paciente.data_nascimento) {
-          showPopup('Por favor, informe a data de nascimento.', 'warning');
+          uiAlert('Por favor, informe a data de nascimento.', { title: 'Validação', type: 'error' });
           return;
         }
         const dataNasc = new Date(paciente.data_nascimento);
         if (isNaN(dataNasc.getTime()) || dataNasc > new Date()) {
-          showPopup('Data de nascimento invalida.', 'warning');
+          uiAlert('Data de nascimento inválida.', { title: 'Validação', type: 'error' });
           return;
         }
         if (!paciente.cpf) {
-          showPopup('Por favor, informe o CPF.', 'warning');
+          uiAlert('Por favor, informe o CPF.', { title: 'Validação', type: 'error' });
           return;
         }
         if (!/^\d{3}\.\d{3}\.\d{3}-\d{2}$/.test(paciente.cpf)) {
-          showPopup('CPF invalido. Use o formato 000.000.000-00.', 'warning');
+          uiAlert('CPF inválido. Use o formato 000.000.000-00.', { title: 'Validação', type: 'error' });
           return;
         }
         if (!paciente.sexo) {
-          showPopup('Por favor, selecione o sexo.', 'warning');
+          uiAlert('Por favor, selecione o sexo.', { title: 'Validação', type: 'error' });
           return;
         }
         if (!paciente.contato_paciente || paciente.contato_paciente.length < 10) {
-          showPopup('Por favor, informe um contato valido (minimo 10 digitos).', 'warning');
+          uiAlert('Por favor, informe um contato válido (mínimo 10 dígitos).', { title: 'Validação', type: 'error' });
           return;
         }
 
@@ -234,7 +234,7 @@
             throw new Error(error.error || 'Erro ao cadastrar paciente');
           }
 
-          showPopup('Paciente cadastrado com sucesso!', 'success');
+          uiAlert('Paciente cadastrado com sucesso!', { title: 'Paciente Cadastrado', type: 'success' });
 
           document.getElementById('nome').value = '';
           document.getElementById('data_nascimento').value = '';
@@ -250,7 +250,7 @@
           loadPacientes();
         } catch (error) {
           console.error('Erro ao cadastrar:', error);
-          showPopup(error.message || 'Erro ao cadastrar paciente', 'error');
+          uiAlert(error.message || 'Erro ao cadastrar paciente.', { title: 'Erro', type: 'error' });
         }
       }
 
@@ -342,7 +342,11 @@
       async function excluirPaciente() {
         if (!pacienteAtual) return;
         
-        const confirmacao = await showConfirm(`Tem certeza que deseja excluir o paciente "${pacienteAtual.nome}"?`);
+        const confirmacao = await uiConfirm(`Tem certeza que deseja excluir o paciente "${pacienteAtual.nome}"? Essa ação não pode ser desfeita.`, {
+          title: 'Excluir Paciente',
+          confirmText: 'Excluir',
+          danger: true
+        });
         if (!confirmacao) return;
         
         try {
@@ -355,12 +359,12 @@
             throw new Error(errorData.error || 'Erro ao excluir paciente');
           }
           
-          showPopup('Paciente excluído com sucesso!', 'success');
+          uiAlert('Paciente excluído com sucesso!', { title: 'Paciente Excluído', type: 'success' });
           hidePatientDetail();
           loadPacientes();
         } catch (error) {
           console.error('Erro ao excluir:', error);
-          showPopup(error.message || 'Erro ao excluir paciente', 'error');
+          uiAlert(error.message || 'Erro ao excluir paciente', { title: 'Erro', type: 'error' });
         }
       }
 

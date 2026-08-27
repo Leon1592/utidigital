@@ -1,0 +1,212 @@
+/* =============================================
+   Pop-Ups compartilhados (uiAlert, uiConfirm, uiPrompt)
+   Tema consistente com o restante do sistema
+   ============================================= */
+
+.ui-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 2000;
+}
+
+.ui-popup {
+  background: var(--dark-teal, #0d3140);
+  border-radius: 16px;
+  padding: 24px;
+  width: 440px;
+  max-width: 100%;
+  border: 2px solid var(--red-main, #a03020);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  color: var(--white, #ffffff);
+  font-family: "Nunito", sans-serif;
+  animation: ui-popup-in 0.18s ease-out;
+}
+
+@keyframes ui-popup-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.ui-popup-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.ui-popup-title {
+  flex: 1;
+  font-family: "Playfair Display", serif;
+  font-size: 20px;
+  color: var(--white, #ffffff);
+}
+
+.ui-popup-close {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.ui-popup-close:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ui-popup-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 18px;
+}
+
+.icon-info {
+  background-color: var(--red-main, #a03020);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z'/%3E%3C/svg%3E");
+}
+
+.icon-success {
+  background-color: #2e7d32;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.58L19 8l-9 9z'/%3E%3C/svg%3E");
+}
+
+.icon-error {
+  background-color: #c62828;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z'/%3E%3C/svg%3E");
+}
+
+.icon-warning {
+  background-color: #ef6c00;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z'/%3E%3C/svg%3E");
+}
+
+.ui-popup-body {
+  margin-bottom: 18px;
+}
+
+.ui-popup-message {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text-light, #e8e8e8);
+  white-space: pre-line;
+}
+
+.ui-popup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.ui-popup-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-family: "Nunito", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.ui-popup-btn:active {
+  transform: translateY(1px);
+}
+
+.btn-primary {
+  background: var(--red-btn-bg, #c0392b);
+  color: var(--white, #ffffff);
+}
+
+.btn-primary:hover {
+  background: #d34839;
+}
+
+.btn-danger {
+  background: #c62828;
+  color: var(--white, #ffffff);
+}
+
+.btn-danger:hover {
+  background: #d32f2f;
+}
+
+.btn-cancel {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--white, #ffffff);
+}
+
+.btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.ui-popup-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.ui-popup-field-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--white, #ffffff);
+}
+
+.ui-popup-input {
+  background: var(--red-input, #7d2418);
+  border: none;
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: var(--white, #ffffff);
+  font-family: "Nunito", sans-serif;
+  font-size: 14px;
+  outline: none;
+  width: 100%;
+}
+
+.ui-popup-input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.ui-popup-input:focus {
+  background: #6a1f14;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18);
+}
+
+.ui-popup-shake {
+  animation: ui-popup-shake 0.3s;
+}
+
+@keyframes ui-popup-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-8px);
+  }
+  75% {
+    transform: translateX(8px);
+  }
+}

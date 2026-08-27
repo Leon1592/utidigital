@@ -8,8 +8,8 @@
   <link rel="shortcut icon" href="/uploads/images/ui.png" type="image/x-icon" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles/global.css">
-  <link rel="stylesheet" href="/styles/popup.css">
   <link rel="stylesheet" href="/styles/gestao_leitos.css">
+  <link rel="stylesheet" href="/styles/popups.css">
 </head>
 
 <body>
@@ -101,17 +101,17 @@
     </div>
   </div>
 
-<script src="/js/popup.js"></script>
+<script src="/js/popups.js"></script>
 <script src="/js/auth.js"></script>
 <script>
 let isUserAdmin = false;
-let isUserEnfermeiro = false;
+    let canManageStatus = false;
     
     async function initGestaoLeitos() {
       const user = await loadUser();
       if (!user) return;
       isUserAdmin = user.perfil === 'Admin';
-      isUserEnfermeiro = user.perfil === 'Enfermeiro';
+      canManageStatus = (user.perfil === 'Admin' || user.perfil === 'Enfermeiro');
       
       if (isUserAdmin) {
         document.getElementById('btnAddLeito').style.display = 'inline-block';
@@ -135,7 +135,7 @@ let isUserEnfermeiro = false;
         document.getElementById('btnConfirmAdd').addEventListener('click', async () => {
           const numero = parseInt(document.getElementById('novoLeitoNumero').value);
           if (!numero || numero <= 0) {
-            showPopup('Por favor, insira um numero valido para o leito.', 'warning');
+            uiAlert('Por favor, insira um número válido para o leito.', { title: 'Número Inválido', type: 'error' });
             return;
           }
           try {
@@ -145,15 +145,15 @@ let isUserEnfermeiro = false;
               body: JSON.stringify({ numero: numero, status: 'disponivel' })
             });
             if (res.ok) {
-              showPopup('Leito adicionado com sucesso!', 'success');
+              uiAlert('Leito ' + numero + ' adicionado com sucesso!', { title: 'Leito Adicionado', type: 'success' });
               document.getElementById('addLeitoModal').style.display = 'none';
               loadBeds();
             } else {
               const err = await res.json();
-              showPopup('Erro ao adicionar leito: ' + (err.error || 'Erro desconhecido'), 'error');
+              uiAlert('Erro ao adicionar leito: ' + (err.error || 'Erro desconhecido'), { title: 'Erro', type: 'error' });
             }
           } catch (err) {
-            showPopup('Erro ao adicionar leito', 'error');
+            uiAlert('Erro ao adicionar leito.', { title: 'Erro', type: 'error' });
           }
         });
       }
@@ -195,78 +195,73 @@ let isUserEnfermeiro = false;
           
           const deleteBtn = isUserAdmin ? `<span class="bed-delete" data-id="${leito.id}" style="color: #ff4444; cursor: pointer; font-size: 12px; margin-left: 10px;">[Excluir]</span>` : '';
           
-          const motivoIndisponivel = leito.motivo_indisponivel || '';
+          const motivoIndisponivel = (leito.status === 'indisponivel' && leito.motivo_indisponivel)
+            ? `<span class="bed-motive" title="${escapeHTML(leito.motivo_indisponivel)}">Motivo: ${escapeHTML(leito.motivo_indisponivel)}</span>`
+            : '';
           
-          let toggleBtnHtml = '';
-          if ((isUserAdmin || isUserEnfermeiro) && leito.status !== 'ocupado') {
-            if (leito.status === 'indisponivel') {
-              toggleBtnHtml = `<button class="toggle-avail-btn" data-id="${leito.id}" data-action="disponivel" style="margin-top:8px;padding:6px 12px;border:none;border-radius:6px;background:#4caf50;color:#fff;font-weight:700;cursor:pointer;font-size:12px;">Disponibilizar</button>`;
-            } else {
-              toggleBtnHtml = `<button class="toggle-avail-btn" data-id="${leito.id}" data-action="indisponivel" style="margin-top:8px;padding:6px 12px;border:none;border-radius:6px;background:#ffaa00;color:#fff;font-weight:700;cursor:pointer;font-size:12px;">Indisponibilizar</button>`;
-            }
+          let toggleBtn = '';
+          if (canManageStatus && leito.status !== 'ocupado') {
+            const isIndisponivel = leito.status === 'indisponivel';
+            toggleBtn = `<button class="bed-toggle-btn ${isIndisponivel ? 'disponibilizar' : ''}" data-id="${leito.id}" data-status="${isIndisponivel ? 'disponivel' : 'indisponivel'}">${isIndisponivel ? 'Disponibilizar Leito' : 'Indisponibilizar Leito'}</button>`;
           }
           
           bedCard.innerHTML = `
             <span class="bed-title ${statusClass}">Leito ${leito.numero}${deleteBtn}</span>
             <span class="bed-info">Nome: ${escapeHTML(pacienteNome)}</span>
             <span class="bed-info">Situacao: ${escapeHTML(statusDisplay)}</span>
-            ${motivoIndisponivel ? '<span class="bed-info" style="color: #ffaa00;">Motivo: ' + escapeHTML(motivoIndisponivel) + '</span>' : ''}
             <span class="bed-info">Data de Internacao: ${escapeHTML(dataInternacao)}</span>
+            ${motivoIndisponivel}
+            ${toggleBtn}
             ${isClickable ? '<span class="bed-info" style="color: #4caf50; font-size: 12px;">Clique para ver detalhes</span>' : ''}
-            ${toggleBtnHtml}
           `;
           grid.appendChild(bedCard);
         });
         
-        document.querySelectorAll('.toggle-avail-btn').forEach(btn => {
+        document.querySelectorAll('.bed-toggle-btn').forEach(btn => {
           btn.addEventListener('click', async (e) => {
             e.stopPropagation();
             const leitoId = btn.dataset.id;
-            const action = btn.dataset.action;
-            if (action === 'indisponivel') {
-              const motivo = await showPrompt('Informe o motivo da indisponibilidade:');
-              if (motivo === null) return;
-              if (!motivo) {
-                showPopup('Informe o motivo da indisponibilidade.', 'warning');
-                return;
-              }
-              btn.disabled = true;
-              try {
-                const r = await fetch('/api/leitos/' + leitoId, {
-                  method: 'PUT',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ status: 'indisponivel', motivo_indisponivel: motivo.trim() })
+            const novoStatus = btn.dataset.status;
+            btn.disabled = true;
+            try {
+              const body = { status: novoStatus };
+              if (novoStatus === 'indisponivel') {
+                const motivo = await uiPrompt({
+                  title: 'Indisponibilizar Leito',
+                  message: 'Informe o motivo da indisponibilidade:',
+                  placeholder: 'Ex: manutenção, aguardando limpeza',
+                  required: true
                 });
-                if (r.ok) {
-                  loadBeds();
-                } else {
-                  const err = await r.json();
-                  showPopup('Erro: ' + (err.error || 'Nao foi possivel indisponibilizar'), 'error');
+                if (motivo === null) {
+                  btn.disabled = false;
+                  return;
                 }
-              } catch (err) {
-                showPopup('Erro ao indisponibilizar leito', 'error');
-              } finally {
-                btn.disabled = false;
-              }
-            } else {
-              btn.disabled = true;
-              try {
-                const r = await fetch('/api/leitos/' + leitoId, {
-                  method: 'PUT',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ status: 'disponivel' })
+                body.motivo_indisponivel = motivo.trim();
+              } else {
+                const confirmou = await uiConfirm('Deseja tornar este leito disponível novamente?', {
+                  title: 'Disponibilizar Leito',
+                  confirmText: 'Disponibilizar'
                 });
-                if (r.ok) {
-                  loadBeds();
-                } else {
-                  const err = await r.json();
-                  showPopup('Erro: ' + (err.error || 'Nao foi possivel disponibilizar'), 'error');
+                if (!confirmou) {
+                  btn.disabled = false;
+                  return;
                 }
-              } catch (err) {
-                showPopup('Erro ao disponibilizar leito', 'error');
-              } finally {
-                btn.disabled = false;
               }
+              const res = await fetch('/api/leitos/' + leitoId, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+              });
+              if (res.ok) {
+                loadBeds();
+              } else {
+                const err = await res.json();
+                uiAlert('Erro: ' + (err.error || 'Não foi possível alterar o status do leito'), { title: 'Erro', type: 'error' });
+              }
+            } catch (err) {
+              uiAlert('Erro ao alterar o status do leito.', { title: 'Erro', type: 'error' });
+            } finally {
+              btn.disabled = false;
             }
           });
         });
@@ -276,17 +271,22 @@ let isUserEnfermeiro = false;
             btn.addEventListener('click', async (e) => {
               e.stopPropagation();
               const leitoId = btn.dataset.id;
-              if (await showConfirm('Tem certeza que deseja excluir este leito?')) {
+              const confirmou = await uiConfirm('Tem certeza que deseja excluir este leito? Todas as medições associadas também serão excluídas.', {
+                title: 'Excluir Leito',
+                confirmText: 'Excluir',
+                danger: true
+              });
+              if (confirmou) {
                 try {
                   const res = await fetch('/api/leitos/' + leitoId, { method: 'DELETE' });
                   if (res.ok) {
-                    showPopup('Leito excluido com sucesso!', 'success');
+                    uiAlert('Leito excluído com sucesso!', { title: 'Leito Excluído', type: 'success' });
                     loadBeds();
                   } else {
-showPopup('Erro ao excluir leito', 'error');
+                    uiAlert('Erro ao excluir leito.', { title: 'Erro', type: 'error' });
                   }
                 } catch (err) {
-                  showPopup('Erro ao excluir leito', 'error');
+                  uiAlert('Erro ao excluir leito.', { title: 'Erro', type: 'error' });
                 }
               }
             });

@@ -36,6 +36,15 @@ async function removeByPaciente(pacienteId) {
     await db.query('DELETE FROM internacoes WHERE paciente_id = $1', [pacienteId]);
 }
 
+async function findById(id) {
+    const result = await db.query('SELECT * FROM internacoes WHERE id = $1', [id]);
+    return result.rows[0];
+}
+
+async function removeById(id) {
+    await db.query('DELETE FROM internacoes WHERE id = $1', [id]);
+}
+
 async function findAll() {
     const result = await db.query(`
         SELECT i.*, p.cpf, p.data_nascimento, p.sexo
@@ -52,5 +61,7 @@ module.exports = {
     closeByLeito,
     moveBetweenLeitos,
     removeByPaciente,
+    findById,
+    removeById,
     findAll
 };

@@ -14,8 +14,8 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="../styles/global.css" />
-    <link rel="stylesheet" href="../styles/popup.css" />
     <link rel="stylesheet" href="../styles/cadastro_usuarios.css" />
+    <link rel="stylesheet" href="/styles/popups.css" />
   </head>
 
   <body>
@@ -269,7 +269,7 @@
       </div>
     </div>
 
-    <script src="/js/popup.js"></script>
+    <script src="/js/popups.js"></script>
     <script src="/js/auth.js"></script>
     <script>
 
@@ -397,15 +397,15 @@
           const novaSenha = document.getElementById("editNovaSenha").value;
 
           if (!nome || nome.length < 3) {
-            showPopup("Nome deve ter no minimo 3 caracteres.", "warning");
+            uiAlert("Nome deve ter no mínimo 3 caracteres.", { title: "Validação", type: "error" });
             return;
           }
           if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            showPopup("Email invalido.", "warning");
+            uiAlert("Email inválido.", { title: "Validação", type: "error" });
             return;
           }
           if (novaSenha && novaSenha.length < 6) {
-            showPopup("A nova senha deve ter no minimo 6 caracteres.", "warning");
+            uiAlert("A nova senha deve ter no mínimo 6 caracteres.", { title: "Validação", type: "error" });
             return;
           }
 
@@ -436,13 +436,13 @@
               }
             }
 
-            showPopup("Usuario atualizado com sucesso!", "success");
+            uiAlert("Usuário atualizado com sucesso!", { title: "Usuário Atualizado", type: "success" });
             document.getElementById("editModal").style.display = "none";
             usuarioEditando = null;
             loadUsers();
           } catch (error) {
             console.error("Erro ao atualizar:", error);
-            showPopup(error.message || "Erro ao atualizar usuario", "error");
+            uiAlert(error.message || "Erro ao atualizar usuário", { title: "Erro", type: "error" });
           } finally {
             btn.disabled = false;
           }
@@ -477,12 +477,12 @@
               throw new Error(error.error || "Erro ao excluir usuario");
             }
 
-            showPopup("Usuario excluido com sucesso!", "success");
+            uiAlert("Usuário excluído com sucesso!", { title: "Usuário Excluído", type: "success" });
             document.getElementById("deleteModal").style.display = "none";
             loadUsers();
           } catch (error) {
             console.error("Erro ao excluir:", error);
-            showPopup(error.message || "Erro ao excluir usuario", "error");
+            uiAlert(error.message || "Erro ao excluir usuário", { title: "Erro", type: "error" });
           }
         });
 
@@ -509,15 +509,15 @@
           ).value;
 
           if (!nome || nome.length < 3) {
-            showPopup("Por favor, informe o nome completo (minimo 3 caracteres).", "warning");
+            uiAlert("Por favor, informe o nome completo (mínimo 3 caracteres).", { title: "Validação", type: "error" });
             return;
           }
           if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            showPopup("Por favor, informe um email valido.", "warning");
+            uiAlert("Por favor, informe um email válido.", { title: "Validação", type: "error" });
             return;
           }
           if (!senha || senha.length < 6) {
-            showPopup("A senha deve ter no minimo 6 caracteres.", "warning");
+            uiAlert("A senha deve ter no mínimo 6 caracteres.", { title: "Validação", type: "error" });
             return;
           }
 
@@ -538,7 +538,7 @@ const response = await fetch("/api/users", {
               throw new Error(error.error || "Erro ao cadastrar usuario");
             }
 
-            showPopup(perfil + " cadastrado com sucesso!", "success");
+            uiAlert(`${perfil} cadastrado com sucesso!`, { title: "Usuário Cadastrado", type: "success" });
 
             document.getElementById(`nome-${perfil.toLowerCase()}`).value = "";
             document.getElementById(`email-${perfil.toLowerCase()}`).value = "";
@@ -547,7 +547,7 @@ const response = await fetch("/api/users", {
             loadUsers();
           } catch (error) {
             console.error("Erro ao cadastrar:", error);
-            showPopup(error.message || "Erro ao cadastrar usuario", "error");
+            uiAlert(error.message || "Erro ao cadastrar usuário", { title: "Erro", type: "error" });
           }
         });
       });
