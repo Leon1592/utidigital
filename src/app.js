@@ -15,6 +15,7 @@ const relatorioRoutes = require('./routes/relatorioRoutes');
 const { isAuthenticated } = require('./middleware/authMiddleware');
 
 const app = express();
+app.set('trust proxy', 1);
 
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json());
@@ -44,7 +45,7 @@ app.use(session({
         maxAge: (Number.isFinite(sessionMaxAge) && sessionMaxAge > 0) ? sessionMaxAge : 3600000,
         httpOnly: true,
         sameSite: 'lax',
-        secure: true
+        secure: process.env.NODE_ENV === 'production'
     }
 }));
 
