@@ -117,11 +117,14 @@ app.use('/api/medicoes', isAuthenticated, medicaoRoutes);
 app.use('/api/relatorios', isAuthenticated, relatorioRoutes);
 
 app.get('/api/health', async (req, res) => {
+    const fs = require('fs');
     try {
         const hasUrl = !!process.env.DATABASE_URL;
         if (!hasUrl) return res.json({ ok: false, error: 'DATABASE_URL nao configurada' });
         await pool.query('SELECT 1');
-        res.json({ ok: true, db: 'connected', env: process.env.NODE_ENV || 'not set' });
+        const dashboardPath = path.join(__dirname, '../public/html/dashboard.html');
+        const exists = fs.existsSync(dashboardPath);
+        res.json({ ok: true, db: 'connected', env: process.env.NODE_ENV || 'not set', dashboardExists: exists, dashboardPath, dirname: __dirname });
     } catch (err) {
         res.json({ ok: false, error: err.message, code: err.code });
     }
@@ -138,7 +141,7 @@ app.get('/internar', isAuthenticated, (req, res) => {
 app.use((err, req, res, next) => {
     console.error('Express error:', err);
     if (!res.headersSent) {
-        res.status(500).json({ error: 'Erro interno do servidor' });
+        res.status(500).json({ error: err.message || 'Erro interno do servidor', path: err.path || null });
     }
 });
 
