@@ -8,6 +8,7 @@
   <link rel="shortcut icon" href="/uploads/images/ui.png" type="image/x-icon" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles/global.css">
+  <link rel="stylesheet" href="/styles/popup.css">
   <link rel="stylesheet" href="/styles/relatorios.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
@@ -188,6 +189,7 @@
 
   </div>
 
+    <script src="/js/popup.js"></script>
     <script src="/js/auth.js"></script>
     <script>
     let reportData = null;
@@ -225,7 +227,7 @@
       const tipoRelatorio = document.querySelector('input[name="tipoRelatorio"]:checked').value;
 
       if (!pacienteId) {
-        alert('Selecione um paciente.');
+        showPopup('Selecione um paciente.', 'warning');
         return;
       }
 
@@ -238,7 +240,7 @@
         reportData = await response.json();
         renderPreview(reportData, periodo);
       } catch (error) {
-        alert(error.message);
+        showPopup(error.message, 'error');
       }
     });
 

@@ -19,10 +19,10 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         if (data.success) {
             window.location.href = data.redirect;
         } else {
-            alert(data.error || 'Erro ao fazer login');
+            showPopup(data.error || 'Erro ao fazer login', 'error');
         }
     } catch (error) {
         console.error('Erro:', error);
-        alert('Erro ao conectar com o servidor');
+        showPopup('Erro ao conectar com o servidor', 'error');
     }
 });

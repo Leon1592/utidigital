@@ -8,6 +8,7 @@
   <link rel="shortcut icon" href="/uploads/images/ui.png" type="image/x-icon" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles/global.css">
+  <link rel="stylesheet" href="/styles/popup.css">
   <link rel="stylesheet" href="/styles/leito_detalhe.css">
 </head>
 
@@ -154,6 +155,7 @@
     </div>
   </div>
 
+  <script src="/js/popup.js"></script>
   <script src="/js/auth.js"></script>
   <script>
 
@@ -205,7 +207,7 @@
         const response = await fetch('/api/leitos/' + leitoId);
 
         if (!response.ok) {
-          alert('Erro ao carregar leito');
+          showPopup('Erro ao carregar leito', 'error');
           return;
         }
 
@@ -231,7 +233,7 @@
             btn.textContent = isIndisponivel ? 'Disponibilizar Leito' : 'Indisponibilizar Leito';
             btn.onclick = async () => {
               if (isIndisponivel) {
-                if (!confirm('Deseja tornar este leito disponível novamente?')) return;
+                if (!await showConfirm('Deseja tornar este leito disponivel novamente?')) return;
                 btn.disabled = true;
                 try {
                   const r = await fetch('/api/leitos/' + leitoId, {
@@ -243,18 +245,18 @@
                     window.location.reload();
                   } else {
                     const err = await r.json();
-                    alert('Erro: ' + (err.error || 'Não foi possível disponibilizar'));
+                    showPopup('Erro: ' + (err.error || 'Nao foi possivel disponibilizar'), 'error');
                   }
                 } catch (err) {
-                  alert('Erro ao disponibilizar leito');
+                  showPopup('Erro ao disponibilizar leito', 'error');
                 } finally {
                   btn.disabled = false;
                 }
               } else {
-                const motivo = prompt('Informe o motivo da indisponibilidade:', '');
+                const motivo = await showPrompt('Informe o motivo da indisponibilidade:');
                 if (motivo === null) return;
-                if (!motivo.trim()) {
-                  alert('Informe o motivo da indisponibilidade.');
+                if (!motivo) {
+                  showPopup('Informe o motivo da indisponibilidade.', 'warning');
                   return;
                 }
                 btn.disabled = true;
@@ -268,10 +270,10 @@
                     window.location.reload();
                   } else {
                     const err = await r.json();
-                    alert('Erro: ' + (err.error || 'Não foi possível indisponibilizar'));
+                    showPopup('Erro: ' + (err.error || 'Nao foi possivel indisponibilizar'), 'error');
                   }
                 } catch (err) {
-                  alert('Erro ao indisponibilizar leito');
+                  showPopup('Erro ao indisponibilizar leito', 'error');
                 } finally {
                   btn.disabled = false;
                 }
@@ -295,7 +297,7 @@
         await loadMedicoes();
       } catch (error) {
         console.error('Erro ao carregar leito:', error);
-        alert('Erro: ' + error.message);
+        showPopup('Erro: ' + error.message, 'error');
       }
     }
 
@@ -399,23 +401,23 @@
       const obs = document.getElementById('obs').value.trim();
 
       if (!fc || isNaN(fc) || fc < 0 || fc > 300) {
-        alert('Frequencia cardiaca invalida (0-300 bpm).');
+        showPopup('Frequencia cardiaca invalida (0-300 bpm).', 'warning');
         return;
       }
       if (!paSistolica || isNaN(paSistolica) || paSistolica < 0 || paSistolica > 300) {
-        alert('Pressao sistolica invalida (0-300 mmHg).');
+        showPopup('Pressao sistolica invalida (0-300 mmHg).', 'warning');
         return;
       }
       if (!paDiastolica || isNaN(paDiastolica) || paDiastolica < 0 || paDiastolica > 300) {
-        alert('Pressao diastolica invalida (0-300 mmHg).');
+        showPopup('Pressao diastolica invalida (0-300 mmHg).', 'warning');
         return;
       }
       if (!spo2 || isNaN(spo2) || spo2 < 0 || spo2 > 100) {
-        alert('SpO2 invalido (0-100%).');
+        showPopup('SpO2 invalido (0-100%).', 'warning');
         return;
       }
       if (!temp || isNaN(temp) || temp < 30 || temp > 45) {
-        alert('Temperatura invalida (30-45 °C).');
+        showPopup('Temperatura invalida (30-45 C).', 'warning');
         return;
       }
 
@@ -456,7 +458,7 @@
         await loadMedicoes();
       } catch (error) {
         console.error('Erro ao registrar:', error);
-        alert(error.message || 'Erro ao registrar medicao');
+        showPopup(error.message || 'Erro ao registrar medicao', 'error');
       } finally {
         btn.disabled = false;
         btn.textContent = 'Registrar Medição';
@@ -467,7 +469,7 @@
     loadLeito();
 
     document.getElementById('btnDeleteAll').addEventListener('click', async function() {
-      if (!confirm('Tem certeza que deseja excluir todo o histórico de medições?')) return;
+      if (!await showConfirm('Tem certeza que deseja excluir todo o historico de medicoes?')) return;
       this.disabled = true;
 
       try {
@@ -478,7 +480,7 @@
         document.getElementById('measurementsList').innerHTML = '<p style="color: var(--text-light); padding: 20px;">Nenhuma medição registrada.</p>';
         document.getElementById('vitalsGrid').innerHTML = '<p style="color: var(--text-light); padding: 20px; grid-column: 1/-1;">Nenhuma medição registrada.</p>';
       } catch (error) {
-        alert('Erro ao excluir histórico: ' + error.message);
+        showPopup('Erro ao excluir historico: ' + error.message, 'error');
       } finally {
         this.disabled = false;
       }
@@ -486,11 +488,11 @@
 
     document.getElementById('btnDarAlta').addEventListener('click', async function() {
       const marcarIndisponivel = document.getElementById('checkMarcarIndisponivel').checked;
-      let mensagem = 'Tem certeza que deseja dar alta ao paciente? O leito será liberado e o paciente irá para o histórico de altas. As medições registradas serão mantidas.';
+      let mensagem = 'Tem certeza que deseja dar alta ao paciente? O leito sera liberado e o paciente ira para o historico de altas. As medicoes registradas serao mantidas.';
       if (marcarIndisponivel) {
-        mensagem = 'Dar alta ao paciente e marcar o leito como indisponível? O paciente irá para o histórico de altas.';
+        mensagem = 'Dar alta ao paciente e marcar o leito como indisponivel? O paciente ira para o historico de altas.';
       }
-      if (!confirm(mensagem)) return;
+      if (!await showConfirm(mensagem)) return;
       this.disabled = true;
       this.textContent = 'Dando alta...';
 
@@ -511,13 +513,13 @@
             body: JSON.stringify({ status: 'indisponivel', motivo_indisponivel: motivo })
           });
           if (!resStatus.ok) {
-            alert('Alta realizada, mas não foi possível marcar o leito como indisponível. Ele ficou disponível.');
+            showPopup('Alta realizada, mas nao foi possivel marcar o leito como indisponivel. Ele ficou disponivel.', 'warning');
           }
         }
 
         window.location.href = '/gestao-leitos';
       } catch (error) {
-        alert('Erro ao dar alta: ' + error.message);
+        showPopup('Erro ao dar alta: ' + error.message, 'error');
         this.disabled = false;
         this.textContent = 'Dar Alta';
       }
@@ -582,10 +584,10 @@
           const err = await r.json();
           throw new Error(err.error || 'Erro ao transferir paciente');
         }
-        alert('Paciente transferido com sucesso!');
+        showPopup('Paciente transferido com sucesso!', 'success');
         window.location.href = '/gestao-leitos';
       } catch (error) {
-        alert('Erro ao transferir: ' + error.message);
+        showPopup('Erro ao transferir: ' + error.message, 'error');
         this.disabled = false;
         this.textContent = 'Confirmar Transferência';
       }

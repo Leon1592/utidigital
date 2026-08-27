@@ -10,6 +10,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/styles/global.css">
+    <link rel="stylesheet" href="/styles/popup.css">
     <link rel="stylesheet" href="/styles/cadastro_pacientes.css" />
   </head>
   <body>
@@ -147,6 +148,7 @@
       </div>
     </div>
 
+    <script src="/js/popup.js"></script>
     <script src="/js/auth.js"></script>
     <script>
       async function buscarCEP() {
@@ -161,7 +163,7 @@
           const data = await response.json();
 
           if (data.erro) {
-            alert('CEP nao encontrado. Preencha manualmente.');
+            showPopup('CEP nao encontrado. Preencha manualmente.', 'warning');
             return;
           }
 
@@ -170,7 +172,7 @@
           document.getElementById('estado').value = data.uf;
         } catch (error) {
           console.error('Erro ao buscar CEP:', error);
-          alert('Erro ao buscar CEP. Preencha manualmente.');
+          showPopup('Erro ao buscar CEP. Preencha manualmente.', 'error');
         }
       }
 
@@ -191,32 +193,32 @@
         };
 
         if (!paciente.nome || paciente.nome.length < 3) {
-          alert('Por favor, informe o nome completo (minimo 3 caracteres).');
+          showPopup('Por favor, informe o nome completo (minimo 3 caracteres).', 'warning');
           return;
         }
         if (!paciente.data_nascimento) {
-          alert('Por favor, informe a data de nascimento.');
+          showPopup('Por favor, informe a data de nascimento.', 'warning');
           return;
         }
         const dataNasc = new Date(paciente.data_nascimento);
         if (isNaN(dataNasc.getTime()) || dataNasc > new Date()) {
-          alert('Data de nascimento invalida.');
+          showPopup('Data de nascimento invalida.', 'warning');
           return;
         }
         if (!paciente.cpf) {
-          alert('Por favor, informe o CPF.');
+          showPopup('Por favor, informe o CPF.', 'warning');
           return;
         }
         if (!/^\d{3}\.\d{3}\.\d{3}-\d{2}$/.test(paciente.cpf)) {
-          alert('CPF invalido. Use o formato 000.000.000-00.');
+          showPopup('CPF invalido. Use o formato 000.000.000-00.', 'warning');
           return;
         }
         if (!paciente.sexo) {
-          alert('Por favor, selecione o sexo.');
+          showPopup('Por favor, selecione o sexo.', 'warning');
           return;
         }
         if (!paciente.contato_paciente || paciente.contato_paciente.length < 10) {
-          alert('Por favor, informe um contato valido (minimo 10 digitos).');
+          showPopup('Por favor, informe um contato valido (minimo 10 digitos).', 'warning');
           return;
         }
 
@@ -232,7 +234,7 @@
             throw new Error(error.error || 'Erro ao cadastrar paciente');
           }
 
-          alert('Paciente cadastrado com sucesso!');
+          showPopup('Paciente cadastrado com sucesso!', 'success');
 
           document.getElementById('nome').value = '';
           document.getElementById('data_nascimento').value = '';
@@ -248,7 +250,7 @@
           loadPacientes();
         } catch (error) {
           console.error('Erro ao cadastrar:', error);
-          alert(error.message || 'Erro ao cadastrar paciente');
+          showPopup(error.message || 'Erro ao cadastrar paciente', 'error');
         }
       }
 
@@ -340,7 +342,7 @@
       async function excluirPaciente() {
         if (!pacienteAtual) return;
         
-        const confirmacao = confirm(`Tem certeza que deseja excluir o paciente "${pacienteAtual.nome}"?`);
+        const confirmacao = await showConfirm(`Tem certeza que deseja excluir o paciente "${pacienteAtual.nome}"?`);
         if (!confirmacao) return;
         
         try {
@@ -353,12 +355,12 @@
             throw new Error(errorData.error || 'Erro ao excluir paciente');
           }
           
-          alert('Paciente excluído com sucesso!');
+          showPopup('Paciente excluído com sucesso!', 'success');
           hidePatientDetail();
           loadPacientes();
         } catch (error) {
           console.error('Erro ao excluir:', error);
-          alert(error.message || 'Erro ao excluir paciente');
+          showPopup(error.message || 'Erro ao excluir paciente', 'error');
         }
       }
 
