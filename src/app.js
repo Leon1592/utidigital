@@ -17,31 +17,11 @@ const { isAuthenticated } = require('./middleware/authMiddleware');
 const app = express();
 app.set('trust proxy', 1);
 
-async function ensureSessionTable() {
-    try {
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS "session" (
-                "sid" varchar NOT NULL COLLATE "default",
-                "sess" json NOT NULL,
-                "expire" timestamp(6) NOT NULL,
-                CONSTRAINT "session_pkey" PRIMARY KEY ("sid")
-            )
-        `);
-        await pool.query('CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON "session" ("expire")');
-        console.log('Tabela session criada/verificada');
-    } catch (err) {
-        console.error('Erro ao criar tabela session:', err.message);
-    }
-}
-
-const sessionReady = ensureSessionTable();
-
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const publicPath = path.join(__dirname, '../public');
-const uploadsPath = path.join(__dirname, '../uploads');
 
 app.use(express.static(path.join(__dirname, '../public')));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
@@ -51,10 +31,6 @@ app.get('/', (req, res) => {
 });
 
 const sessionMaxAge = parseInt(process.env.SESSION_MAX_AGE, 10);
-app.use(async (req, res, next) => {
-    try { await sessionReady; } catch (e) {}
-    next();
-});
 app.use(session({
     store: new pgSession({
         pool: pool,
@@ -81,32 +57,15 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get('/dashboard', isAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/html/dashboard.html'));
-});
-
-app.get('/gestao-leitos', isAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/html/gestao_leitos.html'));
-});
-
-app.get('/cadastro-pacientes', isAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/html/cadastro_pacientes.html'));
-});
-
-app.get('/cadastro-usuarios', isAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/html/cadastro_usuarios.html'));
-});
-
-app.get('/relatorios', isAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/html/relatorios.html'));
-});
-
-app.get('/historico-de-altas', isAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/html/historico_altas.html'));
-});
-
-app.get('/historico-internacoes', isAuthenticated, (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/html/historico_internacoes.html'));
+app.get('/api/health', async (req, res) => {
+    try {
+        const hasUrl = !!process.env.DATABASE_URL;
+        if (!hasUrl) return res.json({ ok: false, error: 'DATABASE_URL missing' });
+        await pool.query('SELECT 1');
+        res.json({ ok: true });
+    } catch (err) {
+        res.json({ ok: false, error: err.message });
+    }
 });
 
 app.use('/auth', authRoutes);
@@ -116,32 +75,38 @@ app.use('/api/pacientes', isAuthenticated, pacienteRoutes);
 app.use('/api/medicoes', isAuthenticated, medicaoRoutes);
 app.use('/api/relatorios', isAuthenticated, relatorioRoutes);
 
-app.get('/api/health', async (req, res) => {
-    const fs = require('fs');
-    try {
-        const hasUrl = !!process.env.DATABASE_URL;
-        if (!hasUrl) return res.json({ ok: false, error: 'DATABASE_URL nao configurada' });
-        await pool.query('SELECT 1');
-        const dashboardPath = path.join(__dirname, '../public/html/dashboard.html');
-        const exists = fs.existsSync(dashboardPath);
-        res.json({ ok: true, db: 'connected', env: process.env.NODE_ENV || 'not set', dashboardExists: exists, dashboardPath, dirname: __dirname });
-    } catch (err) {
-        res.json({ ok: false, error: err.message, code: err.code });
-    }
+app.get('/dashboard', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/html/dashboard.html'));
 });
-
+app.get('/gestao-leitos', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/html/gestao_leitos.html'));
+});
+app.get('/cadastro-pacientes', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/html/cadastro_pacientes.html'));
+});
+app.get('/cadastro-usuarios', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/html/cadastro_usuarios.html'));
+});
+app.get('/relatorios', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/html/relatorios.html'));
+});
+app.get('/historico-de-altas', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/html/historico_altas.html'));
+});
+app.get('/historico-internacoes', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/html/historico_internacoes.html'));
+});
 app.get('/leito/:id', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../public/html/leito_detalhe.html'));
 });
-
 app.get('/internar', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, '../public/html/internar_paciente.html'));
 });
 
 app.use((err, req, res, next) => {
-    console.error('Express error:', err);
+    console.error(err);
     if (!res.headersSent) {
-        res.status(500).json({ error: err.message || 'Erro interno do servidor', path: err.path || null });
+        res.status(500).json({ error: 'Erro interno do servidor' });
     }
 });
 
