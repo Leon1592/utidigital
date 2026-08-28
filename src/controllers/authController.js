@@ -41,7 +41,7 @@ async function logout(req, res) {
             if (err) {
                 return res.status(500).json({ error: 'Erro ao fazer logout' });
             }
-            res.redirect('/');
+            res.redirect(302, '/');
         });
     } catch (error) {
         res.status(500).json({ error: 'Erro ao fazer logout' });
