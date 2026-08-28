@@ -24,17 +24,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-app.get('/api/health', async (req, res) => {
-    try {
-        const hasUrl = !!process.env.DATABASE_URL;
-        if (!hasUrl) return res.json({ ok: false, error: 'DATABASE_URL missing' });
-        await pool.query('SELECT 1');
-        res.json({ ok: true, session: !!process.env.SESSION_SECRET });
-    } catch (err) {
-        res.json({ ok: false, error: err.message });
-    }
-});
-
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/index.html'));
 });
@@ -44,10 +33,7 @@ const sessionMiddleware = session({
     store: new pgSession({
         pool: pool,
         tableName: 'session',
-        createTableIfMissing: true,
-        error: function(err) {
-            console.error('Session store error:', err);
-        }
+        createTableIfMissing: true
     }),
     secret: process.env.SESSION_SECRET || 'utidigital_secret_key',
     resave: false,
@@ -106,9 +92,9 @@ app.get('/internar', isAuthenticated, (req, res) => {
 });
 
 app.use((err, req, res, next) => {
-    console.error('Error:', err.message, err.stack);
+    console.error(err);
     if (!res.headersSent) {
-        res.status(500).json({ error: err.message || 'Erro interno do servidor' });
+        res.status(500).json({ error: 'Erro interno do servidor' });
     }
 });
 
