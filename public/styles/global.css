@@ -8,17 +8,21 @@
 }
 
 :root {
-  --dark-teal: #0d3140;
-  --sidebar-bg: #9b3828;
-  --red-main: #a03020;
-  --red-card: #922b1e;
-  --red-input: #7d2418;
-  --red-btn-bg: #c0392b;
+  --dark-teal: #0d2137;
+  --sidebar-bg: #0a1929;
+  --red-main: #0077b6;
+  --red-card: #0f2d4a;
+  --red-input: #132f4c;
+  --red-btn-bg: #0077b6;
   --white: #ffffff;
-  --text-light: #e8e8e8;
+  --text-light: #c8d6e5;
   --label-color: #ffffff;
   --sidebar-w: 230px;
   --header-h: 64px;
+  --success: #2d936c;
+  --danger: #e74c3c;
+  --warning: #f39c12;
+  --text-muted: #8899a6;
 }
 
 html,
@@ -189,7 +193,7 @@ header {
 }
 
 .header-search:hover {
-  background: #c0392b;
+  background: #005f8a;
 }
 
 .header-search svg {
@@ -214,7 +218,7 @@ aside {
   font-size: 9.5px;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: #ffff6c;
+  color: #4fc3f7;
   padding: 0 22px 10px;
 }
 
@@ -241,7 +245,7 @@ aside {
 
 .nav-item.active {
   color: #fff;
-  background: rgba(160, 48, 32, 0.25);
+  background: rgba(0, 119, 182, 0.2);
 }
 
 main {
@@ -280,8 +284,8 @@ main {
 }
 
 .field-input:focus {
-  background: #6a1f14;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18);
+  background: #1a3a56;
+  box-shadow: 0 0 0 2px rgba(0, 119, 182, 0.3);
 }
 
 .row-2 {

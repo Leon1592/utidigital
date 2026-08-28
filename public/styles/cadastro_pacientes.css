@@ -50,8 +50,8 @@
 }
 
 .field-input:focus {
-  background: #6a1f14;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18);
+  background: #1a3a56;
+  box-shadow: 0 0 0 2px rgba(0, 119, 182, 0.3);
 }
 
 select.field-input {
@@ -146,8 +146,8 @@ select.field-input {
 }
 
 .search-input:focus {
-  background: #6a1f14;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18);
+  background: #1a3a56;
+  box-shadow: 0 0 0 2px rgba(0, 119, 182, 0.3);
 }
 
 .patients-list {
@@ -268,7 +268,7 @@ select.field-input {
 }
 
 .btn-excluir {
-  background: #c0392b;
+  background: #e74c3c;
   color: var(--white);
   border: none;
   border-radius: 8px;
@@ -280,5 +280,5 @@ select.field-input {
 }
 
 .btn-excluir:hover {
-  background: #e74c3c;
+  background: #c0392b;
 }

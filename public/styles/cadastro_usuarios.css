@@ -57,7 +57,7 @@
 }
 
 .btn-excluir-usuario {
-  background: #c0392b;
+  background: #e74c3c;
   color: var(--white);
   border: none;
   border-radius: 6px;
@@ -69,13 +69,13 @@
 }
 
 .btn-excluir-usuario:hover {
-  background: #e74c3c;
+  background: #c0392b;
 }
 
 .btn-editar-usuario {
-  background: #0f3460;
+  background: #0f2d4a;
   color: var(--white);
-  border: 1px solid #00b4d8;
+  border: 1px solid #0077b6;
   border-radius: 6px;
   padding: 8px 16px;
   font-size: 13px;
@@ -85,7 +85,7 @@
 }
 
 .btn-editar-usuario:hover {
-  background: #00b4d8;
+  background: #0077b6;
 }
 
 .no-users {
@@ -244,7 +244,7 @@
 }
 
 .btn-confirmar-excluir {
-  background: #c0392b;
+  background: #e74c3c;
   color: var(--white);
   border: none;
   border-radius: 8px;
@@ -255,7 +255,7 @@
 }
 
 .btn-confirmar-excluir:hover {
-  background: #e74c3c;
+  background: #c0392b;
 }
 
 .edit-modal-field {
@@ -287,7 +287,7 @@
 .edit-modal-field input:focus,
 .edit-modal-field select:focus {
   outline: none;
-  border-color: #00b4d8;
+  border-color: #0077b6;
 }
 
 .edit-modal-section {

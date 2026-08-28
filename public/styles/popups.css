@@ -18,12 +18,12 @@
 }
 
 .ui-popup {
-  background: var(--dark-teal, #0d3140);
+  background: var(--dark-teal, #0d2137);
   border-radius: 16px;
   padding: 24px;
   width: 440px;
   max-width: 100%;
-  border: 2px solid var(--red-main, #a03020);
+  border: 2px solid var(--red-main, #0077b6);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   color: var(--white, #ffffff);
   font-family: "Nunito", sans-serif;
@@ -82,22 +82,22 @@
 }
 
 .icon-info {
-  background-color: var(--red-main, #a03020);
+  background-color: var(--red-main, #0077b6);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z'/%3E%3C/svg%3E");
 }
 
 .icon-success {
-  background-color: #2e7d32;
+  background-color: var(--success, #2d936c);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.58L19 8l-9 9z'/%3E%3C/svg%3E");
 }
 
 .icon-error {
-  background-color: #c62828;
+  background-color: var(--danger, #e74c3c);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z'/%3E%3C/svg%3E");
 }
 
 .icon-warning {
-  background-color: #ef6c00;
+  background-color: var(--warning, #f39c12);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z'/%3E%3C/svg%3E");
 }
 
@@ -134,21 +134,21 @@
 }
 
 .btn-primary {
-  background: var(--red-btn-bg, #c0392b);
+  background: var(--red-btn-bg, #0077b6);
   color: var(--white, #ffffff);
 }
 
 .btn-primary:hover {
-  background: #d34839;
+  background: #005f8a;
 }
 
 .btn-danger {
-  background: #c62828;
+  background: var(--danger, #e74c3c);
   color: var(--white, #ffffff);
 }
 
 .btn-danger:hover {
-  background: #d32f2f;
+  background: #c0392b;
 }
 
 .btn-cancel {
@@ -190,8 +190,8 @@
 }
 
 .ui-popup-input:focus {
-  background: #6a1f14;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18);
+  background: #1a3a56;
+  box-shadow: 0 0 0 2px rgba(0, 119, 182, 0.3);
 }
 
 .ui-popup-shake {

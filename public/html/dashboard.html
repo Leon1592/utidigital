@@ -41,16 +41,16 @@
         height: 6px;
       }
       .stat-card.blue::before {
-        background: #00b4d8;
+        background: #0077b6;
       }
       .stat-card.green::before {
-        background: #4caf50;
+        background: var(--success, #2d936c);
       }
       .stat-card.red::before {
-        background: #ff4444;
+        background: var(--danger, #e74c3c);
       }
       .stat-card.red {
-        border: 2px solid #ff4444;
+        border: 2px solid var(--danger, #e74c3c);
       }
       .stat-value {
         font-size: 42px;
@@ -62,7 +62,7 @@
       }
       .stat-label {
         font-size: 16px;
-        color: #e8e8e8;
+        color: #c8d6e5;
         text-transform: uppercase;
         letter-spacing: 1px;
       }
@@ -76,10 +76,10 @@
       .alert-row {
         display: flex;
         align-items: center;
-        background: #1a1a2e;
+        background: #0f2d4a;
         border-radius: 8px;
         padding: 12px 15px;
-        border-left: 4px solid #ff6b6b;
+        border-left: 4px solid var(--danger, #e74c3c);
       }
       .alert-patient-name {
         color: #ffffff;
@@ -87,7 +87,7 @@
         font-weight: bold;
       }
       .alert-bed-num {
-        color: #aaa;
+        color: #8899a6;
         font-size: 13px;
         margin-left: 10px;
       }
@@ -95,12 +95,12 @@
         margin-top: 5px;
       }
       .alert-issue-name {
-        color: #ff6b6b;
+        color: var(--danger, #e74c3c);
         font-size: 14px;
         font-weight: bold;
       }
       .alert-issue-val {
-        color: #ff6b6b;
+        color: var(--danger, #e74c3c);
         font-weight: bold;
       }
     </style>

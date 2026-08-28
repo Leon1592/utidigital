@@ -71,11 +71,11 @@
 
 .btn-excluir-alta {
     background: rgba(255, 255, 255, 0.1);
-    color: #ff6b6b;
+    color: var(--danger, #e74c3c);
     font-family: "Nunito", sans-serif;
     font-size: 13px;
     font-weight: 700;
-    border: 1px solid rgba(255, 107, 107, 0.4);
+    border: 1px solid rgba(231, 76, 60, 0.4);
     border-radius: 8px;
     padding: 8px 18px;
     cursor: pointer;
@@ -83,7 +83,7 @@
 }
 
 .btn-excluir-alta:hover {
-    background: rgba(255, 107, 107, 0.15);
+    background: rgba(231, 76, 60, 0.15);
 }
 
 .alta-date-label {
