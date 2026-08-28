@@ -21,13 +21,22 @@ app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const publicPath = path.join(__dirname, '../public');
-
 app.use(express.static(path.join(__dirname, '../public')));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+app.get('/api/health', async (req, res) => {
+    try {
+        const hasUrl = !!process.env.DATABASE_URL;
+        if (!hasUrl) return res.json({ ok: false, error: 'DATABASE_URL missing' });
+        await pool.query('SELECT 1');
+        res.json({ ok: true });
+    } catch (err) {
+        res.json({ ok: false, error: err.message });
+    }
+});
+
 app.get('/', (req, res) => {
-    res.sendFile(path.join(publicPath, 'index.html'));
+    res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
 const sessionMaxAge = parseInt(process.env.SESSION_MAX_AGE, 10);
@@ -55,17 +64,6 @@ app.use((req, res, next) => {
     res.locals.error_msg = req.flash('error_msg');
     res.locals.user = req.session.user || null;
     next();
-});
-
-app.get('/api/health', async (req, res) => {
-    try {
-        const hasUrl = !!process.env.DATABASE_URL;
-        if (!hasUrl) return res.json({ ok: false, error: 'DATABASE_URL missing' });
-        await pool.query('SELECT 1');
-        res.json({ ok: true });
-    } catch (err) {
-        res.json({ ok: false, error: err.message });
-    }
 });
 
 app.use('/auth', authRoutes);
