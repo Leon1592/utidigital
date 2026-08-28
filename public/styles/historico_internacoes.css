@@ -85,7 +85,7 @@
 }
 
 .status-badge.ativa {
-    background: var(--success-bg, #e8f5e9);
+    background: var(--success-bg, #c8e6c9);
     color: var(--success, #2e7d32);
     border: 1px solid rgba(46, 125, 50, 0.3);
 }
@@ -97,7 +97,7 @@
 }
 
 .btn-excluir-internacao {
-    background: var(--danger-bg, #ffebee);
+    background: var(--danger-bg, #ffcdd2);
     color: var(--danger, #c62828);
     font-family: "Nunito", sans-serif;
     font-size: 13px;

@@ -70,7 +70,7 @@
 }
 
 .success-message {
-  background: var(--success-bg, #e8f5e9);
+  background: var(--success-bg, #c8e6c9);
   color: var(--success, #2e7d32);
   padding: 14px 20px;
   border-radius: 10px;

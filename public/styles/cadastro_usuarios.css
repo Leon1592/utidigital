@@ -74,7 +74,7 @@
 }
 
 .btn-editar-usuario {
-  background: var(--accent-light, #e3f2fd);
+  background: var(--accent-light, #bbdefb);
   color: var(--accent, #1565c0);
   border: 1px solid var(--accent, #1565c0);
   border-radius: 6px;

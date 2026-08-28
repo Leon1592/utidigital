@@ -12,12 +12,12 @@
 
 body {
   font-family: Arial, sans-serif;
-  background-color: var(--bg, #f5f7fa);
+  background-color: var(--bg, #eef1f5);
 }
 form {
   background-color: var(--surface, #ffffff);
   padding: 20px;
-  border: 1px solid var(--border, #e0e0e0);
+  border: 1px solid var(--border, #d0d5db);
   border-radius: 20px;
   margin: 5px auto;
   width: auto;
@@ -35,9 +35,9 @@ textarea {
   padding: 8px;
   margin-top: 5px;
   margin-bottom: 15px;
-  border: 1px solid var(--border, #e0e0e0);
+  border: 1px solid var(--border, #d0d5db);
   border-radius: 7px;
-  background: var(--input-bg, #f5f7fa);
+  background: var(--input-bg, #eef1f5);
   color: var(--text, #1a1a2e);
 }
 .radio-group {
@@ -95,8 +95,8 @@ input[type="submit"]:hover {
   padding: 8px;
   margin-top: 5px;
   margin-bottom: 15px;
-  border: 1px solid var(--border, #e0e0e0);
+  border: 1px solid var(--border, #d0d5db);
   border-radius: 7px;
-  background: var(--input-bg, #f5f7fa);
+  background: var(--input-bg, #eef1f5);
   color: var(--text, #1a1a2e);
 }

@@ -363,7 +363,7 @@ let isUserAdmin = false;
           const clickAction = isOcupado ? 'onclick="window.location.href=\'/leito/' + escapeHTML(String(item.id)) + '\'"' : '';
           return '<div class="search-result-item" style="padding:10px;cursor:' + (isOcupado ? 'pointer' : 'default') + ';' + (isOcupado ? '' : 'opacity:0.5;') + '" ' + clickAction + '>' +
             '<span style="font-weight:bold; color:var(--primary, #0d6e4a);">Leito ' + itemNumero + '</span>' +
-            '<span style="color:var(--text-secondary, #5f6368);"> - ' + itemStatus + '</span>' +
+            '<span style="color:var(--text-secondary, #4a4e54);"> - ' + itemStatus + '</span>' +
             (itemPacienteNome ? '<span style="display:block; color:#fff;">Paciente: ' + itemPacienteNome + '</span>' : '') +
           '</div>';
         }).join('');

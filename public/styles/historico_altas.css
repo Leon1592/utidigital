@@ -71,7 +71,7 @@
 }
 
 .btn-excluir-alta {
-    background: var(--danger-bg, #ffebee);
+    background: var(--danger-bg, #ffcdd2);
     color: var(--danger, #c62828);
     font-family: "Nunito", sans-serif;
     font-size: 13px;
