@@ -29,7 +29,7 @@ app.get('/api/health', async (req, res) => {
         const hasUrl = !!process.env.DATABASE_URL;
         if (!hasUrl) return res.json({ ok: false, error: 'DATABASE_URL missing' });
         await pool.query('SELECT 1');
-        res.json({ ok: true });
+        res.json({ ok: true, session: !!process.env.SESSION_SECRET });
     } catch (err) {
         res.json({ ok: false, error: err.message });
     }
@@ -40,11 +40,14 @@ app.get('/', (req, res) => {
 });
 
 const sessionMaxAge = parseInt(process.env.SESSION_MAX_AGE, 10);
-app.use(session({
+const sessionMiddleware = session({
     store: new pgSession({
         pool: pool,
         tableName: 'session',
-        createTableIfMissing: true
+        createTableIfMissing: true,
+        error: function(err) {
+            console.error('Session store error:', err);
+        }
     }),
     secret: process.env.SESSION_SECRET || 'utidigital_secret_key',
     resave: false,
@@ -55,7 +58,8 @@ app.use(session({
         sameSite: 'lax',
         secure: process.env.NODE_ENV === 'production'
     }
-}));
+});
+app.use(sessionMiddleware);
 
 app.use(flash());
 
@@ -102,9 +106,9 @@ app.get('/internar', isAuthenticated, (req, res) => {
 });
 
 app.use((err, req, res, next) => {
-    console.error(err);
+    console.error('Error:', err.message, err.stack);
     if (!res.headersSent) {
-        res.status(500).json({ error: 'Erro interno do servidor' });
+        res.status(500).json({ error: err.message || 'Erro interno do servidor' });
     }
 });
 
