@@ -53,15 +53,15 @@
       </div>
 
       <div id="addLeitoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
-        <div style="background: #0a1929; border-radius: 16px; padding: 24px; width: 400px; border: 2px solid #0077b6;">
-          <h3 style="color: #0077b6; margin-top: 0;">Adicionar Novo Leito</h3>
+        <div style="background: var(--surface); border-radius: 16px; padding: 24px; width: 400px; border: 1px solid var(--border); box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+          <h3 style="color: var(--primary); margin-top: 0;">Adicionar Novo Leito</h3>
           <div style="margin-bottom: 15px;">
-            <label style="color: #fff; display: block; margin-bottom: 5px;">Número do Leito:</label>
-            <input type="number" id="novoLeitoNumero" min="1" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #0077b6; background: #0f2d4a; color: #fff;">
+            <label style="color: var(--text); display: block; margin-bottom: 5px;">Número do Leito:</label>
+            <input type="number" id="novoLeitoNumero" min="1" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
           </div>
           <div style="display: flex; gap: 10px; justify-content: flex-end;">
-            <button id="btnCancelAdd" style="padding: 10px 20px; border-radius: 8px; border: none; background: #555; color: #fff; cursor: pointer;">Cancelar</button>
-            <button id="btnConfirmAdd" style="padding: 10px 20px; border-radius: 8px; border: none; background: #0077b6; color: #fff; font-weight: bold; cursor: pointer;">Adicionar</button>
+            <button id="btnCancelAdd" style="padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text-secondary); cursor: pointer;">Cancelar</button>
+            <button id="btnConfirmAdd" style="padding: 10px 20px; border-radius: 8px; border: none; background: var(--primary); color: var(--white); font-weight: bold; cursor: pointer;">Adicionar</button>
           </div>
         </div>
       </div>
@@ -193,7 +193,7 @@ let isUserAdmin = false;
             bedCard.onclick = () => { window.location.href = '/leito/' + leito.id; };
           }
           
-          const deleteBtn = isUserAdmin ? `<span class="bed-delete" data-id="${leito.id}" style="color: var(--danger, #e74c3c); cursor: pointer; font-size: 12px; margin-left: 10px;">[Excluir]</span>` : '';
+          const deleteBtn = isUserAdmin ? `<span class="bed-delete" data-id="${leito.id}" style="color: var(--danger, #c62828); cursor: pointer; font-size: 12px; margin-left: 10px;">[Excluir]</span>` : '';
           
           const motivoIndisponivel = (leito.status === 'indisponivel' && leito.motivo_indisponivel)
             ? `<span class="bed-motive" title="${escapeHTML(leito.motivo_indisponivel)}">Motivo: ${escapeHTML(leito.motivo_indisponivel)}</span>`
@@ -212,7 +212,7 @@ let isUserAdmin = false;
             <span class="bed-info">Data de Internacao: ${escapeHTML(dataInternacao)}</span>
             ${motivoIndisponivel}
             ${toggleBtn}
-            ${isClickable ? '<span class="bed-info" style="color: var(--success, #2d936c); font-size: 12px;">Clique para ver detalhes</span>' : ''}
+            ${isClickable ? '<span class="bed-info" style="color: var(--success, #2e7d32); font-size: 12px;">Clique para ver detalhes</span>' : ''}
           `;
           grid.appendChild(bedCard);
         });
@@ -294,7 +294,7 @@ let isUserAdmin = false;
         }
       } catch (error) {
         console.error('Erro ao carregar leitos:', error);
-        document.getElementById('bedsGrid').innerHTML = '<p style="padding: 20px; color: var(--danger, #e74c3c);">Erro ao carregar leitos. Tente novamente mais tarde.</p>';
+        document.getElementById('bedsGrid').innerHTML = '<p style="padding: 20px; color: var(--danger, #c62828);">Erro ao carregar leitos. Tente novamente mais tarde.</p>';
       }
     }
 
@@ -362,8 +362,8 @@ let isUserAdmin = false;
           const itemPacienteNome = escapeHTML(item.paciente_nome || '');
           const clickAction = isOcupado ? 'onclick="window.location.href=\'/leito/' + escapeHTML(String(item.id)) + '\'"' : '';
           return '<div class="search-result-item" style="padding:10px;cursor:' + (isOcupado ? 'pointer' : 'default') + ';' + (isOcupado ? '' : 'opacity:0.5;') + '" ' + clickAction + '>' +
-            '<span style="font-weight:bold; color:#0077b6;">Leito ' + itemNumero + '</span>' +
-            '<span style="color:#8899a6;"> - ' + itemStatus + '</span>' +
+            '<span style="font-weight:bold; color:var(--primary, #0d6e4a);">Leito ' + itemNumero + '</span>' +
+            '<span style="color:var(--text-secondary, #5f6368);"> - ' + itemStatus + '</span>' +
             (itemPacienteNome ? '<span style="display:block; color:#fff;">Paciente: ' + itemPacienteNome + '</span>' : '') +
           '</div>';
         }).join('');

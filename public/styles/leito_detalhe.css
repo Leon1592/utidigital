@@ -2,7 +2,7 @@
     font-family: "Playfair Display", serif;
     font-size: 32px;
     font-weight: 700;
-    color: var(--white);
+    color: var(--text);
     margin-bottom: 24px;
 }
 
@@ -14,27 +14,28 @@
 }
 
 .breadcrumb a {
-    color: var(--text-light);
+    color: var(--accent);
     text-decoration: none;
     font-size: 15px;
     transition: color 0.2s;
 }
 
 .breadcrumb a:hover {
-    color: var(--white);
+    color: var(--accent-hover);
 }
 
 .breadcrumb span {
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--text-muted);
 }
 
 .breadcrumb .current {
-    color: var(--white);
+    color: var(--text);
     font-weight: 600;
 }
 
 .patient-header {
-    background: var(--red-card);
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 16px;
     padding: 28px 32px;
     margin-bottom: 24px;
@@ -51,11 +52,11 @@
     font-family: "Playfair Display", serif;
     font-size: 32px;
     font-weight: 700;
-    color: var(--white);
+    color: var(--text);
 }
 
 .patient-badge {
-    background: var(--success, #2d936c);
+    background: var(--success, #2e7d32);
     color: var(--white);
     padding: 6px 16px;
     border-radius: 8px;
@@ -78,7 +79,7 @@
 .patient-info-label {
     font-size: 12px;
     font-weight: 600;
-    color: var(--text-light);
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -86,7 +87,7 @@
 .patient-info-value {
     font-size: 16px;
     font-weight: 600;
-    color: var(--white);
+    color: var(--text);
 }
 
 .vitals-section {
@@ -97,7 +98,7 @@
     font-family: "Playfair Display", serif;
     font-size: 24px;
     font-weight: 700;
-    color: var(--white);
+    color: var(--text);
     margin-bottom: 16px;
 }
 
@@ -109,7 +110,8 @@
 }
 
 .vital-card {
-    background: var(--red-card);
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 12px;
     padding: 20px 24px;
     display: flex;
@@ -125,22 +127,23 @@
 .vital-value {
     font-size: 28px;
     font-weight: 700;
-    color: var(--white);
+    color: var(--text);
 }
 
 .vital-label {
     font-size: 13px;
     font-weight: 600;
-    color: var(--text-light);
+    color: var(--text-secondary);
 }
 
 .vital-time {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--text-muted);
 }
 
 .vitals-history {
-    background: var(--red-card);
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 12px;
     padding: 20px 24px;
     margin-bottom: 24px;
@@ -154,17 +157,17 @@
 .history-table th {
     font-size: 12px;
     font-weight: 700;
-    color: var(--text-light);
+    color: var(--text-secondary);
     text-align: left;
     padding: 10px 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--border);
 }
 
 .history-table td {
     font-size: 14px;
-    color: var(--white);
+    color: var(--text);
     padding: 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--border-light);
 }
 
 .history-table tr:last-child td {
@@ -172,7 +175,7 @@
 }
 
 .history-table .time-col {
-    color: var(--text-light);
+    color: var(--text-secondary);
     font-size: 13px;
 }
 
@@ -196,7 +199,7 @@
 }
 
 .btn-delete-all {
-    background: #e74c3c;
+    background: var(--danger, #c62828);
     color: white;
     font-size: 13px;
     font-weight: 600;
@@ -208,11 +211,12 @@
 }
 
 .btn-delete-all:hover {
-    background: #c0392b;
+    background: #b71c1c;
 }
 
 .measurement-card {
-    background: var(--red-card);
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 16px;
     padding: 24px;
     display: flex;
@@ -231,17 +235,17 @@
 .measurement-title {
     font-size: 16px;
     font-weight: 700;
-    color: var(--white);
+    color: var(--text);
 }
 
 .measurement-author {
     font-size: 12px;
-    color: var(--text-light);
+    color: var(--text-secondary);
 }
 
 .measurement-time {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--text-muted);
 }
 
 .measurement-values {
@@ -259,25 +263,26 @@
 .measurement-value-label {
     font-size: 11px;
     font-weight: 600;
-    color: var(--text-light);
+    color: var(--text-muted);
     text-transform: uppercase;
 }
 
 .measurement-value {
     font-size: 18px;
     font-weight: 700;
-    color: var(--white);
+    color: var(--text);
 }
 
 .measurement-obs {
     font-size: 14px;
-    color: var(--text-light);
+    color: var(--text-secondary);
     margin-top: 4px;
     line-height: 1.4;
 }
 
 .medicao-form-card {
-    background: var(--red-card);
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 16px;
     padding: 28px;
     position: sticky;
@@ -288,7 +293,7 @@
     font-family: "Playfair Display", serif;
     font-size: 22px;
     font-weight: 700;
-    color: var(--white);
+    color: var(--text);
     margin-bottom: 20px;
 }
 
@@ -305,22 +310,22 @@
 }
 
 .btn-registrar {
-    background: var(--white);
-    color: #222;
-    font-family: "Nunito", sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    border: none;
-    border-radius: 10px;
-    padding: 14px 24px;
-    width: 100%;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-    margin-top: 8px;
+  background: var(--primary);
+  color: var(--white);
+  font-family: "Nunito", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  padding: 14px 24px;
+  width: 100%;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  margin-top: 8px;
 }
 
 .btn-registrar:hover {
-    background: #ececec;
+    background: var(--primary-hover);
 }
 
 .btn-registrar:active {
@@ -328,8 +333,8 @@
 }
 
 .success-message {
-    background: var(--success, #2d936c);
-    color: white;
+    background: var(--success-bg, #e8f5e9);
+    color: var(--success, #2e7d32);
     padding: 12px 16px;
     border-radius: 8px;
     font-size: 14px;
@@ -345,7 +350,7 @@
 }
 
 .btn-alta {
-    background: var(--warning, #f39c12);
+    background: var(--warning, #f57f17);
     color: white;
     font-size: 14px;
     font-weight: 700;
@@ -357,7 +362,7 @@
 }
 
 .btn-alta:hover {
-    background: #e67e22;
+    background: #e65100;
 }
 
 .leito-indisponivel {
@@ -368,32 +373,32 @@
 .leito-indisponivel h2 {
     font-family: "Playfair Display", serif;
     font-size: 28px;
-    color: var(--white);
+    color: var(--text);
     margin-bottom: 16px;
 }
 
 .leito-indisponivel p {
-    color: var(--text-light);
+    color: var(--text-secondary);
     font-size: 16px;
 }
 
 .alta-options {
     margin-top: 16px;
     padding-top: 14px;
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid var(--border);
 }
 
 .alta-option {
     display: flex;
     align-items: center;
     gap: 10px;
-    color: var(--text-light);
+    color: var(--text-secondary);
     font-size: 14px;
     cursor: pointer;
 }
 
 .alta-option input {
-    accent-color: var(--warning, #f39c12);
+    accent-color: var(--warning, #f57f17);
     width: 16px;
     height: 16px;
 }
@@ -409,7 +414,8 @@
 }
 
 .chart-card {
-    background: var(--red-card);
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 12px;
     padding: 18px;
     min-height: 220px;
@@ -418,7 +424,7 @@
 .chart-card h3 {
     font-size: 14px;
     font-weight: 700;
-    color: var(--text-light);
+    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 12px;
@@ -429,11 +435,11 @@
 }
 
 .btn-transferir {
-    background: #0f2d4a;
+    background: var(--accent);
     color: var(--white);
     font-size: 14px;
     font-weight: 700;
-    border: 1px solid #0077b6;
+    border: none;
     border-radius: 8px;
     padding: 10px 20px;
     cursor: pointer;
@@ -442,7 +448,7 @@
 }
 
 .btn-transferir:hover {
-    background: #0077b6;
+    background: var(--accent-hover);
 }
 
 .delete-confirm-modal {
@@ -451,7 +457,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.4);
     display: none;
     align-items: center;
     justify-content: center;
@@ -459,23 +465,24 @@
 }
 
 .delete-confirm-content {
-    background: var(--dark-teal);
+    background: var(--surface);
     border-radius: 16px;
     padding: 24px;
     width: 420px;
-    border: 2px solid var(--red-main);
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
 }
 
 .delete-confirm-header {
     font-family: "Playfair Display", serif;
     font-size: 22px;
-    color: var(--white);
+    color: var(--text);
     margin-bottom: 16px;
 }
 
 .delete-confirm-body {
     font-size: 15px;
-    color: var(--text-light);
+    color: var(--text-secondary);
     margin-bottom: 24px;
     line-height: 1.5;
 }
@@ -487,9 +494,9 @@
 }
 
 .btn-cancelar {
-    background: var(--red-card);
-    color: var(--white);
-    border: none;
+    background: var(--input-bg);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
     border-radius: 8px;
     padding: 10px 20px;
     font-size: 14px;
@@ -498,11 +505,11 @@
 }
 
 .btn-cancelar:hover {
-    background: var(--red-main);
+    background: var(--border-light);
 }
 
 .btn-confirmar-excluir {
-  background: #e74c3c;
+  background: var(--danger, #c62828);
   color: var(--white);
   border: none;
   border-radius: 8px;
@@ -513,5 +520,5 @@
 }
 
 .btn-confirmar-excluir:hover {
-  background: #c0392b;
+  background: #b71c1c;
 }

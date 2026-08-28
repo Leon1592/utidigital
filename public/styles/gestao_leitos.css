@@ -4,7 +4,7 @@
   font-family: "Playfair Display", serif;
   font-size: 52px;
   font-weight: 700;
-  color: var(--white);
+  color: var(--text);
   text-align: center;
   margin-bottom: 32px;
 }
@@ -32,27 +32,27 @@
 }
 
 .legend-dot.disponivel {
-  background-color: var(--success, #2d936c);
+  background-color: var(--success, #2e7d32);
 }
 
 .legend-dot.ocupado {
-  background-color: var(--warning, #f39c12);
+  background-color: var(--warning, #f57f17);
 }
 
 .legend-dot.indisponivel {
-  background-color: var(--danger, #e74c3c);
+  background-color: var(--danger, #c62828);
 }
 
 .legend-text.disponivel {
-  color: var(--success, #2d936c);
+  color: var(--success, #2e7d32);
 }
 
 .legend-text.ocupado {
-  color: var(--warning, #f39c12);
+  color: var(--warning, #f57f17);
 }
 
 .legend-text.indisponivel {
-  color: var(--danger, #e74c3c);
+  color: var(--danger, #c62828);
 }
 
 .beds-grid {
@@ -65,7 +65,8 @@
 }
 
 .bed-card {
-  background-color: var(--red-card);
+  background-color: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 16px;
   padding: 24px 26px;
   min-height: 160px;
@@ -81,31 +82,32 @@
 }
 
 .bed-title.disponivel {
-  color: var(--success, #2d936c);
+  color: var(--success, #2e7d32);
 }
 
 .bed-title.ocupado {
-  color: var(--warning, #f39c12);
+  color: var(--warning, #f57f17);
 }
 
 .bed-title.indisponivel {
-  color: var(--danger, #e74c3c);
+  color: var(--danger, #c62828);
 }
 
 .bed-info {
   font-size: 16px;
   font-weight: 500;
-  color: var(--text-light);
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 
 .bed-card.clickable {
   transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
 }
 
 .bed-card.clickable:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
 }
 
 .header-actions {
@@ -115,8 +117,8 @@
 }
 
 .btn-internar {
-  background: var(--white);
-  color: #222;
+  background: var(--primary);
+  color: var(--white);
   font-family: "Nunito", sans-serif;
   font-size: 14px;
   font-weight: 700;
@@ -129,16 +131,16 @@
 }
 
 .btn-internar:hover {
-  background: #ececec;
+  background: var(--primary-hover);
 }
 
 .bed-motive {
   display: block;
   font-size: 12px;
   font-weight: 600;
-  color: var(--warning, #f39c12);
-  background: rgba(243, 156, 18, 0.12);
-  border: 1px solid rgba(243, 156, 18, 0.4);
+  color: var(--warning, #f57f17);
+  background: var(--warning-bg, #fff8e1);
+  border: 1px solid rgba(245, 127, 23, 0.3);
   border-radius: 8px;
   padding: 6px 10px;
   margin-bottom: 4px;
@@ -151,8 +153,8 @@
 .bed-toggle-btn {
   align-self: flex-start;
   margin-top: 10px;
-  background: var(--warning, #f39c12);
-  color: #0a1929;
+  background: var(--warning, #f57f17);
+  color: #fff;
   font-family: "Nunito", sans-serif;
   font-size: 13px;
   font-weight: 700;
@@ -164,14 +166,14 @@
 }
 
 .bed-toggle-btn:hover {
-  background: #e67e22;
+  background: #e65100;
 }
 
 .bed-toggle-btn.disponibilizar {
-  background: var(--success, #2d936c);
+  background: var(--success, #2e7d32);
   color: #fff;
 }
 
 .bed-toggle-btn.disponibilizar:hover {
-  background: #27ae60;
+  background: #1b5e20;
 }

@@ -1,30 +1,32 @@
 .perfil {
-  color: antiquewhite;
+  color: var(--text, #1a1a2e);
   padding: 10px;
   text-align: center;
 }
 .email {
-  color: antiquewhite;
+  color: var(--text, #1a1a2e);
 }
 .senha {
-  color: antiquewhite;
+  color: var(--text, #1a1a2e);
 }
 
 body {
   font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
+  background-color: var(--bg, #f5f7fa);
 }
 form {
-  background-color: #0a1929;
+  background-color: var(--surface, #ffffff);
   padding: 20px;
-  border-color: rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--border, #e0e0e0);
   border-radius: 20px;
   margin: 5px auto;
   width: auto;
   height: 400px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 label {
   font-weight: bold;
+  color: var(--text, #1a1a2e);
 }
 input[type="text"],
 input[type="email"],
@@ -33,8 +35,10 @@ textarea {
   padding: 8px;
   margin-top: 5px;
   margin-bottom: 15px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border, #e0e0e0);
   border-radius: 7px;
+  background: var(--input-bg, #f5f7fa);
+  color: var(--text, #1a1a2e);
 }
 .radio-group {
   display: flex;
@@ -49,7 +53,7 @@ textarea {
   gap: 1px;
   padding: 10px 14px;
   border-radius: 999px;
-  background: #0179b6ff;
+  background: var(--primary, #0d6e4a);
   cursor: pointer;
   transition: all 0.2s ease;
   user-select: none;
@@ -57,7 +61,7 @@ textarea {
   font-weight: bold;
 }
 .radio-option:hover {
-  background: #0277BD;
+  background: var(--primary-hover, #0b5e3f);
 }
 .radio-option input {
   display: none;
@@ -74,7 +78,7 @@ textarea {
   font-weight: bold;
 }
 input[type="submit"] {
-  background-color: #014163ff;
+  background-color: var(--primary, #0d6e4a);
   color: #ffffff;
   padding: 12px 40px;
   border: none;
@@ -84,13 +88,15 @@ input[type="submit"] {
   font-size: 16px;
 }
 input[type="submit"]:hover {
-  background-color: #001c2cff;
+  background-color: var(--primary-hover, #0b5e3f);
 }
 #password {
   width: 97%;
   padding: 8px;
   margin-top: 5px;
   margin-bottom: 15px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border, #e0e0e0);
   border-radius: 7px;
+  background: var(--input-bg, #f5f7fa);
+  color: var(--text, #1a1a2e);
 }

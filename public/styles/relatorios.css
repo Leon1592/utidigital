@@ -2,12 +2,13 @@
     font-family: "Playfair Display", serif;
     font-size: 32px;
     font-weight: 700;
-    color: var(--white);
+    color: var(--text);
     margin-bottom: 24px;
 }
 
 .report-controls {
-    background: var(--red-card);
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 16px;
     padding: 28px;
     margin-bottom: 24px;
@@ -31,35 +32,36 @@
 .field-label {
     font-size: 13px;
     font-weight: 700;
-    color: var(--text-light);
+    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .field-input {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: var(--input-bg);
+    border: 1px solid var(--border);
     border-radius: 10px;
     padding: 12px 16px;
-    color: var(--white);
+    color: var(--text);
     font-family: "Nunito", sans-serif;
     font-size: 14px;
     outline: none;
     transition: border-color 0.2s;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235f6368' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 14px center;
     padding-right: 40px;
 }
 
 .field-input:focus {
-    border-color: rgba(255, 255, 255, 0.4);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(13, 110, 74, 0.12);
 }
 
 .field-input option {
-    background: #222;
-    color: var(--white);
+    background: var(--surface);
+    color: var(--text);
 }
 
 .report-type-cards {
@@ -80,21 +82,21 @@
     display: flex;
     align-items: center;
     gap: 14px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 2px solid rgba(255, 255, 255, 0.1);
+    background: var(--input-bg);
+    border: 2px solid var(--border);
     border-radius: 14px;
     padding: 18px 20px;
     transition: all 0.2s;
 }
 
 .type-card:hover .type-card-content {
-    border-color: rgba(255, 255, 255, 0.25);
-    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary);
+    background: var(--primary-light);
 }
 
 .type-card input[type="radio"]:checked + .type-card-content {
-    border-color: var(--white);
-    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--primary);
+    background: var(--primary-light);
 }
 
 .type-card-icon {
@@ -109,11 +111,11 @@
 .type-card-icon svg {
     width: 100%;
     height: 100%;
-    stroke: var(--text-light);
+    stroke: var(--text-secondary);
 }
 
 .type-card input[type="radio"]:checked + .type-card-content .type-card-icon svg {
-    stroke: var(--white);
+    stroke: var(--primary);
 }
 
 .type-card-text {
@@ -125,17 +127,17 @@
 .type-card-title {
     font-size: 15px;
     font-weight: 700;
-    color: var(--white);
+    color: var(--text);
 }
 
 .type-card-desc {
     font-size: 12px;
-    color: var(--text-light);
+    color: var(--text-secondary);
 }
 
 .btn-preview {
-    background: var(--white);
-    color: #222;
+    background: var(--primary);
+    color: var(--white);
     font-family: "Nunito", sans-serif;
     font-size: 15px;
     font-weight: 700;
@@ -148,7 +150,7 @@
 }
 
 .btn-preview:hover {
-    background: #ececec;
+    background: var(--primary-hover);
 }
 
 .btn-preview:active {
@@ -156,7 +158,8 @@
 }
 
 .report-preview {
-    background: var(--red-card);
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 16px;
     padding: 32px;
     margin-bottom: 24px;
@@ -168,7 +171,7 @@
     gap: 12px;
     margin-bottom: 24px;
     padding-bottom: 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--border);
 }
 
 .preview-logo img {
@@ -179,7 +182,7 @@
     font-family: "Playfair Display", serif;
     font-size: 24px;
     font-weight: 700;
-    color: var(--white);
+    color: var(--text);
 }
 
 .preview-info {
@@ -198,7 +201,7 @@
 .preview-info-label {
     font-size: 11px;
     font-weight: 600;
-    color: var(--text-light);
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -206,18 +209,18 @@
 .preview-info-value {
     font-size: 15px;
     font-weight: 700;
-    color: var(--white);
+    color: var(--text);
 }
 
 .preview-alta-notice {
-    background: rgba(255, 193, 7, 0.12);
-    border: 1px solid rgba(255, 193, 7, 0.4);
+    background: var(--warning-bg, #fff8e1);
+    border: 1px solid rgba(245, 127, 23, 0.3);
     border-radius: 10px;
     padding: 12px 16px;
     margin: 12px 0 24px;
     font-size: 13px;
     font-weight: 600;
-    color: #ffd54a;
+    color: var(--warning, #f57f17);
 }
 
 .preview-section {
@@ -228,7 +231,7 @@
     font-family: "Playfair Display", serif;
     font-size: 18px;
     font-weight: 700;
-    color: var(--white);
+    color: var(--text);
     margin-bottom: 12px;
 }
 
@@ -240,17 +243,17 @@
 .preview-table th {
     font-size: 12px;
     font-weight: 700;
-    color: var(--text-light);
+    color: var(--text-secondary);
     text-align: left;
     padding: 10px 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    border-bottom: 1px solid var(--border);
 }
 
 .preview-table td {
     font-size: 13px;
-    color: var(--white);
+    color: var(--text);
     padding: 10px 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--border-light);
 }
 
 .preview-obs {
@@ -261,17 +264,17 @@
 
 .preview-obs p {
     font-size: 13px;
-    color: var(--white);
+    color: var(--text);
     line-height: 1.4;
 }
 
 .preview-footer {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--text-muted);
     text-align: right;
     margin-top: 20px;
     padding-top: 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid var(--border);
 }
 
 .report-actions {
@@ -281,12 +284,12 @@
 }
 
 .btn-voltar {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--white);
+    background: var(--input-bg);
+    color: var(--text-secondary);
     font-family: "Nunito", sans-serif;
     font-size: 14px;
     font-weight: 700;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--border);
     border-radius: 10px;
     padding: 12px 28px;
     cursor: pointer;
@@ -294,11 +297,11 @@
 }
 
 .btn-voltar:hover {
-    background: rgba(255, 255, 255, 0.18);
+    background: var(--border-light);
 }
 
 .btn-gerar-pdf {
-    background: var(--success, #2d936c);
+    background: var(--success, #2e7d32);
     color: white;
     font-family: "Nunito", sans-serif;
     font-size: 14px;
@@ -311,5 +314,5 @@
 }
 
 .btn-gerar-pdf:hover {
-    background: #27ae60;
+    background: #1b5e20;
 }
