@@ -1,7 +1,10 @@
 # UTI Digital - Sistema de Gestão de UTI
 
 <p align="center">
-  <img src="uploads/images/ui.png" alt="UTI Digital Logo" width="150">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="uploads/images/uti_digital_new_logo_(para_fundos_escuros).png">
+    <img src="uploads/images/uti_digital_new_logo_(para_fundos_claros).png" alt="UTI Digital Logo" width="150">
+  </picture>
 </p>
 
 Sistema web completo para gerenciamento de Unidade de Terapia Intensiva (UTI), desenvolvido como Trabalho de Conclusão de Curso (TCC). O sistema permite o controle completo de leitos hospitalares, cadastro de pacientes, registro de medições de sinais vitais e geração automática de alertas para estados críticos.
@@ -236,11 +239,13 @@ utidigital/
 │   │
 │   └── uploads/
 │       └── images/
-│           └── ui.png                  # Logo do sistema
+│           └── uti_digital_new_logo_(para_fundos_claros).png  # Logo do sistema (cópia)
 │
 └── uploads/
     └── images/
-        └── ui.png                      # Logo (cópia para uploads)
+        ├── ui.png                                            # Logo antiga (legado)
+        ├── uti_digital_new_logo_(para_fundos_claros).png     # Logo para fundos claros
+        └── uti_digital_new_logo_(para_fundos_escuros).png    # Logo para fundos escuros
 ```
 
 ---
@@ -1813,5 +1818,8 @@ O UTI Digital é um sistema completo que demonstra:
 <p align="center">
   <strong>Desenvolvido como Trabalho de Conclusão de Curso (TCC)</strong>
   <br>
-  <img src="uploads/images/ui.png" alt="UTI Digital Logo" width="80">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="uploads/images/uti_digital_new_logo_(para_fundos_escuros).png">
+    <img src="uploads/images/uti_digital_new_logo_(para_fundos_claros).png" alt="UTI Digital Logo" width="80">
+  </picture>
 </p>
